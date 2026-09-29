@@ -1,0 +1,10 @@
+name: Bug report
+description: Report an ESP32 SDK or firmware defect
+body:
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Board, versions, reproduction, and observed result
+      description: State whether evidence is host simulation, compilation, or physical hardware. Remove credentials.
+    validations:
+      required: true

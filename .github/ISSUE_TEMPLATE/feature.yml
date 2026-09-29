@@ -1,0 +1,9 @@
+name: Feature request
+description: Propose a reusable ESP32 capability or transport
+body:
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Problem and acceptance criteria
+    validations:
+      required: true
