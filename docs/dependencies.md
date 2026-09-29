@@ -1,0 +1,3 @@
+# Build dependencies and licenses
+
+Original SDK/firmware/bridge code is Apache-2.0. PlatformIO Core 6.1.18 is Apache-2.0; espressif32 platform 6.10.0 is Apache-2.0. Arduino-ESP32 2.0.17 (PlatformIO package 3.20017.0) includes LGPL-2.1 and ESP-IDF Apache-2.0 components; preserve their notices and relinking rights for binary distributions. ArduinoJson 6.21.5 is MIT; Adafruit NeoPixel 1.12.3 is LGPL-3.0; pyserial 3.5 is BSD-3-Clause. Source and licenses remain in installed dependency directories, not vendored into original-code license claims. Binary publication requires dependency-source and corresponding license bundle review; this local build is unpublished.
