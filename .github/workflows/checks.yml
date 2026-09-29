@@ -1,0 +1,23 @@
+name: ESP32 checks
+on: [push, pull_request]
+jobs:
+  esp32-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m venv .venv && .venv/bin/pip install -r requirements.lock
+      - run: .venv/bin/pio pkg install
+      - run: sh tools/check.sh
+      - run: .venv/bin/python tools/check_contract.py
+  esp32-firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m venv .venv && .venv/bin/pip install -r requirements.lock
+      - run: .venv/bin/pio run -e atoms3-lite-usb

@@ -1,12 +1,12 @@
 # Local issue ledger
 
-Owner: grok-gadgets-esp32-sdk. Local authority until approved GitHub migration.
+Canonical structured ledger: [issues.json](issues.json). Owner: grok-gadgets-esp32-sdk. Local authority until approved GitHub migration.
 
-| ID | Problem / acceptance | Labels | Milestone | Stage | Evidence / dependency |
-| --- | --- | --- | --- | --- | --- |
-| ESP-001 | Independent Apache-2.0 repository and contribution foundation | maintenance, esp32, P1 | M0 | done | License, contributor/security/agent instructions and templates; no public repository |
-| ESP-002 | Portable capability, RGB validation, debounce, framing and retry tests | feature, esp32, protocol, P1 | M4 | done | CTest 2/2; strict RGB/custom capability/dedup, debounce/wrap/framing; pinned protocol fixture validation |
-| ESP-003 | C124 USB firmware compiles; bridge and recovery docs | feature, esp32, P1 | M4 | ready | Requires official pins; real compile and host integration |
-| ESP-004 | Physical LED/button/unplug/reboot acceptance | feature, esp32, P1, needs hardware, help wanted | M8 | blocked | No board; requires C124 and user authorization to flash |
-| ESP-005 | Wi-Fi transport using same contract and secure provisioning | feature, esp32, P2 | M4 | proposed | Depends on USB and authenticated reachable LAN/TLS gateway route |
-| ESP-006 | Independent clean setup and physical reproduction | docs, esp32, P2, help wanted | M8 | blocked | Requires another tester |
+| ID | Problem | Stage | Evidence / dependency |
+| --- | --- | --- | --- |
+| ESP-001 | Independent open-source repository foundation | done | Foundation checks and Git diff review passed. |
+| ESP-002 | Portable independently useful ESP32 SDK | done | C++ host tests and pinned canonical protocol frame validation passed. |
+| ESP-003 | C124 USB firmware and lifecycle | done | 3/3 CTest; SDK frame contract; PTY actual firmware simulation/gateway execution, server restart and credential revocation/restoration; real firmware compile. No flash. |
+| ESP-004 | Physical C124 acceptance | blocked | No C124 available; requires physical board and authorization to flash. |
+| ESP-005 | Secure Wi-Fi transport and provisioning | blocked | Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required. |
+| ESP-006 | Independent reproduction | blocked | Independent tester and physical board unavailable. |

@@ -1,0 +1,21 @@
+{
+  "evidence": "unpublished real ESP32-S3 build; no hardware or Grok observation",
+  "files": {
+    "firmware.bin": {
+      "bytes": 276464,
+      "sha256": "6769df30a085b17f29c918c4b957c54849c752f4810abd82969d0ed30a0a8440"
+    },
+    "firmware.elf": {
+      "bytes": 7581788,
+      "sha256": "4c93da0b07ccbf5116b8402b7f0786916f94974e7bdf1f5d25ffd8e40a5299ad"
+    },
+    "bootloader.bin": {
+      "bytes": 15104,
+      "sha256": "1776e4dd896a69d0a5c2e79957b0e2a88aa4129b1381d6478683515a1f6af343"
+    },
+    "partitions.bin": {
+      "bytes": 3072,
+      "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
+    }
+  }
+}

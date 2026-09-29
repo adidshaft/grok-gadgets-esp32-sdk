@@ -20,3 +20,12 @@ add_test(NAME device COMMAND device_tests)
 add_executable(transcript tests/transcript.cpp)
 target_include_directories(transcript PRIVATE lib/GrokGadgets/src "${ARDUINOJSON_INCLUDE}")
 target_compile_options(transcript PRIVATE -Wall -Wextra -Werror)
+
+add_executable(firmware_tests tests/firmware_tests.cpp)
+target_include_directories(firmware_tests PRIVATE tests/stubs lib/GrokGadgets/src "${ARDUINOJSON_INCLUDE}")
+target_compile_options(firmware_tests PRIVATE -Wall -Wextra -Werror)
+add_test(NAME firmware_simulation COMMAND firmware_tests)
+
+add_executable(host_firmware tests/host_firmware.cpp)
+target_include_directories(host_firmware PRIVATE tests/stubs lib/GrokGadgets/src "${ARDUINOJSON_INCLUDE}")
+target_compile_options(host_firmware PRIVATE -Wall -Wextra -Werror)

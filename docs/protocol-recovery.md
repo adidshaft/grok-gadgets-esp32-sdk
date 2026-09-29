@@ -1,0 +1,15 @@
+# USB framing and lifecycle
+
+Canonical version is gateway protocol **0.1.0**, copied into protocol/0.1.0 with SHA-256 source manifest. The gateway is authoritative. Frames are UTF-8 JSON followed by LF, at most 2048 bytes including LF. The firmware line buffer therefore allows 2047 bytes before LF, drops oversize data until the next LF, and resets the session. Debug logs must use a different interface. A partial frame survives loop iterations; timeout resets it.
+
+USB is request/reply: hello, then polls at 100ms, ACK/event/state each with one reply. There are no unsolicited gateway commands. Poll returns at most one command. Serial framing speed is 115200; the C124 USB CDC implementation does not use a separate UART dongle. Hello excludes credentials; a local USB bridge adds the per-device host token to its loopback TCP hello. USB physical/host access is a trust boundary.
+
+Firmware starts with LED off. It publishes MAC-derived device ID, random boot ID, protocol/firmware versions, capability names and real-device identity `simulated:false`. A host harness explicitly uses `simulated:true`. No test injection is exposed in physical firmware. RGB ACK is emitted only after the pixel driver's show() returns; that does not prove light was physically observed.
+
+A request timeout is three seconds. Retry hello uses 500ms initial backoff capped at five seconds. Every successful hello resets backoff. On errors, malformed/oversize response or timeout, firmware drops an old pending ACK and begins a new session; the gateway records dispatched uncertainty. It never executes an ACK as a command or automatically retries an action. Failed credential/revoked/version requests are explicit gateway errors; configure host credentials/protocol then reconnect. No secrets are printed by firmware.
+
+The button debounces for 30ms and reports press/release edges with boot-unique sequence IDs. A queue holds 16 edges and drops newest edges on overflow; when retained edges drain a history_lost event reports the dropped count. New loss while reporting is retained for the next report. Current debounced button state is always included in periodic state/hello/ACK; periodic state reports every three seconds. Events can be retried after reconnect with the same retained edge ID. Gateway deduplication is bounded; gateway restart may report a retried event again. Device reboot loses its RAM event queue and ACK cache. Events have no claimed wall-clock observed_at because this USB firmware has no synchronized clock; use gateway received_at.
+
+## Wi-Fi follow-on
+
+Wi-Fi is not implemented in this local alpha because the canonical gateway device listener is loopback-only and unencrypted. A secure, authenticated reachable transport and secret provisioning are the next slice (ESP-005). Enabling plaintext LAN credentials or public exposure would exceed this contract. Keep per-device credentials off Git, support revocation, add TLS certificate validation, define provisioning/reset behavior, then reuse the same bounded SDK command and event logic. The C124 hardware supports Wi-Fi; this is a transport acceptance dependency, not a claim that its radio was tested.

@@ -1,3 +1,5 @@
 # Contributing
 
 Use main plus short-lived branches. Discuss interface changes against the canonical gateway protocol before implementation. Reference stable ESP issue IDs in commits and update planning/issues.md with checks. Host checks use cmake, a C++ compiler, and ctest. Firmware uses pinned PlatformIO installed in a local virtual environment (see forthcoming build instructions). Never call a compile a physical test. Shared conduct and security policies live in sibling grok-gadgets; public links await approved GitHub ownership.
+
+From a clean local setup follow [build instructions](docs/build-flash.md). Run `sh tools/check.sh` for pinned C++ formatting, Python lint/format and CTest; then `.venv/bin/python tools/check_contract.py` and `.venv/bin/pio run -e atoms3-lite-usb`. Optional sibling integration runs with `../grok-gadgets-gateway/.venv/bin/python tools/check_gateway.py` after installing the gateway. `planning/issues.json` is the canonical machine-readable local tracker; the Markdown table is its readable view. GitHub workflows are prepared but inactive until publication.

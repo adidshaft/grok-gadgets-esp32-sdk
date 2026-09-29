@@ -1,0 +1,146 @@
+{
+  "authority": "local until approved GitHub migration",
+  "issues": [
+    {
+      "id": "ESP-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Independent open-source repository foundation",
+      "acceptance": [
+        "README, Apache-2.0 license and contribution/security/agent instructions exist",
+        "Issue forms and proposed publication checks exist"
+      ],
+      "dependencies": [],
+      "labels": [
+        "maintenance",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "M0",
+      "stage": "done",
+      "commits": [
+        "d4f18b3"
+      ],
+      "evidence": "Foundation checks and Git diff review passed."
+    },
+    {
+      "id": "ESP-002",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Portable independently useful ESP32 SDK",
+      "acceptance": [
+        "Custom capabilities register without gateway changes",
+        "Strict RGB validation and duplicate command handling",
+        "Bounded framing and button debounce tests pass"
+      ],
+      "dependencies": [
+        "GW-002"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "protocol",
+        "P1"
+      ],
+      "milestone": "M4",
+      "stage": "done",
+      "commits": [
+        "ff4dd9d"
+      ],
+      "evidence": "C++ host tests and pinned canonical protocol frame validation passed."
+    },
+    {
+      "id": "ESP-003",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "C124 USB firmware and lifecycle",
+      "acceptance": [
+        "Pinned ESP32-S3 firmware compilation succeeds",
+        "Actual consumer host simulation exercises RGB/button/timeout",
+        "USB bridge/gateway host integration and recovery pass",
+        "Flashing/recovery instructions and build artifacts exist"
+      ],
+      "dependencies": [
+        "ESP-002",
+        "GW-003"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "M4",
+      "stage": "done",
+      "commits": [],
+      "evidence": "3/3 CTest; SDK frame contract; PTY actual firmware simulation/gateway execution, server restart and credential revocation/restoration; real firmware compile. No flash."
+    },
+    {
+      "id": "ESP-004",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Physical C124 acceptance",
+      "acceptance": [
+        "Visibly verify green/colour/off",
+        "Read real button edges",
+        "Unplug/reconnect/reboot acceptance",
+        "Record versions/checksums and observations"
+      ],
+      "dependencies": [
+        "ESP-003"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1",
+        "needs hardware",
+        "help wanted"
+      ],
+      "milestone": "M8",
+      "stage": "blocked",
+      "commits": [],
+      "evidence": "No C124 available; requires physical board and authorization to flash."
+    },
+    {
+      "id": "ESP-005",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Secure Wi-Fi transport and provisioning",
+      "acceptance": [
+        "Agree authenticated reachable TLS transport",
+        "Certificate validation, device credential revocation and secret provisioning",
+        "Compile firmware and test LAN lifecycle"
+      ],
+      "dependencies": [
+        "ESP-003",
+        "GW-003"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "protocol",
+        "P2"
+      ],
+      "milestone": "M4",
+      "stage": "blocked",
+      "commits": [],
+      "evidence": "Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required."
+    },
+    {
+      "id": "ESP-006",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Independent reproduction",
+      "acceptance": [
+        "Another person follows build/install instructions",
+        "Hardware procedure independently reproduced"
+      ],
+      "dependencies": [
+        "ESP-004"
+      ],
+      "labels": [
+        "docs",
+        "esp32",
+        "P2",
+        "help wanted"
+      ],
+      "milestone": "M8",
+      "stage": "blocked",
+      "commits": [],
+      "evidence": "Independent tester and physical board unavailable."
+    }
+  ]
+}
