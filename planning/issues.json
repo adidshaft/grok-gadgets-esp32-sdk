@@ -68,7 +68,9 @@
       ],
       "milestone": "M4",
       "stage": "done",
-      "commits": [],
+      "commits": [
+        "0481cc9b277c1b04886d64e00d92565facb42b91"
+      ],
       "evidence": "3/3 CTest; SDK frame contract; PTY actual firmware simulation/gateway execution, server restart and credential revocation/restoration; real firmware compile. No flash."
     },
     {
