@@ -76,6 +76,7 @@ void hello(uint32_t now) {
   gadget.capabilities(capabilities);
   capabilities.add("button");
   capabilities.add("state");
+  capabilities.add("history_lost");
   gadget.state(d.createNestedObject("state"));
   transmit(Kind::Hello, now);
 }

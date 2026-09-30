@@ -143,6 +143,31 @@
       "stage": "blocked",
       "commits": [],
       "evidence": "Independent tester and physical board unavailable."
+    },
+    {
+      "id": "ESP-007",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Undeclared history_lost event causes repeated session reset after button queue overflow",
+      "acceptance": [
+        "Declare every firmware event capability in hello",
+        "Actual consumer retains 16 ordered edges and reports four dropped edges after a 20-edge stall",
+        "Gateway accepts history_lost without a session reset; subsequent RGB command executes",
+        "Rebuild firmware and update packaged checksums"
+      ],
+      "dependencies": [
+        "ESP-003",
+        "GW-003"
+      ],
+      "labels": [
+        "bug",
+        "esp32",
+        "protocol",
+        "P1"
+      ],
+      "milestone": "M4",
+      "stage": "done",
+      "commits": [],
+      "evidence": "3/3 CTest, pinned contract checks, actual consumer PTY integration (20 GPIO edges, retained 16/drop4, unchanged session, subsequent execution), ESP32-S3 compile SUCCESS."
     }
   ]
 }

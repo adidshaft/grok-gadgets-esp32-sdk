@@ -34,6 +34,10 @@ int main() {
   take("hello");
   assert(frame["protocol_version"] == "0.1.0");
   assert(frame["device"]["model"] == grok::c124::Model);
+  bool declaresLoss = false;
+  for (const char *capability : frame["device"]["capabilities"].as<JsonArrayConst>())
+    declaresLoss |= !strcmp(capability, "history_lost");
+  assert(declaresLoss);
   reply(R"({"ok":true,"session_id":"session-1","protocol_version":"0.1.0"})");
   assert(connected && !waiting);
   advance(100);
@@ -80,8 +84,27 @@ int main() {
     reply(R"({"ok":true,"commands":[]})");
   advance(100);
   take("poll");
+  // Hold one poll response while 20 debounced edges fill the bounded queue.
+  for (int i = 0; i < 20; ++i) {
+    fake::pin = i % 2;
+    loop();
+    advance(30);
+  }
+  assert(edges.size() == 16 && lost == 4);
+  reply(R"({"ok":true,"commands":[]})");
+  for (int i = 0; i < 16; ++i) {
+    take("event");
+    assert(frame["name"] == "button");
+    reply(R"({"ok":true})");
+  }
+  take("event");
+  assert(frame["name"] == "history_lost" && frame["data"]["dropped"] == 4);
+  reply(R"({"ok":true})");
+  assert(lost == 0 && edges.size() == 0 && connected);
+  advance(100);
+  take("poll");
   reply(R"({"ok":false,"error":{"code":"revoked","message":"Credential revoked"}})");
   assert(!connected);
   std::cout << "firmware host simulation: hello/poll/ACK, duplicate execution, invalid RGB, real "
-               "consumer button edges, lost ACK and revocation recovery passed\n";
+               "consumer button edges/overflow recovery, lost ACK and revocation recovery passed\n";
 }

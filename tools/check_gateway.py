@@ -30,6 +30,7 @@ async def main():
     master, slave = pty.openpty()
     serial_port = os.ttyname(slave)
     os.set_blocking(master, False)
+    button_read, button_write = os.pipe()
     loop = asyncio.get_running_loop()
     with tempfile.TemporaryDirectory() as tmp:
         credentials = Path(tmp) / "devices.json"
@@ -48,6 +49,8 @@ async def main():
         bridge_task = asyncio.create_task(bridge(serial_port, token, port=port, stop=stop))
         process = await asyncio.create_subprocess_exec(
             root / "build/host_firmware",
+            env={**os.environ, "GROK_TEST_BUTTON_FD": str(button_read)},
+            pass_fds=(button_read,),
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
         )
@@ -56,12 +59,18 @@ async def main():
             while data := await process.stdout.read(4096):
                 os.write(master, data)
 
+        paused = False
+        delayed = bytearray()
+
         def incoming():
             try:
                 data = os.read(master, 4096)
             except BlockingIOError:
                 return
-            process.stdin.write(data)
+            if paused:
+                delayed.extend(data)
+            else:
+                process.stdin.write(data)
 
         loop.add_reader(master, incoming)
         pump = asyncio.create_task(outgoing())
@@ -78,6 +87,37 @@ async def main():
                 "b": 0,
                 "on": True,
             }
+            # Stall only serial replies, then exercise real consumer debounce and queue logic.
+            overflow_session = gateway.devices[device_id]["session_id"]
+            paused = True
+            await asyncio.sleep(0.15)
+            for index in range(20):
+                os.write(button_write, str(index % 2).encode())
+                await asyncio.sleep(0.045)
+            paused = False
+            process.stdin.write(delayed)
+            delayed.clear()
+            await until(lambda: any(event["name"] == "history_lost" for event in gateway.events))
+            events = list(gateway.events)
+            button_events = [event for event in events if event["name"] == "button"]
+            loss_events = [event for event in events if event["name"] == "history_lost"]
+            assert len(button_events) == 16
+            assert [event["data"]["pressed"] for event in button_events] == [
+                index % 2 == 0 for index in range(16)
+            ]
+            assert len(loss_events) == 1 and loss_events[0]["data"] == {"dropped": 4}
+            assert events.index(loss_events[0]) > events.index(button_events[-1])
+            assert gateway.devices[device_id]["session_id"] == overflow_session
+            gateway.command(
+                device_id,
+                "rgb.set",
+                {"r": 255, "g": 0, "b": 0, "on": True},
+                "integration-after-overflow",
+            )
+            await until(
+                lambda: gateway.command_status("integration-after-overflow")["status"] == "executed"
+            )
+            assert gateway.devices[device_id]["state"]["button"]["pressed"] is False
             old_session = gateway.devices[device_id]["session_id"]
             await server.close()
             await until(lambda: not gateway.devices[device_id]["connected"])
@@ -97,7 +137,8 @@ async def main():
             await until(lambda: gateway.devices[device_id]["connected"])
             print(
                 "integration: simulated firmware -> PTY -> bridge -> authenticated gateway; "
-                "green/off, server restart, revocation/restoration passed"
+                "green/off, 20-edge overflow/loss recovery, server restart, "
+                "revocation/restoration passed"
             )
         finally:
             loop.remove_reader(master)
@@ -110,6 +151,8 @@ async def main():
             await server.close()
             os.close(master)
             os.close(slave)
+            os.close(button_read)
+            os.close(button_write)
 
 
 asyncio.run(main())
