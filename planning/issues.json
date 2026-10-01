@@ -166,7 +166,9 @@
       ],
       "milestone": "M4",
       "stage": "done",
-      "commits": [],
+      "commits": [
+        "74085a9d33fba115a2701d4274140f33d8813d6c"
+      ],
       "evidence": "3/3 CTest, pinned contract checks, actual consumer PTY integration (20 GPIO edges, retained 16/drop4, unchanged session, subsequent execution), ESP32-S3 compile SUCCESS."
     }
   ]
