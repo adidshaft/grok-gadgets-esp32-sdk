@@ -19,6 +19,8 @@ PlatformIO 6.1.18, espressif32 6.10.0, Arduino-ESP32 2.0.17, Xtensa compiler 8.4
 
 Outputs: `.pio/build/atoms3-lite-usb/firmware.bin`, `firmware.elf`, `bootloader.bin`, `partitions.bin`. Build outputs are ignored by Git; `tools/package_build.py` copies them into `artifacts/c124-usb` and writes checksums. These are **build verified, hardware pending** only after the recorded compile succeeds.
 
+For a provenance package, commit the tested source first, then run `.venv/bin/python tools/package_build.py` from a clean checkout. Packaging rebuilds that exact commit and records its clean source state, UTC build time, resolved toolchain and SHA-256 hashes. It rejects uncommitted sources rather than labeling an older binary as the current commit. Refresh the tracked `docs/build-checksums.json` from that manifest in a subsequent evidence commit.
+
 ## Flash when hardware is available
 
 Use a USB-C **data** cable. Inspect ports with `.venv/bin/pio device list`, identify this board rather than guessing another device's port, close any serial monitor/bridge, then:

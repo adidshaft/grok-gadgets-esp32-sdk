@@ -56,7 +56,22 @@ public:
       for (auto &cached : cache_)
         if (!strcmp(id, cached.id)) {
           if (!strcmp(fingerprint, cached.command)) {
-            deserializeJson(ack, cached.ack);
+            // Mutable input enables ArduinoJson zero-copy parsing, which would destroy
+            // this retained serialization. Read-only input also owns replay strings.
+            if (!deserializeJson(ack, static_cast<const char *>(cached.ack)) &&
+                ack.is<JsonObject>())
+              return;
+            // A failed replay is uncertainty, never permission to execute again.
+            // Keep the original cache entry so a correctly sized caller can retry.
+            ack.clear();
+            auto replay = ack.to<JsonObject>();
+            replay["type"] = "ack";
+            replay["command_id"] = id;
+            replay["status"] = "failed";
+            replay.createNestedObject("state");
+            auto failure = replay.createNestedObject("error");
+            failure["code"] = "ack_unavailable";
+            failure["message"] = "Cached acknowledgement could not be decoded";
             return;
           }
           error = {"duplicate_conflict", "Command ID already has different arguments"};

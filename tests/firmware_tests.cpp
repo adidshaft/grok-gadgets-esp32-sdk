@@ -27,6 +27,18 @@ void advance(uint32_t ms) {
   fake::now += ms;
   loop();
 }
+void nextCommand(const char *response) {
+  reply(R"({"ok":true})");
+  advance(100);
+  take("poll");
+  reply(response);
+  take("ack");
+}
+std::string ackJson() {
+  std::string json;
+  serializeJson(frame, json);
+  return json;
+}
 int main() {
   setup();
   assert(fake::pixel == 0);
@@ -47,13 +59,27 @@ int main() {
   take("ack");
   assert(frame["status"] == "executed" && fake::pixel == 0xff00);
   int shows = fake::shows;
-  reply(R"({"ok":true})");
-  advance(100);
-  take("poll");
-  reply(
-      R"({"ok":true,"commands":[{"command_id":"cmd-1","capability":"rgb.set","arguments":{"r":0,"g":255,"b":0,"on":true}}]})");
-  take("ack");
-  assert(fake::shows == shows);
+  auto original = ackJson();
+  const char *green =
+      R"({"ok":true,"commands":[{"command_id":"cmd-1","capability":"rgb.set","arguments":{"r":0,"g":255,"b":0,"on":true}}]})";
+  for (int retry = 0; retry < 4; ++retry) {
+    nextCommand(green);
+    assert(ackJson() == original && fake::shows == shows);
+  }
+  nextCommand(
+      R"({"ok":true,"commands":[{"command_id":"cmd-1","capability":"rgb.set","arguments":{"r":255,"g":0,"b":0,"on":true}}]})");
+  assert(frame["error"]["code"] == "duplicate_conflict" && fake::shows == shows);
+  const char *bad =
+      R"({"ok":true,"commands":[{"command_id":"retry-bad","capability":"rgb.set","arguments":{"r":256,"g":0,"b":0,"on":true}}]})";
+  nextCommand(bad);
+  assert(frame["status"] == "failed" && frame["error"]["code"] == "invalid_arguments");
+  auto failed = ackJson();
+  for (int retry = 0; retry < 4; ++retry) {
+    nextCommand(green);
+    assert(ackJson() == original && fake::shows == shows);
+    nextCommand(bad);
+    assert(ackJson() == failed && fake::shows == shows);
+  }
   reply(R"({"ok":true})");
   fake::pin = 0;
   loop();
@@ -105,6 +131,7 @@ int main() {
   take("poll");
   reply(R"({"ok":false,"error":{"code":"revoked","message":"Credential revoked"}})");
   assert(!connected);
-  std::cout << "firmware host simulation: hello/poll/ACK, duplicate execution, invalid RGB, real "
+  std::cout << "firmware host simulation: hello/poll/ACK, repeated success/failure retries and "
+               "interleaved/conflicting commands, invalid RGB, real "
                "consumer button edges/overflow recovery, lost ACK and revocation recovery passed\n";
 }

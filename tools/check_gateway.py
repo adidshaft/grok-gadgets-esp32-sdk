@@ -1,6 +1,7 @@
 """Optional sibling integration: simulated actual firmware -> PTY USB -> gateway."""
 
 import asyncio
+import copy
 import json
 import os
 from pathlib import Path
@@ -14,6 +15,24 @@ sys.path.insert(0, str(gateway_root / "src"))
 from grok_gadgets_gateway.domain import Gateway
 from grok_gadgets_gateway.transport import Credentials, DeviceServer
 from grok_gadgets_gateway.usb_bridge import bridge
+
+
+class RetryGateway(Gateway):
+    """Local fault injection: redeliver completed commands through real USB polls."""
+
+    def __init__(self):
+        super().__init__()
+        self.replays = []
+        self.acks = []
+
+    def handle(self, did, sid, message):
+        response = super().handle(did, sid, message)
+        if message["type"] == "ack":
+            # Recorded only after the canonical gateway accepts the ACK.
+            self.acks.append(copy.deepcopy(message))
+        if message["type"] == "poll" and not response["commands"] and self.replays:
+            return {"ok": True, "commands": [self.replays.pop(0)]}
+        return response
 
 
 async def until(condition, seconds=8):
@@ -42,7 +61,7 @@ async def main():
             credentials.chmod(0o600)
 
         credential()
-        gateway = Gateway()
+        gateway = RetryGateway()
         server = await DeviceServer(gateway, Credentials(credentials), port=0).start()
         port = server.port
         stop = asyncio.Event()
@@ -87,6 +106,20 @@ async def main():
                 "b": 0,
                 "on": True,
             }
+            original_ack = copy.deepcopy(gateway.acks[-1])
+            retry_session = gateway.devices[device_id]["session_id"]
+            retry_start = len(gateway.acks)
+            gateway.replays = [
+                {
+                    "command_id": "integration-green",
+                    "capability": "rgb.set",
+                    "arguments": {"r": 0, "g": 255, "b": 0, "on": True},
+                }
+                for _ in range(4)
+            ]
+            await until(lambda: len(gateway.acks) == retry_start + 4)
+            assert gateway.acks[retry_start:] == [original_ack] * 4
+            assert gateway.devices[device_id]["session_id"] == retry_session
             # Stall only serial replies, then exercise real consumer debounce and queue logic.
             overflow_session = gateway.devices[device_id]["session_id"]
             paused = True
@@ -137,7 +170,8 @@ async def main():
             await until(lambda: gateway.devices[device_id]["connected"])
             print(
                 "integration: simulated firmware -> PTY -> bridge -> authenticated gateway; "
-                "green/off, 20-edge overflow/loss recovery, server restart, "
+                "green/off, four redelivered identical ACKs in one session, "
+                "20-edge overflow/loss recovery, server restart, "
                 "revocation/restoration passed"
             )
         finally:

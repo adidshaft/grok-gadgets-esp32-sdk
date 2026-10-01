@@ -22,4 +22,6 @@ Names and handler/context storage must outlive Device. Publish `gadget.capabilit
 
 Device retains eight ACKs and exact compact serialized command envelopes within one boot. A retained duplicate returns the original execution state without rerunning its handler. Changed parameters under the same ID fail with duplicate_conflict. Different JSON key ordering is conservatively treated as different parameters. Eviction and reboot end that window; this is not durable exactly-once execution. Gateway never replays an old dispatched command into a new session. A timeout is uncertainty, never permission to resend an action with a new ID.
 
+Repeated retries read the retained serialization without modifying it and own the decoded strings in the destination document. If decoding fails (for example, an undersized destination), the SDK returns `failed` with `ack_unavailable`, empty state and no handler invocation. That error describes an unavailable execution result; it does not prove the original action failed. The cache remains intact for a retry with adequate document capacity. Reading or conflicting with an existing ID does not extend its eight-entry FIFO retention.
+
 Original SDK code is Apache-2.0. See dependency notices before distributing your firmware. The SDK is useful independently with custom capabilities; tests include a non-RGB counter handler.

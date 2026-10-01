@@ -11,3 +11,4 @@ Canonical structured ledger: [issues.json](issues.json). Owner: grok-gadgets-esp
 | ESP-005 | Secure Wi-Fi transport and provisioning | blocked | Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required. |
 | ESP-006 | Independent reproduction | blocked | Independent tester and physical board unavailable. |
 | ESP-007 | Undeclared overflow event causes reconnect loop | done | Declared history_lost; actual consumer 20-edge PTY regression retains 16/drop4, stays connected, executes next command; firmware rebuild passed |
+| HARD-ESP-001 | Preserve ACKs across repeated retries | review | Actual ArduinoJson failure reproduced; four success/failure retries, conflict, bounded eviction/reboot, decode recovery, actual consumer and PTY repeat ACKs pass; C124 compiles; clean-source package pending. See [hardening evidence](../docs/verification/hardening.md). |

@@ -170,6 +170,38 @@
         "74085a9d33fba115a2701d4274140f33d8813d6c"
       ],
       "evidence": "3/3 CTest, pinned contract checks, actual consumer PTY integration (20 GPIO edges, retained 16/drop4, unchanged session, subsequent execution), ESP32-S3 compile SUCCESS."
+    },
+    {
+      "id": "HARD-ESP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Preserve ACKs across repeated retries",
+      "intended_behaviour": "Retained retries return equivalent owned ACKs without rerunning a handler; decode failures preserve retry uncertainty and cached execution result.",
+      "acceptance": [
+        "Repeated valid success/failure ACKs with one execution",
+        "Interleaved and changed argument IDs covered",
+        "Actual consumer retry, contract and C124 compile pass",
+        "Eight-entry FIFO eviction and reboot retention limits covered",
+        "Corrected clean-source firmware artifacts identify source commit, toolchain and hashes"
+      ],
+      "dependencies": [
+        "HARD-001"
+      ],
+      "labels": [
+        "bug",
+        "esp32",
+        "P1",
+        "help wanted"
+      ],
+      "milestone": "MH",
+      "stage": "review",
+      "commits": [],
+      "evidence": [
+        "docs/verification/hardening.md: installed ArduinoJson reproduced valid ACK, valid ACK, true, true, true with execution count 1",
+        "Library and actual firmware retry regressions fail against original585adda; corrected CTest3/3, format/lint, contract, PTY four redeliveries and C124 build pass",
+        "Implementation commit and regenerated clean-source firmware package pending; physical/Grok remain external gates"
+      ],
+      "blocker": null
     }
   ]
 }

@@ -12,3 +12,8 @@
 - Flash/recovery instructions, structured issues and inactive CI/protection proposals.
 
 No physical board, Grok client, Wi-Fi transport, public release or independently reproduced installation is verified. Original code is Apache-2.0; binary redistribution awaits dependency notice/source review.
+
+## Local hardening (unpublished)
+
+- Preserve retained ACKs over repeated retries using read-only ArduinoJson parsing; report replay decode failures without rerunning the handler.
+- Cover interleaved successful/failed commands, conflict, eight-entry FIFO eviction, reboot and actual consumer/PTY retries. Firmware provenance packaging rebuilds a clean identified source and records the resolved toolchain.
