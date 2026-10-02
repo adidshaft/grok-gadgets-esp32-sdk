@@ -24,4 +24,4 @@ Device retains eight ACKs and exact compact serialized command envelopes within 
 
 Repeated retries read the retained serialization without modifying it and own the decoded strings in the destination document. If decoding fails (for example, an undersized destination), the SDK returns `failed` with `ack_unavailable`, empty state and no handler invocation. That error describes an unavailable execution result; it does not prove the original action failed. The cache remains intact for a retry with adequate document capacity. Reading or conflicting with an existing ID does not extend its eight-entry FIFO retention.
 
-Original SDK code is Apache-2.0. See dependency notices before distributing your firmware. The SDK is useful independently with custom capabilities; tests include a non-RGB counter handler.
+Original SDK code is Apache-2.0. See [dependency notices](dependencies.md) before distributing your firmware. The SDK is useful independently with custom capabilities; tests include a non-RGB counter handler.

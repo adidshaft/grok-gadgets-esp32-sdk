@@ -205,6 +205,34 @@
         "Clean integrated main382444d: host3/3, contract, repeated PTY ACK, hub validation and real C124 compile pass; four artifacts rebuilt from clean source and hashes/toolchain recorded in docs/build-checksums.json. Physical/Grok remain external gates."
       ],
       "blocker": null
+    },
+    {
+      "id": "LAUNCH-DOCS-ESP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Prepare an independently buildable C124 SDK guide and public contributor/support policies",
+      "intended_behaviour": "A newcomer builds software without hardware, finds requirements/outputs/provenance, understands pending physical/Grok gates and follows canonical public policy links.",
+      "acceptance": [
+        "README standalone quickstart includes requirements, exact commands,3CTest/contract/firmware success and output paths",
+        "Fresh temporary source and environment host/contract/current C124 compile pass",
+        "SDK/custom capability, USB/recovery, manufacturer sources and licensing remain accurate without runtime/schema changes",
+        "Contribution/security/support/CODEOWNERS identify maintainer and planned channels"
+      ],
+      "dependencies": [
+        "LAUNCH-DOCS-001"
+      ],
+      "labels": [
+        "docs",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "stage": "done",
+      "commits": [],
+      "evidence": [
+        "docs/verification/launch.md: standalone locked pip install, pinned toolcache reuse, hostCTest3/3, canonicalcontract and exactC124 compileSUCCESS; RAM54628/programflash274881/bin283424. Physical/Grok/Wi-Fi remain pending."
+      ],
+      "blocker": null
     }
   ]
 }
