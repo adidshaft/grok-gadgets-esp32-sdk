@@ -194,12 +194,15 @@
         "help wanted"
       ],
       "milestone": "MH",
-      "stage": "review",
-      "commits": [],
+      "stage": "done",
+      "commits": [
+        "3e8ccff4201a19ceb3f6a488c9faee2a442f25d3",
+        "382444d5a7bb9372e8778421a337b82306aa2c58"
+      ],
       "evidence": [
         "docs/verification/hardening.md: installed ArduinoJson reproduced valid ACK, valid ACK, true, true, true with execution count 1",
         "Library and actual firmware retry regressions fail against original585adda; corrected CTest3/3, format/lint, contract, PTY four redeliveries and C124 build pass",
-        "Implementation commit and regenerated clean-source firmware package pending; physical/Grok remain external gates"
+        "Clean integrated main382444d: host3/3, contract, repeated PTY ACK, hub validation and real C124 compile pass; four artifacts rebuilt from clean source and hashes/toolchain recorded in docs/build-checksums.json. Physical/Grok remain external gates."
       ],
       "blocker": null
     }
