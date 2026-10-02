@@ -4,7 +4,7 @@ Local correction for retained command acknowledgements. Electrical board simulat
 
 ## Source and environment
 
-Started from clean SDK `585adda7f854fd33f2d17261d2b1cfa7ec3b1179`, except the coordinator-created HARD-ESP-001 local issue. Branch `fix/ack-retry-hard-esp-001`; exclusive firmware subagent ownership. Actual delegated configuration: GPT-6.1 Sol, High, bounded context (`fork_turns=none`), confirmed by coordinator. Checks below ran against this base plus the correction's uncommitted source; the next evidence checkpoint identifies the committed package.
+Started from clean SDK `585adda7f854fd33f2d17261d2b1cfa7ec3b1179`, except the coordinator-created HARD-ESP-001 local issue. Branch `fix/ack-retry-hard-esp-001`; exclusive firmware subagent ownership. Actual delegated configuration: GPT-6.1 Sol, High, bounded context (`fork_turns=none`), confirmed by coordinator. Initial checks ran against this base plus the correction's uncommitted source; final checks ran against clean integrated main `382444d5a7bb9372e8778421a337b82306aa2c58`.
 
 macOS 27.0 arm64; AppleClang 21.0.0 C++14; PlatformIO Core 6.1.18; espressif32 6.10.0; Arduino-ESP32 package 3.20017.0 (framework 2.0.17); Xtensa ESP32-S3 and RISC-V 8.4.0+2021r2-patch5; esptool 1.40501.0 (4.5.1); SCons 4.40801.0 (4.8.1); ArduinoJson 6.21.5; NeoPixel 1.12.3. ArduinoJson headers are the actual installed `.pio/libdeps/atoms3-lite-usb/ArduinoJson/src`, shared by host checks and board compilation.
 
@@ -22,7 +22,7 @@ One initial regression helper was named `serialized`; ArduinoJson argument-depen
 
 ## Commands and observed results
 
-All commands run from the SDK unless the hub is stated. Before the implementation commit:
+All commands run from the SDK unless the hub is stated. They passed before the implementation commit and again on clean integrated main `382444d5a7bb9372e8778421a337b82306aa2c58`:
 
 | Command | Result |
 | --- | --- |
@@ -36,7 +36,15 @@ The USB test's local `RetryGateway` fault injection redelivers the same complete
 
 ## Package checkpoint
 
-Implementation commit: `3e8ccff4201a19ceb3f6a488c9faee2a442f25d3`. Clean-source packaging ran at 16:22:29 UTC with that commit, all four output hashes verified; host, contract and PTY checks also passed on its clean source. The final main package after canonical pin refresh is recorded in the next evidence checkpoint. Run `.venv/bin/python tools/package_build.py` after committing; it rebuilds the identified clean snapshot, records UTC build time and resolved toolchain, then hashes/copies firmware.bin, firmware.elf, bootloader.bin and partitions.bin to ignored `artifacts/c124-usb`. Tracked `docs/build-checksums.json` will identify that exact source in a separate evidence commit.
+Implementation commit: `3e8ccff4201a19ceb3f6a488c9faee2a442f25d3`. Clean-source packaging ran at 16:22:29 UTC with that commit, all four output hashes verified; host, contract and PTY checks also passed on its clean source. Final main package after canonical pin refresh: clean integrated source `382444d5a7bb9372e8778421a337b82306aa2c58`, rebuilt at `2026-10-04T16:24:01.474053+00:00`, RAM 54,628 and program flash 274,881 bytes. Run `.venv/bin/python tools/package_build.py` after committing; it rebuilds the identified clean snapshot, records UTC build time and resolved toolchain, then hashes/copies firmware.bin, firmware.elf, bootloader.bin and partitions.bin to ignored `artifacts/c124-usb`. Tracked [build checksums](../build-checksums.json) identify that exact source and resolved toolchain; all four ignored artifact files match their byte counts/SHA-256. This later evidence commit changes documentation/issue records only.
+
+| Output | Bytes | SHA-256 |
+| --- | --- | --- |
+| firmware.bin | 283424 | `de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25` |
+| firmware.elf | 7556144 | `cfa5baa2e6709cb6581b1add5a09142531c56db1ad82e09c5b7cfddc90c933f2` |
+| bootloader.bin | 15104 | `1776e4dd896a69d0a5c2e79957b0e2a88aa4129b1381d6478683515a1f6af343` |
+| partitions.bin | 3072 | `1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c` |
+
 
 ## Open external gates
 

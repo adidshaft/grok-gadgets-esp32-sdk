@@ -2,12 +2,12 @@
   "evidence": "unpublished real ESP32-S3 build; no hardware or Grok observation",
   "files": {
     "firmware.bin": {
-      "bytes": 276480,
-      "sha256": "de12327c4fdc7ef6a728c5841a81d844257012d558c71ecd4fe331c6708af709"
+      "bytes": 283424,
+      "sha256": "de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25"
     },
     "firmware.elf": {
-      "bytes": 7582696,
-      "sha256": "09e4c6e3ba19cc3322ad14628a2c9ee644e80f29625b68944cdf9abf5e3ead45"
+      "bytes": 7556144,
+      "sha256": "cfa5baa2e6709cb6581b1add5a09142531c56db1ad82e09c5b7cfddc90c933f2"
     },
     "bootloader.bin": {
       "bytes": 15104,
@@ -18,5 +18,12 @@
       "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
     }
   },
-  "firmware_source_commit": "74085a9d33fba115a2701d4274140f33d8813d6c"
+  "firmware_source_commit": "382444d5a7bb9372e8778421a337b82306aa2c58",
+  "source_tree_clean": true,
+  "built_at_utc": "2026-10-04T16:24:01.474053+00:00",
+  "build_command": ".venv/bin/pio run -e atoms3-lite-usb",
+  "toolchain": {
+    "platformio_core": "PlatformIO Core, version 6.1.18",
+    "resolved_packages": "Resolving atoms3-lite-usb dependencies...\nPlatform espressif32 @ 6.10.0 (required: espressif32 @ 6.10.0)\n\u251c\u2500\u2500 framework-arduinoespressif32 @ 3.20017.0 (required: platformio/framework-arduinoespressif32 @ 3.20017.0)\n\u251c\u2500\u2500 tool-esptoolpy @ 1.40501.0 (required: platformio/tool-esptoolpy @ 1.40501.0)\n\u251c\u2500\u2500 tool-scons @ 4.40801.0 (required: platformio/tool-scons @ 4.40801.0)\n\u251c\u2500\u2500 toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-riscv32-esp @ 8.4.0+2021r2-patch5)\n\u2514\u2500\u2500 toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5)\n\nLibraries\n\u251c\u2500\u2500 Adafruit NeoPixel @ 1.12.3 (required: adafruit/Adafruit NeoPixel @ 1.12.3)\n\u2514\u2500\u2500 ArduinoJson @ 6.21.5 (required: bblanchon/ArduinoJson @ 6.21.5)"
+  }
 }
