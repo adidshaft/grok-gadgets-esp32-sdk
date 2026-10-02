@@ -1,4 +1,8 @@
-# Local verification evidence — 4 October 2026
+# Verification
+
+Current newcomer build rehearsal: [standalone documentation verification](verification/launch.md). The exact account-free guide passed in a fresh source directory and Python environment.
+
+## Historical local checkpoint — 4 October 2026
 
 This is the pre-hardening checkpoint. Current ACK retry correction, commands and package provenance are recorded in [hardening verification](verification/hardening.md).
 

@@ -23,6 +23,8 @@ For a provenance package, commit the tested source first, then run `.venv/bin/py
 
 ## Flash when hardware is available
 
+These are prepared hardware steps, not steps used during the software quickstart. Select and authorize the intended physical board before proceeding.
+
 Use a USB-C **data** cable. Inspect ports with `.venv/bin/pio device list`, identify this board rather than guessing another device's port, close any serial monitor/bridge, then:
 
 ```sh
@@ -31,7 +33,7 @@ Use a USB-C **data** cable. Inspect ports with `.venv/bin/pio device list`, iden
 
 Linux port is commonly `/dev/ttyACM0`, but inspect it. Linux may require membership in the OS's serial-device group (often dialout) and reconnect/login afterward; never run the entire gateway as root. The normal example has no log prints on the protocol CDC channel.
 
-The device ID is `c124-<MAC hex>` and boot ID is random per boot. To inspect hello before registering a gateway credential, run the serial monitor at 115200 briefly. It prints no token because credentials stay on the host. Close monitor before starting the gateway USB bridge. See sibling gateway README for `.venv/bin/python -m grok_gadgets_gateway.usb_bridge PORT` (set `GROK_GADGETS_DEVICE_TOKEN` in your private shell environment); gateway supplies the token to the loopback connection. USB owns one serial connection at a time.
+The device ID is `c124-<MAC hex>` and boot ID is random per boot. To inspect hello before registering a gateway credential, run the serial monitor at 115200 briefly. It prints no token because credentials stay on the host. Close monitor before starting the gateway USB bridge. See the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge) for `.venv/bin/python -m grok_gadgets_gateway.usb_bridge PORT` (set `GROK_GADGETS_DEVICE_TOKEN` in your private shell environment); gateway supplies the token to the loopback connection. USB owns one serial connection at a time.
 
 ## Recovery / rollback
 
