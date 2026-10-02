@@ -4,13 +4,13 @@ Local correction for retained command acknowledgements. Electrical board simulat
 
 ## Source and environment
 
-Started from clean SDK `585adda7f854fd33f2d17261d2b1cfa7ec3b1179`, except the coordinator-created HARD-ESP-001 local issue. Branch `fix/ack-retry-hard-esp-001`; exclusive firmware subagent ownership. Coordinator records actual agent model/effort; this record does not infer runtime settings. Checks below ran against this base plus the correction's uncommitted source; the next evidence checkpoint identifies the committed package.
+Started from clean SDK `585adda7f854fd33f2d17261d2b1cfa7ec3b1179`, except the coordinator-created HARD-ESP-001 local issue. Branch `fix/ack-retry-hard-esp-001`; exclusive firmware subagent ownership. Delegated to a bounded agent with its own context, confirmed by the coordinator. Checks below ran against this base plus the correction's uncommitted source; the next evidence checkpoint identifies the committed package.
 
 macOS 27.0 arm64; AppleClang 21.0.0 C++14; PlatformIO Core 6.1.18; espressif32 6.10.0; Arduino-ESP32 package 3.20017.0 (framework 2.0.17); Xtensa ESP32-S3 and RISC-V 8.4.0+2021r2-patch5; esptool 1.40501.0 (4.5.1); SCons 4.40801.0 (4.8.1); ArduinoJson 6.21.5; NeoPixel 1.12.3. ArduinoJson headers are the actual installed `.pio/libdeps/atoms3-lite-usb/ArduinoJson/src`, shared by host checks and board compilation.
 
 ## Failure and correction
 
-At 16:10–16:20 UTC, an isolated `counter.bump` probe ran an original command followed by four identical retries against the installed headers. Calls 1/2 returned `{"type":"ack","command_id":"retry-probe","status":"executed","state":{"counter":1}}`; calls 3/4/5 returned JSON `true`. Execution count remained one. Before/after raw probe output remains under ignored `build/hardening/retry-before.log` and `retry-after.log`.
+During the 4 October 2026 correction session (first build checkpoint 16:19 UTC), an isolated `counter.bump` probe ran an original command followed by four identical retries against the installed headers. Calls 1/2 returned `{"type":"ack","command_id":"retry-probe","status":"executed","state":{"counter":1}}`; calls 3/4/5 returned JSON `true`. Execution count remained one. Before/after raw probe output remains under ignored `build/hardening/retry-before.log` and `retry-after.log`.
 
 Mutable ArduinoJson input selected zero-copy parsing and modified the retained buffer. `Device::execute` now explicitly passes a `const char*`, preserving its cached serialization and owning replay strings. Deserialization failure returns a bounded `failed` ACK with `ack_unavailable` and empty state, without running the handler or replacing the retained result. That failure means the execution result is unavailable; it does not imply the original action failed. A correctly sized destination can retrieve the original result later.
 
@@ -32,11 +32,11 @@ All commands run from the SDK unless the hub is stated. Before the implementatio
 | `.venv/bin/pio run -e atoms3-lite-usb` | exit 0 SUCCESS; RAM 54,628/327,680; program flash 274,881/3,342,336 |
 | Hub `python3 scripts/check.py` | exit 0; 19 labeled issues and syntax verified |
 
-The USB test's local `RetryGateway` fault injection redelivers the same completed command through ordinary poll responses; production gateway command semantics stay unchanged. It records ACKs only after canonical validation and duplicate acceptance. Single handler execution is asserted at the library and actual consumer `show()` boundary. The PTY integration passed with clean gateway `85548ea9824d11d89c81437ee5feeaa0b9e789be`; canonical SDK fixtures still pin `17d31686ad06d608f20b117e6f4070bacbff7a35` until coordinated refresh.
+The USB test's local `RetryGateway` fault injection redelivers the same completed command through ordinary poll responses; production gateway command semantics stay unchanged. It records ACKs only after canonical validation and duplicate acceptance. Single handler execution is asserted at the library and actual consumer `show()` boundary. The PTY integration passed with clean gateway `85548ea9824d11d89c81437ee5feeaa0b9e789be`; subsequent coordinated checks use clean final gateway `84b06fb9bef0f01639c215f2b5ada83fe5074218`. Canonical schemas/fixtures remain byte-identical; the SDK now pins that exact commit and includes the authoritative README hash `b1ae2a5c8ea0933eb9bcedce01e8c7bbed5215591229a78932637f2a76f07ac1`, covering clarified command/event roles and bounded per-device/current-boot event windows.
 
 ## Package checkpoint
 
-Implementation commit and final clean-source package: pending the tested source commit. Run `.venv/bin/python tools/package_build.py` after committing; it rebuilds the identified clean snapshot, records UTC build time and resolved toolchain, then hashes/copies firmware.bin, firmware.elf, bootloader.bin and partitions.bin to ignored `artifacts/c124-usb`. Tracked `docs/build-checksums.json` will identify that exact source in a separate evidence commit.
+Implementation commit: `3e8ccff4201a19ceb3f6a488c9faee2a442f25d3`. Clean-source packaging ran at 16:22:29 UTC with that commit, all four output hashes verified; host, contract and PTY checks also passed on its clean source. The final main package after canonical pin refresh is recorded in the next evidence checkpoint. Run `.venv/bin/python tools/package_build.py` after committing; it rebuilds the identified clean snapshot, records UTC build time and resolved toolchain, then hashes/copies firmware.bin, firmware.elf, bootloader.bin and partitions.bin to ignored `artifacts/c124-usb`. Tracked `docs/build-checksums.json` will identify that exact source in a separate evidence commit.
 
 ## Open external gates
 
