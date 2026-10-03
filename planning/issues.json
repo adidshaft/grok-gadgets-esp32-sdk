@@ -236,6 +236,29 @@
         "Clean documentation commit ff954cc packaged with tools/package_build.py; four artifact hashes and resolved toolchain recorded in docs/build-checksums.json. No hardware/Grok observation."
       ],
       "blocker": null
+    },
+    {
+      "id": "LAUNCH-CI-ESP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "problem": "Pin and bound standalone read-only checks",
+      "acceptance": [
+        "Verified official action commit pins, read-only permissions, no persisted credentials and timeouts",
+        "Real hosted contexts remain unverified until approved activation"
+      ],
+      "dependencies": [],
+      "labels": [
+        "maintenance",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "stage": "done",
+      "commits": [],
+      "evidence": [
+        ".github/workflows/checks.yml",
+        "Local YAML/pin/permission validation; runtime unchanged from fresh standalone docs acceptance"
+      ],
+      "blocker": null
     }
   ]
 }
