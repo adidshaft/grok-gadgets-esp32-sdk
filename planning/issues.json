@@ -228,9 +228,12 @@
       ],
       "milestone": "PUBLIC-ALPHA",
       "stage": "done",
-      "commits": [],
+      "commits": [
+        "ff954cc533c18ab4700e2798cabf4944ededb0ab"
+      ],
       "evidence": [
-        "docs/verification/launch.md: standalone locked pip install, pinned toolcache reuse, hostCTest3/3, canonicalcontract and exactC124 compileSUCCESS; RAM54628/programflash274881/bin283424. Physical/Grok/Wi-Fi remain pending."
+        "docs/verification/launch.md: standalone locked pip install, pinned toolcache reuse, hostCTest3/3, canonicalcontract and exactC124 compileSUCCESS; RAM54628/programflash274881/bin283424. Physical/Grok/Wi-Fi remain pending.",
+        "Clean documentation commit ff954cc packaged with tools/package_build.py; four artifact hashes and resolved toolchain recorded in docs/build-checksums.json. No hardware/Grok observation."
       ],
       "blocker": null
     }
