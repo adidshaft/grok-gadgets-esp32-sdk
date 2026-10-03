@@ -18,9 +18,9 @@
       "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
     }
   },
-  "firmware_source_commit": "382444d5a7bb9372e8778421a337b82306aa2c58",
+  "firmware_source_commit": "ff954cc533c18ab4700e2798cabf4944ededb0ab",
   "source_tree_clean": true,
-  "built_at_utc": "2026-10-04T16:24:01.474053+00:00",
+  "built_at_utc": "2026-10-04T20:45:18.885157+00:00",
   "build_command": ".venv/bin/pio run -e atoms3-lite-usb",
   "toolchain": {
     "platformio_core": "PlatformIO Core, version 6.1.18",
