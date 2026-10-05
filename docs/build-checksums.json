@@ -1,29 +1,55 @@
 {
-  "status": "build verified; hardware and Grok pending; unpublished",
-  "source_commit": "4b497fec3ec69dfea90ab71f85bda96fb4070924",
-  "source_tree_clean": true,
-  "built_at_utc": "2026-10-05T03:18:27.491954+00:00",
-  "build_command": ".venv/bin/pio run -e atoms3-lite-usb",
-  "toolchain": {
-    "platformio_core": "PlatformIO Core, version 6.1.18",
-    "resolved_packages": "Resolving atoms3-lite-usb dependencies...\nPlatform espressif32 @ 6.10.0 (required: espressif32 @ 6.10.0)\n\u251c\u2500\u2500 framework-arduinoespressif32 @ 3.20017.0 (required: platformio/framework-arduinoespressif32 @ 3.20017.0)\n\u251c\u2500\u2500 tool-esptoolpy @ 1.40501.0 (required: platformio/tool-esptoolpy @ 1.40501.0)\n\u251c\u2500\u2500 tool-scons @ 4.40801.0 (required: platformio/tool-scons @ 4.40801.0)\n\u251c\u2500\u2500 toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-riscv32-esp @ 8.4.0+2021r2-patch5)\n\u2514\u2500\u2500 toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5)\n\nLibraries\n\u251c\u2500\u2500 Adafruit NeoPixel @ 1.12.3 (required: adafruit/Adafruit NeoPixel @ 1.12.3)\n\u2514\u2500\u2500 ArduinoJson @ 6.21.5 (required: bblanchon/ArduinoJson @ 6.21.5)"
-  },
-  "files": {
-    "firmware.bin": {
-      "bytes": 275216,
-      "sha256": "7a4b0681be5a51534c59aa36b99a82268b81dd9452d8357f3ef59347ee70a765"
+  "role": "Only tracked firmware checksum record. Hash tables under docs/verification/ are historical snapshots of older commits.",
+  "status": "current image pending a clean rebuild of this tree; hardware and Grok pending; unpublished",
+  "hash_depends_on": "firmware.bin and firmware.elf follow the installed toolchain-xtensa-esp32s3 package system (darwin_arm64, darwin_x86_64, or a Linux value), not only version 8.4.0+2021r2-patch5. -ffile-prefix-map removes the checkout path and PlatformIO home from the image. bootloader.bin and partitions.bin omit those paths. Two checkouts match when the toolchain variant matches.",
+  "current": null,
+  "historical": [
+    {
+      "label": "Previous contents of this file, before the session rewrite",
+      "source_commit": "4b497fec3ec69dfea90ab71f85bda96fb4070924",
+      "built_at_utc": "2026-10-05T03:18:27.491954+00:00",
+      "note": "Toolchain package system was not recorded. This is not the current image.",
+      "files": {
+        "firmware.bin": {
+          "bytes": 275216,
+          "sha256": "7a4b0681be5a51534c59aa36b99a82268b81dd9452d8357f3ef59347ee70a765"
+        },
+        "firmware.elf": {
+          "bytes": 7550860,
+          "sha256": "d7789353e8479fd853d31f9e21750e5a52896cf99e28de27be0c89de215316dd"
+        },
+        "bootloader.bin": {
+          "bytes": 15104,
+          "sha256": "1776e4dd896a69d0a5c2e79957b0e2a88aa4129b1381d6478683515a1f6af343"
+        },
+        "partitions.bin": {
+          "bytes": 3072,
+          "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
+        }
+      }
     },
-    "firmware.elf": {
-      "bytes": 7550860,
-      "sha256": "d7789353e8479fd853d31f9e21750e5a52896cf99e28de27be0c89de215316dd"
-    },
-    "bootloader.bin": {
-      "bytes": 15104,
-      "sha256": "1776e4dd896a69d0a5c2e79957b0e2a88aa4129b1381d6478683515a1f6af343"
-    },
-    "partitions.bin": {
-      "bytes": 3072,
-      "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
+    {
+      "label": "Launch and hardening notes for an earlier arm64-toolchain image",
+      "source_commit": "304c518cfce8b7f5cb4a1604beae76f680af3460",
+      "note": "docs/verification/launch.md and docs/verification/hardening.md. Different size from the 275216-byte image above because the host toolchain variant differed. Not the current tree.",
+      "files": {
+        "firmware.bin": {
+          "bytes": 283424,
+          "sha256": "de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25"
+        },
+        "firmware.elf": {
+          "bytes": 7556144,
+          "sha256": "cfa5baa2e6709cb6581b1add5a09142531c56db1ad82e09c5b7cfddc90c933f2"
+        },
+        "bootloader.bin": {
+          "bytes": 15104,
+          "sha256": "1776e4dd896a69d0a5c2e79957b0e2a88aa4129b1381d6478683515a1f6af343"
+        },
+        "partitions.bin": {
+          "bytes": 3072,
+          "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
+        }
+      }
     }
-  }
+  ]
 }

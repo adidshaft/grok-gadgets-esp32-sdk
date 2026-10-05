@@ -9,3 +9,5 @@ Verified on 4 October 2026 from manufacturer sources:
 | User button | GPIO41, active-low | [M5Unified 0.2.5 button sampling](https://github.com/m5stack/M5Unified/blob/0.2.5/src/M5Unified.cpp) cases board_M5AtomS3Lite in setup and update |
 
 Firmware uses NeoPixel's supported WS2812 driver and this explicit board header rather than pulling in display/IMU libraries irrelevant to C124. Pin verification is documentation evidence, not physical verification. The product page's schematic link is shared AtomS3 family material and includes display circuitry; the explicit C124 manufacturer library is used to resolve its LED/button pins.
+
+`RGB_BUILTIN` and `LED_BUILTIN` are GPIO48 in the generic `esp32s3` variant and in `m5stack_atoms3`. C124's RGB data pin is GPIO35 (`grok::c124::RgbPin`). `neopixelWrite(RGB_BUILTIN, ...)` drives the wrong pin on this board. The generic [LED and button example](../examples/led-button/main.cpp) uses GPIO4 and GPIO0 on purpose and is a different, unverified board.
