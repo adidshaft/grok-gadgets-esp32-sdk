@@ -1,7 +1,7 @@
 {
   "canonical_repository": "grok-gadgets-gateway",
   "protocol_version": "0.1.0",
-  "gateway_commit": "b5f316e78849528d7f76b8dac8c24d1f6e795669",
+  "gateway_commit": "135dbb8349eeccab88b7be5e804066bfbf2bcf23",
   "files_sha256": {
     "README.md": "debb5c2d884ac427746523923f9729eb126710bde889bdaa8087b61a8e84ce7f",
     "device-request.schema.json": "fcb3b09fa217e7f5dd4a91474ed32b45ef34155f99ec638336c1bee357620125",

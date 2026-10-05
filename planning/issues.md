@@ -17,8 +17,8 @@ Canonical structured ledger: [issues.json](issues.json). Owner: grok-gadgets-esp
 | REVIEW-ESP-001 | Reusable `grok::Gadget` session; event, loss, parse and registration fixes (review ESP-01/02/07/08/09/10/11/15/18/19) | done | Host session and firmware tests. ESP-08 RX buffer is set before `Serial.begin()` and remains unverified on hardware. |
 | REVIEW-ESP-002 | Contract check validates real sketch output (ESP-14) | done | `transcript_c124` and `transcript_led_button` compile the real sketches; `check_contract.py` validates their frames. |
 | REVIEW-ESP-003 | Optional PTY integration fails instead of hanging (ESP-06) | done | `tools/check_gateway.py` bounds close. Gateway `DeviceServer.close` closes clients first. |
-| REVIEW-ESP-004 | Reproducible firmware hashes, one checksum record, flash offsets (ESP-05/16) | done | `docs/build-checksums.json` records clean `f618df1` on toolchain system `darwin_x86_64`. Path maps are on. Another host variant still changes `firmware.bin`. |
+| REVIEW-ESP-004 | Reproducible firmware hashes, one checksum record, flash offsets (ESP-05/16) | done | `docs/build-checksums.json` records clean `6af0b20` on toolchain system `darwin_x86_64`. Path maps are on. Another host variant still changes `firmware.bin`. |
 | REVIEW-ESP-005 | Plain README and corrected guides (ESP-13/15/16/19/21, enroll/serve) | done | One build quickstart, explicit Bot/hardware gates, local HTTP MCP, and same-port USB retry. Host 4/4, two generated sketch contracts, PTY simulation and both firmware builds pass. Physical USB and Grok Bot remain unverified. |
 | REVIEW-ESP-006 | Ledger citations and blocker fields (ESP-17) | done | `851ffab` / `bca5d4e`. ESP-004/005/006 name external blockers. |
 | REVIEW-ESP-007 | Deferred: boot_id counter (ESP-12), float RGB (ESP-03, gateway), protocol request IDs | ready | Needs NVS work or coordinated protocol/gateway changes. |
-| REVIEW-ESP-008 | Pin protocol 0.1.0 to gateway b5f316e (events + ID anchors) | done | Copied files; check_contract.py |
+| REVIEW-ESP-008 | Pin protocol 0.1.0 to gateway 135dbb8 (events + ID anchors) | done | Copied files; check_contract.py |
