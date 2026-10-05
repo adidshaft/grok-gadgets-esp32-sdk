@@ -92,16 +92,13 @@ PlatformIO uploads this Arduino board as DIO, 80 MHz, 8 MB. It rewrites the boar
 
 ## Connect the USB bridge
 
-The device ID is `c124-` plus the MAC in the order esptool prints, lowercase hex, no separators. MAC `bc:9a:78:56:34:12` is `c124-bc9a78563412`. Each boot creates a new random boot ID. Credentials stay on the host.
+The device ID is `c124-` plus the MAC in the order esptool prints, lowercase hex, no separators. MAC `bc:9a:78:56:34:12` is `c124-bc9a78563412`. Each boot creates a new random boot ID. Credentials stay on the host. The USB hello has no credential.
 
-1. Open a serial monitor at 115200 long enough to read the hello device ID.
-2. Close the monitor. Only one process can hold the port.
-3. Enroll that ID with `grok-gadgets-gateway enroll`.
-4. Set `GROK_GADGETS_DEVICE_TOKEN` in your private shell environment.
-5. Start the gateway with `grok-gadgets-gateway serve`.
-6. Start the USB bridge on the board's port. The bridge adds the token. The USB hello has no credential.
+The bridge reads `GROK_GADGETS_DEVICE_TOKEN` from the environment and adds that token on the loopback connection. Keep the token out of Git.
 
-`enroll` and `serve` are the intended gateway commands. This SDK does not implement them. The bridge module remains `python -m grok_gadgets_gateway.usb_bridge PORT` until that gateway checkout exposes the same flow. The token protects the local device connection. It is not remote MCP authentication. Keep this device transport on the gateway computer. See the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge).
+`grok-gadgets-gateway enroll` and `grok-gadgets-gateway serve` are the intended host commands. They were not run for this record, and the current gateway entry point does not provide those subcommands. Until it does, follow the gateway guide: a private credentials file, `grok-gadgets-gateway --credentials`, and `python -m grok_gadgets_gateway.usb_bridge PORT` with the token set. The token protects the local device connection. It is not remote MCP authentication. Keep this device transport on the gateway computer. See the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge).
+
+Unplugging the board stops the bridge. Plugging it back in power-cycles the board, so the boot ID changes. Start the bridge again after the port returns.
 
 ## Recover the board
 

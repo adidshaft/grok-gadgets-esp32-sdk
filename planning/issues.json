@@ -408,7 +408,8 @@
       "dependencies": [],
       "blocker": null,
       "commits": [
-        "f618df1"
+        "f618df1",
+        "91d5ed6"
       ],
       "evidence": [
         "docs/build-checksums.json current record is clean f618df1, toolchain system darwin_x86_64, firmware.bin 284544 bytes",
@@ -437,11 +438,14 @@
       ],
       "dependencies": [],
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "f618df1"
+      ],
       "evidence": [
-        "README states compile-only status and unverified Grok Bot reach via grok-gadgets-gateway serve plus an operator tunnel",
+        "README states compile-only status. Grok Bot reach was not run",
+        "grok-gadgets-gateway enroll and serve are named as intended host commands and were not run. The USB bridge reads GROK_GADGETS_DEVICE_TOKEN",
         "docs/sdk.md documents the global Gadget rule, name limits, and event schemas",
-        "docs/build-flash.md documents enroll, serve, GROK_GADGETS_DEVICE_TOKEN, bridge restart after unplug, MAC-order device IDs, and flash offsets",
+        "docs/build-flash.md documents device IDs, PlatformIO flash offsets, and restarting the bridge after unplug",
         "docs/board-sources.md warns that RGB_BUILTIN and LED_BUILTIN are GPIO48"
       ]
     },
@@ -464,7 +468,9 @@
       ],
       "dependencies": [],
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "f618df1"
+      ],
       "evidence": [
         "HARD-ESP-001 cites reachable 851ffab and bca5d4e",
         "ESP-004, ESP-005, and ESP-006 name their external blockers"
