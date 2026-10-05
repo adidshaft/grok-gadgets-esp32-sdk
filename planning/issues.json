@@ -481,7 +481,7 @@
       "id": "REVIEW-ESP-007",
       "repository": "grok-gadgets-esp32-sdk",
       "owner": "grok-gadgets-esp32-sdk",
-      "problem": "Deferred review items: guaranteed boot_id uniqueness (ESP-12), integral-float RGB (ESP-03), protocol request IDs (ESP-09 long term)",
+      "problem": "Deferred review items: guaranteed boot_id uniqueness (ESP-12) and protocol request IDs (ESP-09 long term)",
       "stage": "ready",
       "labels": [
         "enhancement",
@@ -491,13 +491,14 @@
       "milestone": "PUBLIC-ALPHA",
       "acceptance": [
         "NVS boot counter in boot_id, or documented acceptance of the pseudo-random risk",
-        "Gateway canonicalises integral float RGB channels (gateway-owned)",
         "Protocol 0.2 request_id echo coordinated through the canonical gateway protocol"
       ],
       "dependencies": [],
       "blocker": null,
       "commits": [],
-      "evidence": []
+      "evidence": [
+        "ESP-03 is resolved: gateway and firmware reject integral-float RGB channels. No canonicalisation change is planned. The SDK guide also documents the gateway schema restrictions."
+      ]
     },
     {
       "id": "REVIEW-ESP-008",

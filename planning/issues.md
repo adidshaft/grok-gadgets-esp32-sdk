@@ -20,5 +20,5 @@ Canonical structured ledger: [issues.json](issues.json). Owner: grok-gadgets-esp
 | REVIEW-ESP-004 | Reproducible firmware hashes, one checksum record, flash offsets (ESP-05/16) | done | `docs/build-checksums.json` records clean `f1af1d4` on toolchain system `darwin_x86_64`. Path maps are on. Another host variant still changes `firmware.bin`. |
 | REVIEW-ESP-005 | Plain README and corrected guides (ESP-13/15/16/19/21, enroll/serve) | done | One build quickstart, explicit Bot/hardware gates, local HTTP MCP, and same-port USB retry. Host 4/4, two generated sketch contracts, PTY simulation and both firmware builds pass. Physical USB and Grok Bot remain unverified. |
 | REVIEW-ESP-006 | Ledger citations and blocker fields (ESP-17) | done | `851ffab` / `804f64f`. ESP-004/005/006 name external blockers. |
-| REVIEW-ESP-007 | Deferred: boot_id counter (ESP-12), float RGB (ESP-03, gateway), protocol request IDs | ready | Needs NVS work or coordinated protocol/gateway changes. |
+| REVIEW-ESP-007 | Deferred: boot_id counter (ESP-12), protocol request IDs | ready | Needs NVS work or a coordinated protocol change. Integral-float RGB is resolved: gateway and firmware reject it. |
 | REVIEW-ESP-008 | Pin protocol 0.1.0 to gateway 5ea23b7 (events + ID anchors) | done | Copied files; check_contract.py |
