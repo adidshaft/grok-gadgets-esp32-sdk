@@ -20,11 +20,16 @@ inline bool validId(const char *id) {
   }
   return true;
 }
+// Built-in names the gateway gives a fixed meaning; never valid for application commands/events.
+inline bool reservedName(const char *name) {
+  return !strcmp(name, "button") || !strcmp(name, "state") || !strcmp(name, "history_lost");
+}
+constexpr size_t MaxCapabilities = 16; // Hello capabilities limit, built-in names included.
 class Device {
 public:
   Device(StateWriter writer, void *context) : writer_(writer), context_(context) {}
   bool capability(const char *name, Handler handler, void *context) {
-    if (!validId(name) || !handler || count_ == 16)
+    if (!validId(name) || reservedName(name) || !handler || count_ == MaxCapabilities)
       return false;
     for (size_t i = 0; i < count_; ++i)
       if (!strcmp(entries_[i].name, name))
@@ -36,6 +41,13 @@ public:
     for (size_t i = 0; i < count_; ++i)
       array.add(entries_[i].name);
   }
+  size_t size() const { return count_; }
+  bool has(const char *name) const {
+    for (size_t i = 0; i < count_; ++i)
+      if (!strcmp(entries_[i].name, name))
+        return true;
+    return false;
+  }
   void state(JsonObject target) const { writer_(target, context_); }
   // Never re-execute a retained ID. Changed arguments produce an explicit conflict.
   void execute(JsonObjectConst command, JsonDocument &ack) {
@@ -44,7 +56,7 @@ public:
     const char *id = command["command_id"] | "";
     const char *cap = command["capability"] | "";
     out["type"] = "ack";
-    out["command_id"] = id;
+    out["command_id"] = JsonString(id, JsonString::Copied);
     Error error;
     char fingerprint[MaxFrame + 1];
     if (!validId(id) || !validId(cap) || !command["arguments"].is<JsonObjectConst>())
@@ -66,7 +78,7 @@ public:
             ack.clear();
             auto replay = ack.to<JsonObject>();
             replay["type"] = "ack";
-            replay["command_id"] = id;
+            replay["command_id"] = JsonString(id, JsonString::Copied);
             replay["status"] = "failed";
             replay.createNestedObject("state");
             auto failure = replay.createNestedObject("error");
@@ -98,7 +110,7 @@ public:
       ack.clear();
       out = ack.to<JsonObject>();
       out["type"] = "ack";
-      out["command_id"] = id;
+      out["command_id"] = JsonString(id, JsonString::Copied);
       out["status"] = error.code ? "failed" : "executed";
       out.createNestedObject("state");
       if (error.code) {
@@ -127,7 +139,7 @@ private:
     const char *name = nullptr;
     Handler handler = nullptr;
     void *context = nullptr;
-  } entries_[16];
+  } entries_[MaxCapabilities];
   struct Cached {
     char id[65] = {};
     char command[MaxFrame + 1] = {};

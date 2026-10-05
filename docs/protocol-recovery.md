@@ -21,11 +21,17 @@ The gateway does not send unsolicited commands. Each poll returns at most one co
 
 The USB hello contains no credentials. The local bridge adds the host's per-device token to the loopback TCP hello. Physical USB access and host access affect security.
 
+Run the bridge and gateway on the same host. The device protocol is not an HTTPS MCP endpoint.
+Do not expose it through a tunnel. A tunnel does not add gateway authentication.
+The gateway's separate `serve` command provides authenticated HTTP MCP on loopback.
+Public HTTPS and Grok Bot compatibility are not verified; see `HARD-GROK-REMOTE-001` and the
+[hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
+
 ## Startup and identity
 
 The LED starts off. Firmware publishes:
 
-- A MAC-derived device ID.
+- A device ID of `c124-` plus the MAC bytes in esptool order.
 - A random boot ID.
 - Protocol and firmware versions.
 - Capability names.
@@ -37,19 +43,21 @@ An RGB acknowledgement follows the return of the pixel driver's `show()` functio
 
 ## Recover a session
 
-A request times out after three seconds. Hello retries start at 500 ms and increase up to five seconds. Successful hello resets the delay.
+A request times out after 13 seconds. That is longer than the USB bridge's 2-second connect wait plus its 10-second reply wait, so a late reply is not applied to the next request. Hello retries start at 500 ms and increase up to five seconds. The delay returns to 500 ms after a successful request other than hello.
 
-An error, malformed response, oversized response or timeout starts a new session. Firmware drops the old pending acknowledgement. The gateway records dispatched commands as uncertain when their results are unknown.
+A reply must be one JSON object whose fields match the outstanding request. Trailing bytes, a second object, an embedded NUL, or the wrong shape starts a new session. Firmware drops the old pending acknowledgement. The gateway records dispatched commands as uncertain when their results are unknown.
+
+A permanently rejected queued event (`duplicate_conflict`, `invalid_event`, `invalid_request`, `unsupported_capability`, `invalid_state`) is dropped, counted in `history_lost`, and polling continues. Other event failures reconnect. After five failures the event is dropped.
 
 Firmware never treats an acknowledgement as a command. It does not automatically retry an action. Correct credentials or protocol settings after authorization, revocation or version errors. Then reconnect. Firmware does not print secrets.
 
 ## Button events
 
-The button debounce period is 30 ms. Press and release events use sequence IDs unique within a boot.
+The button debounce period is 30 ms. Press and release events use sequence IDs unique within a boot. The gateway retains events for a client to read; a button press does not start a Grok Bot task.
 
-The queue holds 16 events. On overflow, it drops new events. After retained events drain, a `history_lost` event reports the dropped count. Hello declares `history_lost`, `rgb.set`, `button` and `state` so the gateway accepts these reports.
+The queue holds 16 events. On overflow, it drops new events. After retained events drain, a `history_lost` event reports the dropped count. Retries of that report reuse one event ID and the same count, so a lost reply is not counted twice. A successful reply clears only the reported count. Losses during the report wait for the next ID.
 
-A successful `history_lost` reply clears only the reported count. Losses that occur during reporting remain for the next report.
+Hello declares `history_lost`, `rgb.set`, `button`, and `state`. Custom event names also appear there, and their `capability_schemas` entries include `"x-grok-gadgets-kind": "event"`. `history_lost` is reserved and is not a sketch-registered name.
 
 Current debounced button state appears in hello, acknowledgements and periodic state. Periodic state is sent every three seconds.
 
@@ -62,6 +70,10 @@ Device reboot removes the RAM event queue and acknowledgement cache. USB firmwar
 ## Future Wi-Fi support
 
 Wi-Fi transport is not implemented in this alpha. The gateway's device listener is loopback-only and unencrypted. Wi-Fi needs an authenticated, reachable transport and secure credential setup. This is tracked as ESP-005.
+
+Wi-Fi device transport and cloud Bot MCP access are separate work.
+Neither creates the other. Future customer-hosted and maker-hosted services are product
+options, not shipped features. The hosting FAQ keeps their operation and security requirements together.
 
 Before adding that transport:
 
