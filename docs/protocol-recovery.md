@@ -23,7 +23,8 @@ The USB hello contains no credentials. The local bridge adds the host's per-devi
 
 Run the bridge and gateway on the same host. The device protocol is not an HTTPS MCP endpoint.
 Do not expose it through a tunnel. A tunnel does not add gateway authentication.
-The separate remote MCP service is not implemented; see `HARD-GROK-REMOTE-001` and the
+The gateway's separate `serve` command provides authenticated HTTP MCP on loopback.
+Public HTTPS and Grok Bot compatibility are not verified; see `HARD-GROK-REMOTE-001` and the
 [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
 
 ## Startup and identity
@@ -52,7 +53,7 @@ Firmware never treats an acknowledgement as a command. It does not automatically
 
 ## Button events
 
-The button debounce period is 30 ms. Press and release events use sequence IDs unique within a boot.
+The button debounce period is 30 ms. Press and release events use sequence IDs unique within a boot. The gateway retains events for a client to read; a button press does not start a Grok Bot task.
 
 The queue holds 16 events. On overflow, it drops new events. After retained events drain, a `history_lost` event reports the dropped count. Retries of that report reuse one event ID and the same count, so a lost reply is not counted twice. A successful reply clears only the reported count. Losses during the report wait for the next ID.
 
