@@ -326,7 +326,7 @@
       ],
       "blocker": null,
       "commits": [
-        "1df48db"
+        "55058ea"
       ],
       "evidence": [
         "Host session tests cover stable history_lost IDs, rejected events including invalid_state, full-size commands, strict lines, reply shape, registration limits, and setRxBufferSize before begin",
@@ -353,7 +353,7 @@
       "dependencies": [],
       "blocker": null,
       "commits": [
-        "1df48db"
+        "55058ea"
       ],
       "evidence": [
         "tools/check_contract.py validates frames printed by transcript_c124 and transcript_led_button, which compile src/main.cpp and examples/led-button/main.cpp"
@@ -380,7 +380,7 @@
       ],
       "blocker": null,
       "commits": [
-        "3f5c867"
+        "95200cb"
       ],
       "evidence": [
         "tools/check_gateway.py bounds server close and the whole run",
@@ -408,11 +408,11 @@
       "dependencies": [],
       "blocker": null,
       "commits": [
-        "f618df1",
-        "91d5ed6"
+        "f1af1d4",
+        "e3e12d9"
       ],
       "evidence": [
-        "docs/build-checksums.json current record is clean f618df1, toolchain system darwin_x86_64, firmware.bin 284544 bytes",
+        "docs/build-checksums.json current record is clean f1af1d4, toolchain system darwin_x86_64, firmware.bin 284544 bytes",
         "Older verification tables are labeled historical",
         "package_build.py records host machine, Python, toolchain system, boot_app0.bin, and flash offsets",
         "A different toolchain package system still changes firmware.bin"
@@ -439,7 +439,7 @@
       "dependencies": [],
       "blocker": null,
       "commits": [
-        "f618df1"
+        "f1af1d4"
       ],
       "evidence": [
         "README states compile-only status. Grok Bot reach was not run",
@@ -470,7 +470,7 @@
       "dependencies": [],
       "blocker": null,
       "commits": [
-        "f618df1"
+        "f1af1d4"
       ],
       "evidence": [
         "HARD-ESP-001 cites reachable 851ffab and 804f64f",
@@ -505,7 +505,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "Vendored protocol 0.1.0 lagged gateway event classification and ID anchors",
       "acceptance": [
-        "Copied protocol files match gateway b5f316e hashes",
+        "Copied protocol files match gateway 5ea23b7 hashes",
         "tools/check_contract.py passes"
       ],
       "dependencies": [
