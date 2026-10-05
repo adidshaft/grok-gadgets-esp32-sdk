@@ -1,8 +1,8 @@
 {
   "status": "build verified; hardware and Grok pending; unpublished",
-  "source_commit": "1cafebc7bece594b95f78799c5fda2d741908ebc",
+  "source_commit": "4b497fec3ec69dfea90ab71f85bda96fb4070924",
   "source_tree_clean": true,
-  "built_at_utc": "2026-10-05T03:10:38.448918+00:00",
+  "built_at_utc": "2026-10-05T03:18:27.491954+00:00",
   "build_command": ".venv/bin/pio run -e atoms3-lite-usb",
   "toolchain": {
     "platformio_core": "PlatformIO Core, version 6.1.18",
