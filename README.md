@@ -1,8 +1,12 @@
 # Grok Gadgets ESP32 SDK
 
-Build an ESP32 gadget for Grok with a reusable C++ capability library and an **M5Stack AtomS3 Lite C124** USB example.
+Build an ESP32 gadget for Grok with a reusable C++ library. **M5Stack AtomS3 Lite C124** is the first USB example. Other boards need configuration and separate verification.
 
-**Experimental alpha — software tests and ESP32-S3 compilation pass; physical hardware, native Grok invocation and mobile behavior remain unverified.** You can build and contribute without a board or Grok account. This is standalone Arduino firmware, not an ESPHome integration.
+Documentation uses an [ASD-STE100-inspired writing guide](https://github.com/adidshaft/grok-gadgets/blob/main/docs/contributing/writing-guide.md). Formal compliance is not claimed.
+
+**Experimental alpha.** Software tests and ESP32-S3 compilation pass. Physical hardware, actual Grok invocation and mobile behavior remain unverified.
+
+You can build and contribute without a board or Grok account. The example uses standalone Arduino firmware. It is not an ESPHome integration.
 
 ```mermaid
 flowchart LR
@@ -12,13 +16,25 @@ flowchart LR
     BOT["Existing Grok Bot"] -.-> GW
 ```
 
-The firmware uses the SDK, a computer bridges USB to the local gateway, and the Grok connection is a separately pending authenticated route. Compilation checks the firmware build; it does not demonstrate the LED, button or USB cable working physically.
+Firmware uses the SDK. A computer connects USB to the local gateway. The authenticated route from Grok remains pending.
+
+Compilation checks the build. It does not prove physical LED, button or USB operation.
 
 ## Start without hardware
 
 Clone [adidshaft/grok-gadgets-esp32-sdk](https://github.com/adidshaft/grok-gadgets-esp32-sdk) and enter its root directory. A sibling repository is unnecessary for the following checks.
 
-Requirements: Python 3.11+, Git, CMake 3.16+, a C++14 compiler, and internet access for the first pinned dependency/toolchain installation. The recorded build host is macOS arm64. Linux USB permissions, Windows and Intel Mac installation are not verified here. The physical example additionally needs the exact C124 board and a USB-C **data** cable; ATOM Lite and display-equipped AtomS3 are different boards.
+You need:
+
+- Python 3.11 or later.
+- Git.
+- CMake 3.16 or later.
+- A C++14 compiler.
+- Internet access for the first dependency and toolchain installation.
+
+The recorded build host is macOS arm64. Linux USB permissions, Windows installation and Intel Mac installation remain unverified.
+
+For physical tests, use C124 and a USB-C **data** cable. ATOM Lite and AtomS3 with a display are different boards.
 
 ```sh
 python3 -m venv .venv
@@ -29,7 +45,15 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-Expected results: CTest reports **3/3** host suites passed; the contract checker reports valid canonical and generated frames; PlatformIO reports **SUCCESS**. The firmware output is `.pio/build/atoms3-lite-usb/firmware.bin`, alongside the ELF, bootloader and partition files. Host suites include the real example loop compiled with simulated board/serial APIs; no board is flashed by these commands.
+Expected results:
+
+- CTest reports **3/3** host suites passed.
+- The contract checker accepts canonical and generated frames.
+- PlatformIO reports **SUCCESS**.
+
+Build output is `.pio/build/atoms3-lite-usb/firmware.bin`. The same directory contains ELF, bootloader and partition files.
+
+Host tests compile the example loop with simulated board and serial APIs. These commands do not flash a board.
 
 | Next step | Guide |
 | --- | --- |
