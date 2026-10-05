@@ -52,6 +52,8 @@ Hello may list at most 16 names. The gadget always appends `state` and `history_
 
 `command(name, handler, context, schema)` registers a callable capability. The optional schema is an inline JSON object. Grok sees that object as the argument contract. `rgb.set` keeps the built-in RGB rules; a replacement schema is rejected.
 
+The gateway rejects schema references, `pattern` and `patternProperties`. Use explicit properties, `enum`, `minLength` and `maxLength` instead. This prevents a device-supplied regular expression from blocking the gateway.
+
 `begin()` calls `Serial.setRxBufferSize` for two full frames (4096 bytes) before `Serial.begin()`. The Arduino-ESP32 2.0.17 USB CDC queue otherwise stays 256 bytes and can drop a long reply. That call is unverified on hardware.
 
 ## Limits
