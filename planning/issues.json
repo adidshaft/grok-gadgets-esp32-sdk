@@ -18,7 +18,7 @@
       "milestone": "M0",
       "stage": "done",
       "commits": [
-        "c61bea2"
+        "ee28fe9"
       ],
       "evidence": "Foundation checks and Git diff review passed."
     },
@@ -43,7 +43,7 @@
       "milestone": "M4",
       "stage": "done",
       "commits": [
-        "483c5a5"
+        "097e1db"
       ],
       "evidence": "C++ host tests and pinned canonical protocol frame validation passed."
     },
@@ -69,7 +69,7 @@
       "milestone": "M4",
       "stage": "done",
       "commits": [
-        "d6faf53a36067a53c606be501a2e8628e0e5b628"
+        "809f5b9f8cb90a8b505ed056a2fbc2e63e7ae36d"
       ],
       "evidence": "3/3 CTest; SDK frame contract; PTY actual firmware simulation/gateway execution, server restart and credential revocation/restoration; real firmware compile. No flash."
     },
@@ -167,7 +167,7 @@
       "milestone": "M4",
       "stage": "done",
       "commits": [
-        "45b50a7900478fc2824ad3a002f08bd54eebeeb2"
+        "e5a672f3ff275ada4ac273500bd392af80ed42f9"
       ],
       "evidence": "3/3 CTest, pinned contract checks, actual consumer PTY integration (20 GPIO edges, retained 16/drop4, unchanged session, subsequent execution), ESP32-S3 compile SUCCESS."
     },
@@ -196,8 +196,8 @@
       "milestone": "MH",
       "stage": "done",
       "commits": [
-        "ad89e7ad8888ab9d4119f4859147a67495e45763",
-        "08bfa697d2ccbb95d25d123ebc29a6127b76db3e"
+        "851ffab2a9fa81feb20f9f2b3c2e044b78224b33",
+        "bca5d4e75123034a973be6b3837d75ac2c02a2c2"
       ],
       "evidence": [
         "docs/verification/hardening.md: installed ArduinoJson reproduced valid ACK, valid ACK, true, true, true with execution count 1",
@@ -229,11 +229,11 @@
       "milestone": "PUBLIC-ALPHA",
       "stage": "done",
       "commits": [
-        "9177ff51cce6a6340e6f6eeb59dccfb695141427"
+        "5ee8be35208a3216bf2c63b93f6deb2a74267942"
       ],
       "evidence": [
         "docs/verification/launch.md: standalone locked pip install, pinned toolcache reuse, hostCTest3/3, canonicalcontract and exactC124 compileSUCCESS; RAM54628/programflash274881/bin283424. Physical/Grok/Wi-Fi remain pending.",
-        "Clean documentation commit 9177ff5 packaged with tools/package_build.py; four artifact hashes and resolved toolchain recorded in docs/build-checksums.json. No hardware/Grok observation.",
+        "Clean documentation commit 5ee8be3 packaged with tools/package_build.py; four artifact hashes and resolved toolchain recorded in docs/build-checksums.json. No hardware/Grok observation.",
         "Publication sanitization on 5 October 2026 preserves every incremental commit, date and message; private author email and machine paths removed, commit references remapped. .gitignore and contributor maintenance instructions cover local configuration, secrets, caches, logs and build outputs while retaining reviewed examples.",
         "Sanitized publication checkout: 3 CTest suites, format/lint and canonical contract checks pass; fresh clean firmware packaging follows; git check-ignore confirms sensitive/output paths are excluded and reviewed example paths remain addable."
       ],

@@ -1,6 +1,6 @@
 # Standalone build-guide rehearsal — 5 October 2026
 
-The newcomer commands were run in a fresh temporary source directory without sibling repositories. Runtime source was committed `e78fb1c017f674df5010aa1b2e6c212be2d7ae0f`; current README/build/policy working changes were copied into that archive. Runtime, host tests, protocol/schema pins, dependency locks, LICENSE and NOTICE were unchanged.
+The newcomer commands were run in a fresh temporary source directory without sibling repositories. Runtime source was committed `d6262e186e4ae651c4c211b29189359ba51191ad`; current README/build/policy working changes were copied into that archive. Runtime, host tests, protocol/schema pins, dependency locks, LICENSE and NOTICE were unchanged.
 
 Environment: macOS 27.0 arm64, Python 3.14.7, AppleClang 21.0.0, C++14, pinned requirements and PlatformIO Core 6.1.18. Global downloaded PlatformIO tool packages/cache were reused; ArduinoJson and NeoPixel were installed into the fresh checkout. This verifies a new source directory and Python environment, not empty-cache Linux/Windows installation or independent-human reproduction.
 
@@ -21,6 +21,6 @@ Original code remains Apache-2.0; dependency license obligations are recorded in
 
 ## Committed build checkpoint
 
-`tools/package_build.py` compiled and packaged clean commit `9177ff51cce6a6340e6f6eeb59dccfb695141427` after the documentation commit. The [tracked checksum record](../build-checksums.json) identifies that source, UTC build time, resolved pinned toolchain and all four actual file hashes. The firmware image is 283,424 bytes, SHA-256 `de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25`. The host environment remains macOS 27.0 arm64; raw build output stays ignored under `build/launch-docs/`.
+`tools/package_build.py` compiled and packaged clean commit `5ee8be35208a3216bf2c63b93f6deb2a74267942` after the documentation commit. The [tracked checksum record](../build-checksums.json) identifies that source, UTC build time, resolved pinned toolchain and all four actual file hashes. The firmware image is 283,424 bytes, SHA-256 `de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25`. The host environment remains macOS 27.0 arm64; raw build output stays ignored under `build/launch-docs/`.
 
 This evidence-only checkpoint does not change build inputs. A later workflow/toolchain/runtime change requires another clean build before a publication candidate; a final candidate must carry its selected sources and actual package hashes. These outputs remain local and unpublished.
