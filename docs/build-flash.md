@@ -1,10 +1,14 @@
-# Build, flash, and recover C124
+# Build, flash and recover C124
 
-This is standalone Arduino firmware consuming the reusable library in `lib/GrokGadgets`, not an ESPHome recipe. Target **M5Stack AtomS3 Lite SKU C124**, ESP32-S3FN8, 8MB flash. ATOM Lite and display AtomS3 are different boards.
+This example uses the reusable library in `lib/GrokGadgets`. It is standalone Arduino firmware, not an ESPHome integration.
+
+Use **M5Stack AtomS3 Lite SKU C124**, with ESP32-S3FN8 and 8 MB flash. ATOM Lite and AtomS3 with a display are different boards.
 
 ## Clean setup
 
-From this repository on macOS or Linux with Python 3.11+ (the local build used 3.14.7), CMake 3.16+, Git and a C++14 compiler:
+You need Python 3.11 or later, CMake 3.16 or later, Git and a C++14 compiler. The recorded local build used Python 3.14.7 on macOS. Linux USB operation remains unverified.
+
+From the repository root, run:
 
 ```sh
 python3 -m venv .venv
@@ -15,32 +19,102 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-PlatformIO 6.1.18, espressif32 6.10.0, Arduino-ESP32 2.0.17, Xtensa compiler 8.4.0+2021r2-patch5, ArduinoJson 6.21.5 and NeoPixel 1.12.3 are pinned. The complete resolved package list and hashes are recorded in verification evidence. Tool downloads require internet and local disk space. Host logic tests on a Mac do not validate Linux USB permissions or physical pins.
+The pinned tools and libraries are:
 
-Outputs: `.pio/build/atoms3-lite-usb/firmware.bin`, `firmware.elf`, `bootloader.bin`, `partitions.bin`. Build outputs are ignored by Git; `tools/package_build.py` copies them into `artifacts/c124-usb` and writes checksums. These are **build verified, hardware pending** only after the recorded compile succeeds.
+| Dependency | Version |
+| --- | --- |
+| PlatformIO | 6.1.18 |
+| espressif32 | 6.10.0 |
+| Arduino-ESP32 | 2.0.17 |
+| Xtensa compiler | 8.4.0+2021r2-patch5 |
+| ArduinoJson | 6.21.5 |
+| NeoPixel | 1.12.3 |
 
-For a provenance package, commit the tested source first, then run `.venv/bin/python tools/package_build.py` from a clean checkout. Packaging rebuilds that exact commit and records its clean source state, UTC build time, resolved toolchain and SHA-256 hashes. It rejects uncommitted sources rather than labeling an older binary as the current commit. Refresh the tracked `docs/build-checksums.json` from that manifest in a subsequent evidence commit.
+Verification records contain the full resolved package list and hashes. Downloads need internet access and local disk space. Mac host tests do not verify Linux USB permissions or physical pins.
+
+## Inspect build output
+
+The build writes these files in `.pio/build/atoms3-lite-usb/`:
+
+- `firmware.bin`
+- `firmware.elf`
+- `bootloader.bin`
+- `partitions.bin`
+
+Git ignores build output. `tools/package_build.py` copies these files into `artifacts/c124-usb` and writes checksums. A successful compile means **build verified, hardware pending**.
+
+To create a package with source records:
+
+1. Commit the tested source.
+2. From a clean checkout, run `.venv/bin/python tools/package_build.py`.
+3. Update `docs/build-checksums.json` from the resulting manifest.
+4. Record that update in a separate evidence commit.
+
+Packaging rebuilds the exact commit. It records clean source state, UTC build time, toolchain versions and SHA-256 hashes. It rejects uncommitted source changes.
 
 ## Flash when hardware is available
 
-These are prepared hardware steps, not steps used during the software quickstart. Select and authorize the intended physical board before proceeding.
+These hardware steps remain unverified. They are separate from the software quickstart. Select and authorize the intended physical board first.
 
-Use a USB-C **data** cable. Inspect ports with `.venv/bin/pio device list`, identify this board rather than guessing another device's port, close any serial monitor/bridge, then:
+1. Connect C124 with a USB-C **data** cable.
+2. Run `.venv/bin/pio device list`.
+3. Identify the board's port. Do not guess another device's port.
+4. Close any serial monitor or bridge.
+5. Replace the port placeholder and upload:
 
 ```sh
 .venv/bin/pio run -e atoms3-lite-usb -t upload --upload-port /dev/cu.usbmodemYOUR_BOARD
 ```
 
-Linux port is commonly `/dev/ttyACM0`, but inspect it. Linux may require membership in the OS's serial-device group (often dialout) and reconnect/login afterward; never run the entire gateway as root. The normal example has no log prints on the protocol CDC channel.
+On Linux, the port is often `/dev/ttyACM0`. Inspect the actual port before use. Linux can require membership in a serial-device group, often `dialout`. You can need to reconnect or log in again after that change. Do not run the entire gateway as root.
 
-The device ID is `c124-<MAC hex>` and boot ID is random per boot. To inspect hello before registering a gateway credential, run the serial monitor at 115200 briefly. It prints no token because credentials stay on the host. Close monitor before starting the gateway USB bridge. See the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge) for `.venv/bin/python -m grok_gadgets_gateway.usb_bridge PORT` (set `GROK_GADGETS_DEVICE_TOKEN` in your private shell environment); gateway supplies the token to the loopback connection. USB owns one serial connection at a time.
+The example sends no debug logs on the protocol CDC channel.
 
-## Recovery / rollback
+## Connect the USB bridge
 
-If the board stops enumerating, follow [M5Stack's C124 download-mode procedure](https://docs.m5stack.com/en/core/AtomS3-Lite): hold the reset button about two seconds until the green indicator appears, then release and identify the newly enumerated port before uploading. Do not confuse this reset/boot control with the front user button. Use a direct USB port and known data cable if enumeration fails. Reduce upload speed in platformio.ini if the connection is unreliable and record that build change.
+The device ID is `c124-<MAC hex>`. Each boot creates a random boot ID. Credentials remain on the host.
 
-To roll back, check out a previous tested commit in a clean checkout, repeat its pinned build and upload. Prefer `pio run -t upload`, which supplies the correct bootloader/partition/firmware offsets, over writing only firmware.bin at an improvised address. Factory restoration remains the manufacturer M5Burner/Easyloader route; preserve its source/license and verify the exact C124 target. No firmware was flashed during this local phase.
+1. Open a serial monitor at 115200 briefly to inspect hello.
+2. Record the device ID for the gateway credential.
+3. Close the monitor.
+4. Set `GROK_GADGETS_DEVICE_TOKEN` in your private shell environment.
+5. Follow the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge).
+
+The bridge command is `.venv/bin/python -m grok_gadgets_gateway.usb_bridge PORT`. The bridge supplies the token to the loopback connection. Only one process can use the serial connection at a time.
+
+## Recover the board
+
+If the board does not appear as a USB device, follow [M5Stack's C124 download-mode procedure](https://docs.m5stack.com/en/core/AtomS3-Lite):
+
+1. Hold the reset button for about two seconds, until the green indicator appears.
+2. Release the button.
+3. Identify the new port.
+4. Upload to that port.
+
+The reset/boot control is different from the front user button. If the board still does not appear, use a direct USB port and a known data cable.
+
+For an unreliable upload connection, reduce upload speed in `platformio.ini`. Record this build change.
+
+## Restore a previous version
+
+1. Open a clean checkout of a previously tested commit.
+2. Repeat that commit's pinned build.
+3. Upload with `pio run -t upload`.
+
+This command supplies the bootloader, partition and firmware offsets. Do not write only `firmware.bin` to a guessed address.
+
+For factory restoration, use the manufacturer's M5Burner or Easyloader route. Preserve its source and license. Verify the exact C124 target. No firmware was flashed during the recorded local phase.
 
 ## First physical acceptance
 
-Record SDK/gateway commits, firmware checksums, OS/port, timestamps and observations. Discover C124; request green, another colour, then off and visibly inspect each. Press/release the real user button; read ordered edges. Unplug during a command and verify offline/unconfirmed; reconnect and verify fresh state. Reboot board and gateway to verify boot/cursor reset. Repeat through real Grok Bot only after its account/transport route is verified. A compiled binary or firmware ACK cannot replace those observations.
+Record SDK and gateway commits, firmware checksums, operating system, port, timestamps and observations.
+
+1. Discover C124.
+2. Request green, another colour and off. Observe each result.
+3. Press and release the user button. Check the order of reported events.
+4. Unplug the board during a command. Check offline and unconfirmed status.
+5. Reconnect and check fresh state.
+6. Reboot the board and gateway. Check boot and cursor resets.
+7. Repeat through Grok only after its account and transport route is verified.
+
+A compiled binary or firmware acknowledgement cannot replace these observations.
