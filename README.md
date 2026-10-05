@@ -11,10 +11,10 @@ You can build and contribute without a board or Grok account. The example uses s
 ```mermaid
 flowchart LR
     SDK["Reusable C++ SDK"] --> FW["C124 firmware"]
-    FW --> USB["USB bridge on your computer"]
-    USB -->|"Authenticated loopback"| GW["Gateway on the same computer"]
+    FW --> USB["Host USB bridge"]
+    USB -->|"Authenticated loopback"| GW["Local gateway"]
     LOCAL["Local MCP client"] -->|"stdio"| GW
-    BOT["Cloud Grok Bot"] -.-> REMOTE["Remote HTTPS MCP: not implemented"]
+    BOT["Cloud Grok Bot"] -.-> REMOTE["Remote MCP: missing"]
     REMOTE -.-> GW
 ```
 
