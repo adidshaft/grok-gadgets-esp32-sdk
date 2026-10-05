@@ -1,6 +1,20 @@
-# Using the library in another gadget
+# Use the library in another gadget
 
-The C124 example is a library consumer. Reuse `GrokCore.h` without Arduino for bounded lines, queues and button debounce. `GrokGadgets.h` adds ArduinoJson 6.21.5 and an extensible device capability registry, with no board or serial dependency. Add `lib/GrokGadgets` to another PlatformIO project, pin ArduinoJson, and include the header. The consumer owns hardware, authentication/transport adapters and state.
+The C124 example uses the reusable SDK. It does not define the SDK's board support limit.
+
+| Library | Purpose | Dependencies |
+| --- | --- | --- |
+| `GrokCore.h` | Bounded lines, queues and button debounce | No Arduino dependency |
+| `GrokGadgets.h` | Device capabilities and command results | ArduinoJson 6.21.5; no board or serial dependency |
+
+## Add the library
+
+1. Add `lib/GrokGadgets` to your PlatformIO project.
+2. Pin ArduinoJson 6.21.5.
+3. Include `GrokGadgets.h`.
+4. Implement hardware handlers, state reporting and transport authentication in your application.
+
+This counter example needs no RGB device:
 
 ```cpp
 #include <GrokGadgets.h>
@@ -18,10 +32,38 @@ gadget.capability("counter.bump", bump, nullptr);
 // gadget.execute(command.as<JsonObjectConst>(), acknowledgement);
 ```
 
-Names and handler/context storage must outlive Device. Publish `gadget.capabilities()` in hello alongside read-only names like button/state. Register at most 16 unique names. Handlers validate their own JSON arguments; return an empty Error for execution or a static code/message on failure. StateWriter writes a bounded state object. The application must size JsonDocuments sufficiently (4096 bytes in the consumer) and keep serialized ACK/state below 2048 including LF. If a state callback overflows the document or frame budget, Device returns the original execution status with an empty state object (state unknown) and caches that bounded result, preserving retry safety. Callers must still provide at least 4096 bytes of document capacity. Check document overflow before transmitting. `readRgb` strictly accepts exactly integer r/g/b 0..255 and a boolean on; it validates into a temporary value before touching hardware.
+## Register capabilities
 
-Device retains eight ACKs and exact compact serialized command envelopes within one boot. A retained duplicate returns the original execution state without rerunning its handler. Changed parameters under the same ID fail with duplicate_conflict. Different JSON key ordering is conservatively treated as different parameters. Eviction and reboot end that window; this is not durable exactly-once execution. Gateway never replays an old dispatched command into a new session. A timeout is uncertainty, never permission to resend an action with a new ID.
+Names, handlers and context storage must remain valid for the lifetime of `Device`. Register no more than 16 unique names.
 
-Repeated retries read the retained serialization without modifying it and own the decoded strings in the destination document. If decoding fails (for example, an undersized destination), the SDK returns `failed` with `ack_unavailable`, empty state and no handler invocation. That error describes an unavailable execution result; it does not prove the original action failed. The cache remains intact for a retry with adequate document capacity. Reading or conflicting with an existing ID does not extend its eight-entry FIFO retention.
+Include `gadget.capabilities()` in the hello message. Also include read-only capabilities, such as button and state.
 
-Original SDK code is Apache-2.0. See [dependency notices](dependencies.md) before distributing your firmware. The SDK is useful independently with custom capabilities; tests include a non-RGB counter handler.
+Each handler validates its own JSON arguments. Return an empty `Error` after execution. On failure, return a static error code and message.
+
+`readRgb` accepts exactly integer `r`, `g` and `b` values from 0 to 255, plus a boolean `on` value. It validates a temporary value before hardware changes.
+
+## Keep state within limits
+
+`StateWriter` writes the state object. Give the application JSON documents at least 4096 bytes of capacity. Keep each serialized acknowledgement or state frame below or equal to 2048 bytes, including LF.
+
+If the state callback exceeds the document or frame limit, `Device` keeps the execution status but returns an empty state object. Empty state means unknown state. The SDK caches this bounded result to protect retries.
+
+Check document overflow before transmission. The fallback does not remove the 4096-byte document-capacity requirement.
+
+## Handle retries
+
+Within one boot, `Device` retains eight acknowledgements and their exact compact command envelopes. A retained duplicate returns the original result without running the handler again.
+
+Changed parameters with the same ID produce `duplicate_conflict`. Different JSON key order also counts as changed parameters.
+
+Eviction or reboot ends this protection. This is not durable exactly-once execution. The gateway does not replay an old dispatched command into a new session. A timeout means the result is uncertain. Never resend an uncertain physical action with a new ID.
+
+On retry, the SDK decodes the cached result into the destination document. It does not change the stored result. Decoded strings belong to the destination document.
+
+If decoding fails, the SDK returns `failed` with `ack_unavailable` and empty state. It does not run the handler. This error does not prove the original action failed.
+
+The cached result remains available. Retry with sufficient document capacity. A retry or conflict does not extend the eight-entry FIFO retention window.
+
+## License
+
+Original SDK code uses Apache-2.0. Read the [dependency notices](dependencies.md) before you distribute firmware.
