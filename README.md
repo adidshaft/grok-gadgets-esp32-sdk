@@ -1,17 +1,14 @@
 # Grok Gadgets ESP32 SDK
 
-This library builds an ESP32 gadget that speaks the Grok Gadgets device protocol over USB to a gateway on the same computer. The first sketch is an M5Stack AtomS3 Lite (SKU C124): one RGB LED and a button. [examples/led-button](examples/led-button/main.cpp) is a generic ESP32-S3 LED and button. The firmware is Arduino, not ESPHome. It is an experimental alpha. Original code is Apache-2.0.
+Build USB gadgets for your existing **Grok Bot**. Define commands and events in an Arduino sketch; `grok::Gadget` handles the connection to the local Grok Gadgets gateway. This is an experimental alpha. Original code is Apache-2.0.
 
 ## What works with Grok Bot today
 
-The C124 sketch compiles for ESP32-S3. It has not been flashed, and no LED, button, or USB behavior was observed on hardware here. Reaching Grok Bot would need this gateway on the same computer and a separate operator tunnel. That path was not run. There is no hosted device service in this repository, and no Grok check was completed.
+**You can build and test the software now. Hardware and Grok Bot control remain unverified.** Two examples compile: the M5Stack AtomS3 Lite C124 RGB LED/button and a [generic ESP32-S3 LED/button](examples/led-button/main.cpp). Neither has been flashed here. Wi-Fi, hosted pairing, and button-triggered Bot tasks are not provided.
 
 ## Quickstart
 
-1. Install Python 3.11 or later, CMake 3.16 or later, Git, and a C++14 compiler.
-2. Run the host checks and compile the C124 firmware. Success means **build verified, hardware pending**.
-3. Read [Build, flash and recovery](docs/build-flash.md) before connecting a board. Upload with PlatformIO so the bootloader, partitions, `boot_app0.bin`, and app land at their offsets.
-4. For a board, set `GROK_GADGETS_DEVICE_TOKEN` for the USB bridge. `grok-gadgets-gateway enroll` prints that token once, and `grok-gadgets-gateway serve` keeps the loopback listener running. Those commands exist on the gateway branch. They were not run from this SDK, and they are not verified with Grok Bot.
+You need Python 3.11+, CMake 3.16+, Git, and a C++14 compiler. From this repository, run:
 
 ```sh
 python3 -m venv .venv
@@ -22,7 +19,9 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-Declare `grok::Gadget` as a global or static object. It is about 40 KB and does not fit the 8 KB `loop()` stack.
+Expected: four host test suites pass, both sketch transcripts pass the contract check, and the C124 firmware compiles. No board or account is needed. This means **build verified, hardware pending**.
+
+Next, [create your own gadget](docs/sdk.md), or [flash C124 and connect its USB bridge](docs/build-flash.md). The gateway and bridge run on the same computer. `enroll` issues a device token; `serve` keeps the local gateway running. Grok Bot needs a separately verified, authenticated remote route. A tunnel alone does not establish Bot compatibility.
 
 ## Details
 

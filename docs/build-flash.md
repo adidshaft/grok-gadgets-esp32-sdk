@@ -6,8 +6,9 @@ Use **M5Stack AtomS3 Lite SKU C124**, with ESP32-S3FN8 and 8 MB flash. ATOM Lite
 
 Builds and local software tests need no public hosting. For the USB route, run the bridge
 and gateway on the same computer. That computer must remain on during use.
-The gateway's MCP interface is local stdio. Its device port is authenticated loopback TCP.
-It has no remote HTTPS or OAuth MCP service. Do not expose the device port through a tunnel.
+The gateway offers local stdio or authenticated HTTP MCP through `serve` at
+`http://127.0.0.1:8766/mcp`. Its separate device port is authenticated loopback TCP.
+Public HTTPS, OAuth, and actual Grok Bot use remain separate gates. Do not expose the device port through a tunnel.
 See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
 for who operates each process and the `HARD-GROK-REMOTE-001` remote-access gate.
 
@@ -15,16 +16,7 @@ for who operates each process and the `HARD-GROK-REMOTE-001` remote-access gate.
 
 You need Python 3.11 or later, CMake 3.16 or later, Git and a C++14 compiler. The recorded local build used Python 3.14.7 on macOS. Linux USB operation remains unverified.
 
-From the repository root, run:
-
-```sh
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.lock
-.venv/bin/pio pkg install
-sh tools/check.sh
-.venv/bin/python tools/check_contract.py
-.venv/bin/pio run -e atoms3-lite-usb
-```
+Run the [README quickstart](../README.md#quickstart) from the repository root. It installs the pinned tools, runs host checks, and compiles C124 without hardware.
 
 The pinned tools and libraries are:
 
@@ -96,9 +88,16 @@ The device ID is `c124-` plus the MAC in the order esptool prints, lowercase hex
 
 The bridge reads `GROK_GADGETS_DEVICE_TOKEN` from the environment and adds that token on the loopback connection. Keep the token out of Git.
 
-`grok-gadgets-gateway enroll <device-id>` prints `GROK_GADGETS_DEVICE_TOKEN=...` once. `grok-gadgets-gateway serve` keeps the loopback device listener and MCP HTTP service running. Those commands exist on the gateway `simplify-and-fix` branch. They were not run for this ESP32 record, and they are not verified with Grok Bot. The USB bridge is still `python -m grok_gadgets_gateway.usb_bridge PORT` with the token set. The token protects the local device connection. It is not remote MCP authentication. Keep this device transport on the gateway computer. See the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge).
+Install the [gateway](https://github.com/adidshaft/grok-gadgets-gateway) on this computer, then follow its [enrollment and USB bridge steps](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#per-device-credential-enrollment):
 
-Unplugging the board stops the bridge. Plugging it back in power-cycles the board, so the boot ID changes. Start the bridge again after the port returns.
+1. Run `grok-gadgets-gateway init` once to create the private MCP token and device registry.
+2. Enroll the exact device ID above with `grok-gadgets-gateway enroll DEVICE_ID`.
+3. Keep `grok-gadgets-gateway serve` running in one terminal.
+4. In another terminal, set `GROK_GADGETS_DEVICE_TOKEN` to the value printed once by enrollment. Start `python -m grok_gadgets_gateway.usb_bridge PORT` with the identified serial port.
+
+Use the gateway's Python environment for these commands. The device token protects the local connection; it is separate from the MCP bearer token. The commands exist on `simplify-and-fix`, but no physical C124 or Grok Bot session has used them here.
+
+If USB disconnects, the bridge retries the same serial path. Plugging the board back in power-cycles it, so the boot ID changes. If the operating system assigns a different port, stop the bridge, identify that port, and restart with it. Automatic recovery is software-tested; physical USB recovery remains unverified.
 
 ## Recover the board
 
@@ -130,9 +129,9 @@ Record SDK and gateway commits, firmware checksums, operating system, port, time
 1. Discover C124.
 2. Request green, another colour and off. Observe each result.
 3. Press and release the user button. Check the order of reported events.
-4. Unplug the board during a command. The USB bridge exits. Check that the gateway shows the device offline and the command unconfirmed.
-5. Plug the board back in. USB power starts a new boot, so the boot ID changes. Start the bridge again, then check fresh state.
+4. Unplug the board during a command. Check that the gateway marks it offline after its timeout and does not report an unobserved result as confirmed. The bridge should keep retrying.
+5. Plug the board back in. USB power starts a new boot, so the boot ID changes. Check automatic recovery and fresh state. Restart the bridge only if the port name changed.
 6. Reboot the board and gateway. Check boot and cursor resets.
-7. Repeat through Grok only after its account and transport route is verified.
+7. Repeat through Grok Bot only after its account and transport route is verified.
 
 A compiled binary or firmware acknowledgement cannot replace these observations.

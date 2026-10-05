@@ -431,10 +431,10 @@
       ],
       "milestone": "PUBLIC-ALPHA",
       "acceptance": [
-        "Plain README with honest Grok Bot status and a four-step quickstart",
-        "SDK guide shows the Gadget API, limits and the global-object rule",
-        "Build guide covers enroll, bridge token, bridge restart after unplug, device ID format and flash offsets",
-        "Board sources warn about RGB_BUILTIN/LED_BUILTIN GPIO48"
+        "README opens with the Grok Bot target, tested local software, missing hardware/Bot verification, and a runnable build block",
+        "README owns build commands; build-flash guide links them and explains actual gateway enroll/serve setup",
+        "Current setup and recovery guides distinguish local HTTP MCP from public HTTPS, and same-port bridge retry from changed-port restart",
+        "Events are retained for a client to read, not promised as button-triggered Bot tasks"
       ],
       "dependencies": [],
       "blocker": null,
@@ -446,7 +446,8 @@
         "grok-gadgets-gateway enroll prints the device token, and serve keeps the loopback listener running. Both exist on the gateway branch. They were not run from this SDK and are not Grok-verified. The USB bridge reads GROK_GADGETS_DEVICE_TOKEN",
         "docs/sdk.md documents the global Gadget rule, name limits, and event schemas",
         "docs/build-flash.md documents device IDs, PlatformIO flash offsets, and restarting the bridge after unplug",
-        "docs/board-sources.md warns that RGB_BUILTIN and LED_BUILTIN are GPIO48"
+        "docs/board-sources.md warns that RGB_BUILTIN and LED_BUILTIN are GPIO48",
+        "2026-10-05 finish review: README, docs/build-flash.md and docs/protocol-recovery.md agree with implemented local serve and USB retry. Ruff/format/clang-format, CTest 4/4 and real-sketch contract checks pass (129 C124 frames, 130 generic frames). Clean PlatformIO compilation passes for atoms3-lite-usb and esp32s3-led-button. Baseline PTY integration passes; no hardware, real Bot or tunnel used. Historical firmware checksum record was not promoted to new source."
       ]
     },
     {
