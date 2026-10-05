@@ -96,7 +96,7 @@ The device ID is `c124-` plus the MAC in the order esptool prints, lowercase hex
 
 The bridge reads `GROK_GADGETS_DEVICE_TOKEN` from the environment and adds that token on the loopback connection. Keep the token out of Git.
 
-`grok-gadgets-gateway enroll` and `grok-gadgets-gateway serve` are the intended host commands. They were not run for this record, and the current gateway entry point does not provide those subcommands. Until it does, follow the gateway guide: a private credentials file, `grok-gadgets-gateway --credentials`, and `python -m grok_gadgets_gateway.usb_bridge PORT` with the token set. The token protects the local device connection. It is not remote MCP authentication. Keep this device transport on the gateway computer. See the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge).
+`grok-gadgets-gateway enroll <device-id>` prints `GROK_GADGETS_DEVICE_TOKEN=...` once. `grok-gadgets-gateway serve` keeps the loopback device listener and MCP HTTP service running. Those commands exist on the gateway `simplify-and-fix` branch. They were not run for this ESP32 record, and they are not verified with Grok Bot. The USB bridge is still `python -m grok_gadgets_gateway.usb_bridge PORT` with the token set. The token protects the local device connection. It is not remote MCP authentication. Keep this device transport on the gateway computer. See the [gateway USB bridge guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#usb-bridge).
 
 Unplugging the board stops the bridge. Plugging it back in power-cycles the board, so the boot ID changes. Start the bridge again after the port returns.
 
