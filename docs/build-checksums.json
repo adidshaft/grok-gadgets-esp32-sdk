@@ -1,13 +1,21 @@
 {
-  "evidence": "unpublished real ESP32-S3 build; no hardware or Grok observation",
+  "status": "build verified; hardware and Grok pending; unpublished",
+  "source_commit": "c2bc39aae3495e9c68c46232a920924e1a61eca3",
+  "source_tree_clean": true,
+  "built_at_utc": "2026-10-05T02:52:14.173703+00:00",
+  "build_command": ".venv/bin/pio run -e atoms3-lite-usb",
+  "toolchain": {
+    "platformio_core": "PlatformIO Core, version 6.1.18",
+    "resolved_packages": "Resolving atoms3-lite-usb dependencies...\nPlatform espressif32 @ 6.10.0 (required: espressif32 @ 6.10.0)\n\u251c\u2500\u2500 framework-arduinoespressif32 @ 3.20017.0 (required: platformio/framework-arduinoespressif32 @ 3.20017.0)\n\u251c\u2500\u2500 tool-esptoolpy @ 1.40501.0 (required: platformio/tool-esptoolpy @ 1.40501.0)\n\u251c\u2500\u2500 tool-scons @ 4.40801.0 (required: platformio/tool-scons @ 4.40801.0)\n\u251c\u2500\u2500 toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-riscv32-esp @ 8.4.0+2021r2-patch5)\n\u2514\u2500\u2500 toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5)\n\nLibraries\n\u251c\u2500\u2500 Adafruit NeoPixel @ 1.12.3 (required: adafruit/Adafruit NeoPixel @ 1.12.3)\n\u2514\u2500\u2500 ArduinoJson @ 6.21.5 (required: bblanchon/ArduinoJson @ 6.21.5)"
+  },
   "files": {
     "firmware.bin": {
-      "bytes": 283424,
-      "sha256": "de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25"
+      "bytes": 275216,
+      "sha256": "7a4b0681be5a51534c59aa36b99a82268b81dd9452d8357f3ef59347ee70a765"
     },
     "firmware.elf": {
-      "bytes": 7556144,
-      "sha256": "cfa5baa2e6709cb6581b1add5a09142531c56db1ad82e09c5b7cfddc90c933f2"
+      "bytes": 7550860,
+      "sha256": "d7789353e8479fd853d31f9e21750e5a52896cf99e28de27be0c89de215316dd"
     },
     "bootloader.bin": {
       "bytes": 15104,
@@ -17,13 +25,5 @@
       "bytes": 3072,
       "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
     }
-  },
-  "firmware_source_commit": "2d4a70dfa55f39c22c108289f9d523f2650d31b4",
-  "source_tree_clean": true,
-  "built_at_utc": "2026-10-04T21:01:29.753349+00:00",
-  "build_command": ".venv/bin/pio run -e atoms3-lite-usb",
-  "toolchain": {
-    "platformio_core": "PlatformIO Core, version 6.1.18",
-    "resolved_packages": "Resolving atoms3-lite-usb dependencies...\nPlatform espressif32 @ 6.10.0 (required: espressif32 @ 6.10.0)\n\u251c\u2500\u2500 framework-arduinoespressif32 @ 3.20017.0 (required: platformio/framework-arduinoespressif32 @ 3.20017.0)\n\u251c\u2500\u2500 tool-esptoolpy @ 1.40501.0 (required: platformio/tool-esptoolpy @ 1.40501.0)\n\u251c\u2500\u2500 tool-scons @ 4.40801.0 (required: platformio/tool-scons @ 4.40801.0)\n\u251c\u2500\u2500 toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-riscv32-esp @ 8.4.0+2021r2-patch5)\n\u2514\u2500\u2500 toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5 (required: espressif/toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5)\n\nLibraries\n\u251c\u2500\u2500 Adafruit NeoPixel @ 1.12.3 (required: adafruit/Adafruit NeoPixel @ 1.12.3)\n\u2514\u2500\u2500 ArduinoJson @ 6.21.5 (required: bblanchon/ArduinoJson @ 6.21.5)"
   }
 }
