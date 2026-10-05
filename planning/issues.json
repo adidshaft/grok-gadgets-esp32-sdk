@@ -497,6 +497,31 @@
       "blocker": null,
       "commits": [],
       "evidence": []
+    },
+    {
+      "id": "REVIEW-ESP-008",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Vendored protocol 0.1.0 lagged gateway event classification and ID anchors",
+      "acceptance": [
+        "Copied protocol files match gateway b5f316e hashes",
+        "tools/check_contract.py passes"
+      ],
+      "dependencies": [
+        "REVIEW-ESP-004"
+      ],
+      "labels": [
+        "protocol",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "stage": "done",
+      "commits": [],
+      "evidence": [
+        "protocol/source.json"
+      ],
+      "blocker": null
     }
   ]
 }
