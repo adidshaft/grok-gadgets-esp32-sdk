@@ -4,14 +4,14 @@ This library builds an ESP32 gadget that speaks the Grok Gadgets device protocol
 
 ## What works with Grok Bot today
 
-The C124 sketch compiles for ESP32-S3. It has not been flashed, and no LED, button, or USB behavior was observed on hardware here. Grok Bot can reach a gadget only if you run `grok-gadgets-gateway serve` and an operator tunnel. That path is unverified. There is no hosted device service in this repository, and no Grok check was completed.
+The C124 sketch compiles for ESP32-S3. It has not been flashed, and no LED, button, or USB behavior was observed on hardware here. Reaching Grok Bot would need this gateway on the same computer and a separate operator tunnel. That path was not run. There is no hosted device service in this repository, and no Grok check was completed.
 
 ## Quickstart
 
 1. Install Python 3.11 or later, CMake 3.16 or later, Git, and a C++14 compiler.
 2. Run the host checks and compile the C124 firmware. Success means **build verified, hardware pending**.
 3. Read [Build, flash and recovery](docs/build-flash.md) before connecting a board. Upload with PlatformIO so the bootloader, partitions, `boot_app0.bin`, and app land at their offsets.
-4. Enroll the device and serve it from the gateway repository: `grok-gadgets-gateway enroll`, then `grok-gadgets-gateway serve`. The USB bridge reads `GROK_GADGETS_DEVICE_TOKEN` from the environment.
+4. For a board, set `GROK_GADGETS_DEVICE_TOKEN` for the USB bridge. `grok-gadgets-gateway enroll` and `grok-gadgets-gateway serve` are the intended host commands. They were not run here.
 
 ```sh
 python3 -m venv .venv
