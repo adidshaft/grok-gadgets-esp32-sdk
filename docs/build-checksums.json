@@ -18,7 +18,7 @@
       "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
     }
   },
-  "firmware_source_commit": "0a36948d49fe292374cea222e3971c74c6cc2e4e",
+  "firmware_source_commit": "2d4a70dfa55f39c22c108289f9d523f2650d31b4",
   "source_tree_clean": true,
   "built_at_utc": "2026-10-04T21:01:29.753349+00:00",
   "build_command": ".venv/bin/pio run -e atoms3-lite-usb",

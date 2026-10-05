@@ -18,7 +18,7 @@
       "milestone": "M0",
       "stage": "done",
       "commits": [
-        "d4f18b3"
+        "c61bea2"
       ],
       "evidence": "Foundation checks and Git diff review passed."
     },
@@ -43,7 +43,7 @@
       "milestone": "M4",
       "stage": "done",
       "commits": [
-        "ff4dd9d"
+        "483c5a5"
       ],
       "evidence": "C++ host tests and pinned canonical protocol frame validation passed."
     },
@@ -69,7 +69,7 @@
       "milestone": "M4",
       "stage": "done",
       "commits": [
-        "0481cc9b277c1b04886d64e00d92565facb42b91"
+        "d6faf53a36067a53c606be501a2e8628e0e5b628"
       ],
       "evidence": "3/3 CTest; SDK frame contract; PTY actual firmware simulation/gateway execution, server restart and credential revocation/restoration; real firmware compile. No flash."
     },
@@ -167,7 +167,7 @@
       "milestone": "M4",
       "stage": "done",
       "commits": [
-        "74085a9d33fba115a2701d4274140f33d8813d6c"
+        "45b50a7900478fc2824ad3a002f08bd54eebeeb2"
       ],
       "evidence": "3/3 CTest, pinned contract checks, actual consumer PTY integration (20 GPIO edges, retained 16/drop4, unchanged session, subsequent execution), ESP32-S3 compile SUCCESS."
     },
@@ -196,13 +196,13 @@
       "milestone": "MH",
       "stage": "done",
       "commits": [
-        "3e8ccff4201a19ceb3f6a488c9faee2a442f25d3",
-        "382444d5a7bb9372e8778421a337b82306aa2c58"
+        "ad89e7ad8888ab9d4119f4859147a67495e45763",
+        "08bfa697d2ccbb95d25d123ebc29a6127b76db3e"
       ],
       "evidence": [
         "docs/verification/hardening.md: installed ArduinoJson reproduced valid ACK, valid ACK, true, true, true with execution count 1",
-        "Library and actual firmware retry regressions fail against original585adda; corrected CTest3/3, format/lint, contract, PTY four redeliveries and C124 build pass",
-        "Clean integrated main382444d: host3/3, contract, repeated PTY ACK, hub validation and real C124 compile pass; four artifacts rebuilt from clean source and hashes/toolchain recorded in docs/build-checksums.json. Physical/Grok remain external gates."
+        "Library and actual firmware retry regressions fail against original3988061; corrected CTest3/3, format/lint, contract, PTY four redeliveries and C124 build pass",
+        "Clean integrated main08bfa69: host3/3, contract, repeated PTY ACK, hub validation and real C124 compile pass; four artifacts rebuilt from clean source and hashes/toolchain recorded in docs/build-checksums.json. Physical/Grok remain external gates."
       ],
       "blocker": null
     },
@@ -229,11 +229,13 @@
       "milestone": "PUBLIC-ALPHA",
       "stage": "done",
       "commits": [
-        "ff954cc533c18ab4700e2798cabf4944ededb0ab"
+        "9177ff51cce6a6340e6f6eeb59dccfb695141427"
       ],
       "evidence": [
         "docs/verification/launch.md: standalone locked pip install, pinned toolcache reuse, hostCTest3/3, canonicalcontract and exactC124 compileSUCCESS; RAM54628/programflash274881/bin283424. Physical/Grok/Wi-Fi remain pending.",
-        "Clean documentation commit ff954cc packaged with tools/package_build.py; four artifact hashes and resolved toolchain recorded in docs/build-checksums.json. No hardware/Grok observation."
+        "Clean documentation commit 9177ff5 packaged with tools/package_build.py; four artifact hashes and resolved toolchain recorded in docs/build-checksums.json. No hardware/Grok observation.",
+        "Publication sanitization on 5 October 2026 preserves every incremental commit, date and message; private author email and machine paths removed, commit references remapped. .gitignore and contributor maintenance instructions cover local configuration, secrets, caches, logs and build outputs while retaining reviewed examples.",
+        "Sanitized publication checkout: 3 CTest suites, format/lint and canonical contract checks pass; fresh clean firmware packaging follows; git check-ignore confirms sensitive/output paths are excluded and reviewed example paths remain addable."
       ],
       "blocker": null
     },

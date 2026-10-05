@@ -28,3 +28,7 @@ The [canonical protocol](https://github.com/adidshaft/grok-gadgets-gateway/tree/
 Optional USB/gateway integration uses a separate gateway checkout as a sibling, its pinned environment installed, and `../grok-gadgets-gateway/.venv/bin/python tools/check_gateway.py`. This is a development workspace command, not a standalone build requirement. The host simulation reports simulated identity; a firmware ACK is not physical verification.
 
 Original contributions use Apache-2.0 without an additional CLA or sign-off requirement. You remain responsible for AI-assisted code, citations and claimed test results. Follow the shared [Code of Conduct](https://github.com/adidshaft/grok-gadgets/blob/main/CODE_OF_CONDUCT.md) and [governance](https://github.com/adidshaft/grok-gadgets/blob/main/GOVERNANCE.md). For private conduct reports email [adidshaft@kyokasuigetsu.xyz](mailto:adidshaft@kyokasuigetsu.xyz); use [Security](SECURITY.md) for vulnerabilities.
+
+## Ignore rules and publication privacy
+
+Keep `.gitignore` current whenever a new tool produces caches, build output, local device configurations, execution logs or credentials. Preserve reviewed sample configuration files and the hub's verified public simulator download. Check new patterns with `git check-ignore`, then review the staged file list before committing. Ignore rules do not remove tracked files or past history; never merge the private pre-publication history back into a public branch. Use the sanitized public checkout and a public or GitHub noreply commit email.
