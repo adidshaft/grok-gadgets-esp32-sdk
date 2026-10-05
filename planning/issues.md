@@ -21,3 +21,4 @@ Canonical structured ledger: [issues.json](issues.json). Owner: grok-gadgets-esp
 | REVIEW-ESP-005 | Plain README and corrected guides (ESP-13/15/16/19/21, enroll/serve) | done | README, SDK guide, build guide, and board-source warning. `enroll` and `serve` are intended and were not run. |
 | REVIEW-ESP-006 | Ledger citations and blocker fields (ESP-17) | done | `851ffab` / `bca5d4e`. ESP-004/005/006 name external blockers. |
 | REVIEW-ESP-007 | Deferred: boot_id counter (ESP-12), float RGB (ESP-03, gateway), protocol request IDs | ready | Needs NVS work or coordinated protocol/gateway changes. |
+| REVIEW-ESP-008 | Pin protocol 0.1.0 to gateway b5f316e (events + ID anchors) | done | Copied files; check_contract.py |
