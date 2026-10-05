@@ -1,14 +1,16 @@
 # Contributing to the ESP32 SDK
 
-Work here on the reusable C++ SDK, portable utilities, C124 firmware, host regressions and hardware instructions. Gateway transport/authentication belongs in the [gateway](https://github.com/adidshaft/grok-gadgets-gateway); shared architecture and canonical contribution policies live in the [hub](https://github.com/adidshaft/grok-gadgets/blob/main/CONTRIBUTING.md).
+Contribute to the reusable C++ SDK, portable utilities, C124 firmware, tests and hardware instructions. The [gateway](https://github.com/adidshaft/grok-gadgets-gateway) owns transport and authentication. The [hub](https://github.com/adidshaft/grok-gadgets/blob/main/CONTRIBUTING.md) owns shared architecture and contribution policy.
+
+Use the [writing guide](https://github.com/adidshaft/grok-gadgets/blob/main/docs/contributing/writing-guide.md) for documentation.
 
 You do not need a board to improve host tests, documentation or custom-capability examples. Physical testing requires the exact C124 and separate safe test preparation. Report the evidence level explicitly.
 
 ## Make one focused change
 
-1. Choose a [ready issue](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22), or discuss an interface/protocol/large feature first. Typo fixes can go directly to a PR. Until publication, use [stable local IDs](planning/issues.json).
-2. Fork the repository after activation, clone your fork, and create a short branch, for example `git switch -c docs/clarify-build`.
-3. Follow the standalone [README setup](README.md#start-without-hardware). Change one behavior or document journey; preserve the pinned contract and dependency versions unless the issue calls for coordinated changes.
+1. Choose a [ready issue](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22), or discuss an interface/protocol/large feature first. Typo fixes can go directly to a PR. The [local ledger](planning/issues.json) records preparation work.
+2. Fork the repository. Clone your fork and create a short branch. For example: `git switch -c docs/clarify-build`.
+3. Follow the standalone [README setup](README.md#start-without-hardware). Change one behavior or procedure. Keep protocol and dependency pins unless the issue requires coordinated changes.
 4. Run relevant checks from the repository root:
 
    ```sh
@@ -31,4 +33,6 @@ Original contributions use Apache-2.0 without an additional CLA or sign-off requ
 
 ## Ignore rules and publication privacy
 
-Keep `.gitignore` current whenever a new tool produces caches, build output, local device configurations, execution logs or credentials. Preserve reviewed sample configuration files and the hub's verified public simulator download. Check new patterns with `git check-ignore`, then review the staged file list before committing. Ignore rules do not remove tracked files or past history; never merge the private pre-publication history back into a public branch. Use the sanitized public checkout and a public or GitHub noreply commit email.
+Update `.gitignore` for new caches, build output, local device configuration, logs and credentials. Keep reviewed sample configuration and the hub’s public simulator download.
+
+Check new patterns with `git check-ignore`. Review staged files before each commit. Ignore rules do not remove tracked files or history. Never merge private pre-publication history into a public branch. Use the sanitized public checkout and a public or GitHub noreply commit email.
