@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+#undef NDEBUG // Tests are assertions.
 #include "GrokCore.h"
 #include <cassert>
 #include <iostream>

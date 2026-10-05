@@ -96,7 +96,8 @@
       "milestone": "M8",
       "stage": "blocked",
       "commits": [],
-      "evidence": "No C124 available; requires physical board and authorization to flash."
+      "evidence": "No C124 available; requires physical board and authorization to flash.",
+      "blocker": "No C124 board is available here, and flashing is not authorized."
     },
     {
       "id": "ESP-005",
@@ -120,7 +121,8 @@
       "milestone": "M4",
       "stage": "blocked",
       "commits": [],
-      "evidence": "Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required."
+      "evidence": "Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required.",
+      "blocker": "Gateway 0.1.0 has no authenticated LAN or TLS device endpoint to build on."
     },
     {
       "id": "ESP-006",
@@ -142,7 +144,8 @@
       "milestone": "M8",
       "stage": "blocked",
       "commits": [],
-      "evidence": "Independent tester and physical board unavailable."
+      "evidence": "Independent tester and physical board unavailable.",
+      "blocker": "Needs an independent person and a physical board (ESP-004)."
     },
     {
       "id": "ESP-007",
@@ -202,7 +205,7 @@
       "evidence": [
         "docs/verification/hardening.md: installed ArduinoJson reproduced valid ACK, valid ACK, true, true, true with execution count 1",
         "Library and actual firmware retry regressions fail against original3988061; corrected CTest3/3, format/lint, contract, PTY four redeliveries and C124 build pass",
-        "Clean integrated main08bfa69: host3/3, contract, repeated PTY ACK, hub validation and real C124 compile pass; four artifacts rebuilt from clean source and hashes/toolchain recorded in docs/build-checksums.json. Physical/Grok remain external gates."
+        "Clean integrated main bca5d4e75123034a973be6b3837d75ac2c02a2c2 (reachable): host tests, contract, repeated PTY ACK, and real C124 compile passed. Historical package hashes are in docs/verification/hardening.md. Physical/Grok remain external gates."
       ],
       "blocker": null
     },
@@ -259,6 +262,266 @@
       "evidence": [
         ".github/workflows/checks.yml",
         "Local YAML/pin/permission validation; runtime unchanged from fresh standalone docs acceptance"
+      ],
+      "blocker": null
+    },
+    {
+      "id": "HOSTING-DOCS-ESP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Explain hosting ownership and current remote connection limits",
+      "acceptance": [
+        "Relevant entry points link the canonical hub hosting FAQ",
+        "Local software use needs no public hosting; gateway remote HTTPS/OAuth MCP remains unimplemented",
+        "Tunnel reachability is distinct from authentication, native Grok invocation, and physical evidence",
+        "Agent or USB bridge shares the local gateway host; device transport must not be exposed",
+        "Product hosting options remain proposals; no service or tunnel is activated"
+      ],
+      "dependencies": [],
+      "labels": [
+        "docs",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "stage": "done",
+      "commits": [],
+      "evidence": [
+        "README.md",
+        "docs/build-flash.md",
+        "docs/sdk.md",
+        "docs/protocol-recovery.md",
+        "Documentation only. Runtime, protocol and workflows unchanged. HARD-GROK-REMOTE-001 remains an unimplemented engineering gate; no tunnel or service activated.",
+        "2026-10-05: tools/check.sh passed Ruff, clang-format and all 3 CTest suites. tools/check_contract.py accepted pinned and generated frames. git diff --check passed. No firmware change or new firmware compilation claim."
+      ],
+      "blocker": null
+    },
+    {
+      "id": "REVIEW-ESP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Session logic lives in the C124 example; event, loss and parse defects (ESP-01/02/07/08/09/10/11/15/18/19)",
+      "stage": "done",
+      "labels": [
+        "bug",
+        "sdk",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "grok::Gadget in lib/GrokGadgets owns hello, polling, ACKs, events, loss reports and recovery; a gadget is declarations plus begin()/loop()",
+        "history_lost retries reuse one event_id and count (ESP-01)",
+        "Permanently rejected events are dropped, counted as lost and polling continues; unknown failures drop after 5 attempts; backoff resets only after non-hello traffic (ESP-02)",
+        "Any compact frame up to 2047 bytes parses; deeper-than-limit commands get a failed ACK (ESP-07)",
+        "Serial RX buffer is set to two frames (ESP-08; unverified on hardware)",
+        "Request timeout exceeds the bridge worst case and replies must match the pending request shape (ESP-09)",
+        "Registrations that would exceed 16 hello names, duplicate names or reuse button/state/history_lost are rejected (ESP-10)",
+        "Lines with NUL, trailing bytes or extra keys are rejected (ESP-11)",
+        "Device ID prints MAC bytes in transmission order (ESP-15)",
+        "Generic examples/led-button sketch with a custom annotated event compiles as esp32s3-led-button"
+      ],
+      "dependencies": [
+        "ESP-003"
+      ],
+      "blocker": null,
+      "commits": [
+        "8ce53ce"
+      ],
+      "evidence": [
+        "Host session tests cover stable history_lost IDs, rejected events including invalid_state, full-size commands, strict lines, reply shape, registration limits, and setRxBufferSize before begin",
+        "ESP-08 RX buffer size is set in source and host stubs; it is unverified on hardware (ESP-004)"
+      ]
+    },
+    {
+      "id": "REVIEW-ESP-002",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Contract check validated a hand-written transcript, not SDK output (ESP-14)",
+      "stage": "done",
+      "labels": [
+        "test",
+        "protocol",
+        "esp32",
+        "P2"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "check_contract.py validates every frame written by the real C124 and led-button sketches compiled on the host",
+        "Asserts all request kinds, declared events, unique event IDs, one history_lost and executed/failed ACKs"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [
+        "8ce53ce"
+      ],
+      "evidence": [
+        "tools/check_contract.py validates frames printed by transcript_c124 and transcript_led_button, which compile src/main.cpp and examples/led-button/main.cpp"
+      ]
+    },
+    {
+      "id": "REVIEW-ESP-003",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Optional PTY integration can hang forever on Python >= 3.12 (ESP-06)",
+      "stage": "done",
+      "labels": [
+        "test",
+        "esp32",
+        "P2"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "tools/check_gateway.py bounds each server close and the whole run and fails with a message instead of hanging",
+        "The gateway shutdown deadlock itself is fixed in the gateway repository"
+      ],
+      "dependencies": [
+        "GW-001"
+      ],
+      "blocker": null,
+      "commits": [
+        "63940c0"
+      ],
+      "evidence": [
+        "tools/check_gateway.py bounds server close and the whole run",
+        "Gateway DeviceServer.close closes clients before wait_closed in the gateway repository"
+      ]
+    },
+    {
+      "id": "REVIEW-ESP-004",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Recorded firmware hashes are not reproducible and records disagree; package lacks flash offsets (ESP-05/16)",
+      "stage": "done",
+      "labels": [
+        "build",
+        "esp32",
+        "P2"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "Builds map project and PlatformIO paths with -ffile-prefix-map so the image hash does not depend on checkout location",
+        "Manifest records host machine, Python architecture and toolchain package system",
+        "docs/build-checksums.json is the one tracked record; older records are marked historical",
+        "Package includes boot_app0.bin and flash_args with offsets"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [
+        "6af0b20",
+        "9f789bb"
+      ],
+      "evidence": [
+        "docs/build-checksums.json current record is clean 6af0b20, toolchain system darwin_x86_64, firmware.bin 284544 bytes",
+        "Older verification tables are labeled historical",
+        "package_build.py records host machine, Python, toolchain system, boot_app0.bin, and flash offsets",
+        "A different toolchain package system still changes firmware.bin"
+      ]
+    },
+    {
+      "id": "REVIEW-ESP-005",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "README and guides are long, and some steps are wrong or missing (ESP-13/15/16/19/21, enroll/serve)",
+      "stage": "done",
+      "labels": [
+        "docs",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "README opens with the Grok Bot target, tested local software, missing hardware/Bot verification, and a runnable build block",
+        "README owns build commands; build-flash guide links them and explains actual gateway enroll/serve setup",
+        "Current setup and recovery guides distinguish local HTTP MCP from public HTTPS, and same-port bridge retry from changed-port restart",
+        "Events are retained for a client to read, not promised as button-triggered Bot tasks"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [
+        "6af0b20"
+      ],
+      "evidence": [
+        "README states compile-only status. Grok Bot reach was not run",
+        "grok-gadgets-gateway enroll prints the device token, and serve keeps the loopback listener running. Both exist on the gateway branch. They were not run from this SDK and are not Grok-verified. The USB bridge reads GROK_GADGETS_DEVICE_TOKEN",
+        "docs/sdk.md documents the global Gadget rule, name limits, and event schemas",
+        "docs/build-flash.md documents device IDs, PlatformIO flash offsets, and restarting the bridge after unplug",
+        "docs/board-sources.md warns that RGB_BUILTIN and LED_BUILTIN are GPIO48",
+        "2026-10-05 finish review: README, docs/build-flash.md and docs/protocol-recovery.md agree with implemented local serve and USB retry. Ruff/format/clang-format, CTest 4/4 and real-sketch contract checks pass (129 C124 frames, 130 generic frames). Clean PlatformIO compilation passes for atoms3-lite-usb and esp32s3-led-button. Baseline PTY integration passes; no hardware, real Bot or tunnel used. Historical firmware checksum record was not promoted to new source."
+      ]
+    },
+    {
+      "id": "REVIEW-ESP-006",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Ledger cites unreachable commits and blocked issues have null blockers (ESP-17)",
+      "stage": "done",
+      "labels": [
+        "docs",
+        "maintenance",
+        "esp32",
+        "P3"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "HARD-ESP-001 cites reachable 851ffab/bca5d4e",
+        "ESP-004/005/006 name their external blockers"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [
+        "6af0b20"
+      ],
+      "evidence": [
+        "HARD-ESP-001 cites reachable 851ffab and bca5d4e",
+        "ESP-004, ESP-005, and ESP-006 name their external blockers"
+      ]
+    },
+    {
+      "id": "REVIEW-ESP-007",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Deferred review items: guaranteed boot_id uniqueness (ESP-12) and protocol request IDs (ESP-09 long term)",
+      "stage": "ready",
+      "labels": [
+        "enhancement",
+        "esp32",
+        "P3"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "NVS boot counter in boot_id, or documented acceptance of the pseudo-random risk",
+        "Protocol 0.2 request_id echo coordinated through the canonical gateway protocol"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "ESP-03 is resolved: gateway and firmware reject integral-float RGB channels. No canonicalisation change is planned. The SDK guide also documents the gateway schema restrictions."
+      ]
+    },
+    {
+      "id": "REVIEW-ESP-008",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Vendored protocol 0.1.0 lagged gateway event classification and ID anchors",
+      "acceptance": [
+        "Copied protocol files match gateway 135dbb8 hashes",
+        "tools/check_contract.py passes"
+      ],
+      "dependencies": [
+        "REVIEW-ESP-004"
+      ],
+      "labels": [
+        "protocol",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "stage": "done",
+      "commits": [],
+      "evidence": [
+        "protocol/source.json"
       ],
       "blocker": null
     }

@@ -1,21 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 // Unix host harness: actual firmware loop, simulated board, NDJSON stdio.
-#include "Arduino.h"
+#define GROK_HOST_SIMULATION
+#include "../src/main.cpp"
+#include "host_board.h"
 #include <chrono>
 #include <cstdlib>
 #include <fcntl.h>
 #include <iostream>
 #include <unistd.h>
-namespace fake {
-uint32_t now = 0;
-int pin = 1;
-uint32_t pixel = 0;
-int shows = 0;
-} // namespace fake
-FakeSerial Serial;
-FakeEsp ESP;
-#define GROK_HOST_SIMULATION
-#include "../src/main.cpp"
 int main() {
   fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
   // Separate test-only GPIO input: never injected into the device protocol.

@@ -17,6 +17,7 @@ public:
         return Result::Overflow;
       }
       data_[used_] = 0;
+      size_ = used_;
       used_ = 0;
       return Result::Ready;
     }
@@ -30,15 +31,18 @@ public:
     return Result::Pending;
   }
   const char *value() const { return data_; }
+  // Byte length of the last ready line; differs from strlen() when it contains NUL.
+  size_t size() const { return size_; }
   void reset() {
     used_ = 0;
+    size_ = 0;
     dropping_ = false;
     data_[0] = 0;
   }
 
 private:
   char data_[Limit + 1] = {};
-  size_t used_ = 0;
+  size_t used_ = 0, size_ = 0;
   bool dropping_ = false;
 };
 class Button {
@@ -71,6 +75,7 @@ public:
     return true;
   }
   const T *front() const { return count_ ? &entries_[head_] : nullptr; }
+  T *front() { return count_ ? &entries_[head_] : nullptr; }
   void pop() {
     if (count_) {
       head_ = (head_ + 1) % Capacity;

@@ -15,12 +15,14 @@ Environment: macOS 27.0 arm64, Python 3.14.7, AppleClang 21.0.0, C++14, pinned r
 
 An initial optional offline uv-cache install failed because several pinned packages, including ajsonrpc, were absent from that cache. The guide does not promise offline installation. Re-running the documented pip installation in a fresh environment succeeded; the failed cache experiment remains in ignored local evidence.
 
-The temporary compile produced a 283,424-byte firmware image plus ELF, bootloader and partition files. Their actual SHA-256 hashes and command results are in ignored `build/launch-docs/standalone-pip.json`; they identify that temporary working-source trial, not a future committed release. ELF/image hashes can differ across build locations/timestamps; use the selected clean-source package manifest rather than assuming an older output is current. Clean firmware packaging is documented in [build instructions](../build-flash.md), with the recorded build commit/toolchain/hashes in [build checksums](../build-checksums.json).
+The temporary compile produced a 283,424-byte firmware image plus ELF, bootloader and partition files. Their actual SHA-256 hashes and command results are in ignored `build/launch-docs/standalone-pip.json`; they identify that temporary working-source trial, not the current tree. `firmware.bin` follows the Xtensa toolchain package `system`, not the checkout path. The only current checksum record is [build checksums](../build-checksums.json).
 
 Original code remains Apache-2.0; dependency license obligations are recorded in [dependencies](../dependencies.md) and root NOTICE. Source preparation does not authorize firmware binary redistribution. No board was flashed or observed, no USB port was opened, no Linux serial permissions were tested, and no Grok/home/mobile account was used. Physical C124, secure Wi-Fi and independent-human acceptance remain blocked under their existing issues.
 
-## Committed build checkpoint
+## Committed build checkpoint (historical)
 
-`tools/package_build.py` compiled and packaged clean commit `5ee8be35208a3216bf2c63b93f6deb2a74267942` after the documentation commit. The [tracked checksum record](../build-checksums.json) identifies that source, UTC build time, resolved pinned toolchain and all four actual file hashes. The firmware image is 283,424 bytes, SHA-256 `de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25`. The host environment remains macOS 27.0 arm64; raw build output stays ignored under `build/launch-docs/`.
+These hashes identify clean commit `5ee8be35208a3216bf2c63b93f6deb2a74267942` on one host toolchain variant. They are not the current tree. The only current checksum record is [build-checksums.json](../build-checksums.json). `firmware.bin` also changes when the Xtensa package `system` changes (`darwin_arm64`, `darwin_x86_64`, or Linux) even when the version string matches.
+
+The firmware image from that checkpoint is 283,424 bytes, SHA-256 `de30fff189e37682ede9613bfccabb39550b5fa30d606eab797da4c49b80de25`. The host environment was macOS 27.0 arm64; raw build output stays ignored under `build/launch-docs/`.
 
 This evidence-only checkpoint does not change build inputs. A later workflow/toolchain/runtime change requires another clean build before a publication candidate; a final candidate must carry its selected sources and actual package hashes. These outputs remain local and unpublished.
