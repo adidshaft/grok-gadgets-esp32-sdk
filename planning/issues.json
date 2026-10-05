@@ -261,6 +261,37 @@
         "Local YAML/pin/permission validation; runtime unchanged from fresh standalone docs acceptance"
       ],
       "blocker": null
+    },
+    {
+      "id": "HOSTING-DOCS-ESP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Explain hosting ownership and current remote connection limits",
+      "acceptance": [
+        "Relevant entry points link the canonical hub hosting FAQ",
+        "Local software use needs no public hosting; gateway remote HTTPS/OAuth MCP remains unimplemented",
+        "Tunnel reachability is distinct from authentication, native Grok invocation, and physical evidence",
+        "Agent or USB bridge shares the local gateway host; device transport must not be exposed",
+        "Product hosting options remain proposals; no service or tunnel is activated"
+      ],
+      "dependencies": [],
+      "labels": [
+        "docs",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "stage": "done",
+      "commits": [],
+      "evidence": [
+        "README.md",
+        "docs/build-flash.md",
+        "docs/sdk.md",
+        "docs/protocol-recovery.md",
+        "Documentation only. Runtime, protocol and workflows unchanged. HARD-GROK-REMOTE-001 remains an unimplemented engineering gate; no tunnel or service activated.",
+        "2026-10-05: tools/check.sh passed Ruff, clang-format and all 3 CTest suites. tools/check_contract.py accepted pinned and generated frames. git diff --check passed. No firmware change or new firmware compilation claim."
+      ],
+      "blocker": null
     }
   ]
 }

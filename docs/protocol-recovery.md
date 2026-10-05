@@ -21,6 +21,11 @@ The gateway does not send unsolicited commands. Each poll returns at most one co
 
 The USB hello contains no credentials. The local bridge adds the host's per-device token to the loopback TCP hello. Physical USB access and host access affect security.
 
+Run the bridge and gateway on the same host. The device protocol is not an HTTPS MCP endpoint.
+Do not expose it through a tunnel. A tunnel does not add gateway authentication.
+The separate remote MCP service is not implemented; see `HARD-GROK-REMOTE-001` and the
+[hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
+
 ## Startup and identity
 
 The LED starts off. Firmware publishes:
@@ -62,6 +67,10 @@ Device reboot removes the RAM event queue and acknowledgement cache. USB firmwar
 ## Future Wi-Fi support
 
 Wi-Fi transport is not implemented in this alpha. The gateway's device listener is loopback-only and unencrypted. Wi-Fi needs an authenticated, reachable transport and secure credential setup. This is tracked as ESP-005.
+
+Wi-Fi device transport and cloud Bot MCP access are separate work.
+Neither creates the other. Future customer-hosted and maker-hosted services are product
+options, not shipped features. The hosting FAQ keeps their operation and security requirements together.
 
 Before adding that transport:
 
