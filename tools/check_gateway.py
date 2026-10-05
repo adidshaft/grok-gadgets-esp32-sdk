@@ -2,6 +2,7 @@
 
 import asyncio
 import copy
+import faulthandler
 import json
 import os
 from pathlib import Path
@@ -33,6 +34,18 @@ class RetryGateway(Gateway):
         if message["type"] == "poll" and not response["commands"] and self.replays:
             return {"ok": True, "commands": [self.replays.pop(0)]}
         return response
+
+
+STEP_SECONDS = 10
+TOTAL_SECONDS = 120
+
+
+async def bounded(awaitable, what):
+    """Fail instead of hanging; gateway DeviceServer.close() can block on Python >= 3.12."""
+    try:
+        return await asyncio.wait_for(awaitable, STEP_SECONDS)
+    except asyncio.TimeoutError:
+        raise AssertionError(f"{what} did not finish within {STEP_SECONDS} s") from None
 
 
 async def until(condition, seconds=8):
@@ -152,7 +165,7 @@ async def main():
             )
             assert gateway.devices[device_id]["state"]["button"]["pressed"] is False
             old_session = gateway.devices[device_id]["session_id"]
-            await server.close()
+            await bounded(server.close(), "gateway server close")
             await until(lambda: not gateway.devices[device_id]["connected"])
             server = await DeviceServer(gateway, Credentials(credentials), port=port).start()
             await until(
@@ -182,11 +195,13 @@ async def main():
             await asyncio.gather(pump, return_exceptions=True)
             stop.set()
             await asyncio.wait_for(bridge_task, timeout=2)
-            await server.close()
+            await bounded(server.close(), "gateway server close")
             os.close(master)
             os.close(slave)
             os.close(button_read)
             os.close(button_write)
 
 
-asyncio.run(main())
+# Last resort if cancellation itself hangs: dump stacks and exit non-zero.
+faulthandler.dump_traceback_later(TOTAL_SECONDS + 30, exit=True)
+asyncio.run(asyncio.wait_for(main(), TOTAL_SECONDS))
