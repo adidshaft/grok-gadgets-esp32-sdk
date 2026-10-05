@@ -193,7 +193,17 @@ void rejectedEvents() {
   reply(error("unsupported_capability")); // A rejected report is dropped too.
   assert(gadget.connected() && gadget.lost() == 0);
   idlePoll();
-  assert(gadget.connected());
+  gadget.emit("tick");
+  advance(1);
+  take("event");
+  reply(error("invalid_state"));
+  assert(gadget.connected() && gadget.queued() == 0 && gadget.lost() == 1);
+  advance(1);
+  take("event");
+  assert(frame["name"] == "history_lost" && frame["data"]["dropped"] == 1);
+  reply(ok);
+  assert(gadget.lost() == 0 && gadget.connected());
+  idlePoll();
 
   // Unknown failures reconnect with growing backoff, then drop after the attempt cap.
   gadget.emit("tick");

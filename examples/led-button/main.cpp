@@ -10,6 +10,7 @@ constexpr uint32_t HoldMs = 1000;
 bool ledOn = false;
 uint32_t pressedAt = 0;
 bool held = false;
+// Global or static only. Gadget is about 40 KB and overflows the 8 KB loop stack.
 grok::Gadget gadget("Generic ESP32-S3 LED and button", "0.1.0", "esp32s3");
 
 void reportState(JsonObject state, void *) { state["led"]["on"] = ledOn; }

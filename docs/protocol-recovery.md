@@ -30,7 +30,7 @@ The separate remote MCP service is not implemented; see `HARD-GROK-REMOTE-001` a
 
 The LED starts off. Firmware publishes:
 
-- A MAC-derived device ID.
+- A device ID of `c124-` plus the MAC bytes in esptool order.
 - A random boot ID.
 - Protocol and firmware versions.
 - Capability names.
@@ -42,9 +42,11 @@ An RGB acknowledgement follows the return of the pixel driver's `show()` functio
 
 ## Recover a session
 
-A request times out after three seconds. Hello retries start at 500 ms and increase up to five seconds. Successful hello resets the delay.
+A request times out after 13 seconds. That is longer than the USB bridge's 2-second connect wait plus its 10-second reply wait, so a late reply is not applied to the next request. Hello retries start at 500 ms and increase up to five seconds. The delay returns to 500 ms after a successful request other than hello.
 
-An error, malformed response, oversized response or timeout starts a new session. Firmware drops the old pending acknowledgement. The gateway records dispatched commands as uncertain when their results are unknown.
+A reply must be one JSON object whose fields match the outstanding request. Trailing bytes, a second object, an embedded NUL, or the wrong shape starts a new session. Firmware drops the old pending acknowledgement. The gateway records dispatched commands as uncertain when their results are unknown.
+
+A permanently rejected queued event (`duplicate_conflict`, `invalid_event`, `invalid_request`, `unsupported_capability`, `invalid_state`) is dropped, counted in `history_lost`, and polling continues. Other event failures reconnect. After five failures the event is dropped.
 
 Firmware never treats an acknowledgement as a command. It does not automatically retry an action. Correct credentials or protocol settings after authorization, revocation or version errors. Then reconnect. Firmware does not print secrets.
 
@@ -52,9 +54,9 @@ Firmware never treats an acknowledgement as a command. It does not automatically
 
 The button debounce period is 30 ms. Press and release events use sequence IDs unique within a boot.
 
-The queue holds 16 events. On overflow, it drops new events. After retained events drain, a `history_lost` event reports the dropped count. Hello declares `history_lost`, `rgb.set`, `button` and `state` so the gateway accepts these reports.
+The queue holds 16 events. On overflow, it drops new events. After retained events drain, a `history_lost` event reports the dropped count. Retries of that report reuse one event ID and the same count, so a lost reply is not counted twice. A successful reply clears only the reported count. Losses during the report wait for the next ID.
 
-A successful `history_lost` reply clears only the reported count. Losses that occur during reporting remain for the next report.
+Hello declares `history_lost`, `rgb.set`, `button`, and `state`. Custom event names also appear there, and their `capability_schemas` entries include `"x-grok-gadgets-kind": "event"`. `history_lost` is reserved and is not a sketch-registered name.
 
 Current debounced button state appears in hello, acknowledgements and periodic state. Periodic state is sent every three seconds.
 

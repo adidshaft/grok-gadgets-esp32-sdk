@@ -9,6 +9,10 @@
 - Registration rejects reserved names (`button`, `state`, `history_lost`), duplicates and more than 16 hello names.
 - Device ID prints MAC bytes in order (`c124-<mac>`). Firmware version 0.2.0.
 - The contract check validates frames written by the real sketches.
+- Hello schemas for custom events include `"x-grok-gadgets-kind": "event"`. `history_lost` stays reserved.
+- `Serial.setRxBufferSize` runs before `Serial.begin()` (unverified on hardware). `invalid_state` drops a queued event instead of stopping polls.
+- Firmware hashes depend on the Xtensa toolchain host variant. `-ffile-prefix-map` keeps checkout paths out of the image. The only current checksum record is `docs/build-checksums.json`.
+- Local packages include `boot_app0.bin` and PlatformIO flash offsets. USB unplug stops the bridge; start it again after the board power-cycles.
 
 ## 0.1.0 (unreleased local alpha)
 

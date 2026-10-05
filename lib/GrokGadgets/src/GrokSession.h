@@ -85,7 +85,8 @@ public:
   }
   bool emit(const char *name) { return emit(name, JsonObjectConst()); }
 
-  // Uses the board's `Serial` with an RX buffer that holds a full reply frame.
+  // USB CDC (HWCDC) defaults to a 256-byte RX queue and drops the rest.
+  // Set the larger queue before begin(). Unverified on hardware.
   bool begin() {
     Serial.setRxBufferSize(SerialRxBuffer);
     Serial.begin(115200);
@@ -411,7 +412,8 @@ private:
   }
   static bool permanent(const char *code) {
     return !strcmp(code, "duplicate_conflict") || !strcmp(code, "invalid_event") ||
-           !strcmp(code, "invalid_request") || !strcmp(code, "unsupported_capability");
+           !strcmp(code, "invalid_request") || !strcmp(code, "unsupported_capability") ||
+           !strcmp(code, "invalid_state");
   }
   // A rejected event never blocks polling: drop it (counted as lost) and continue.
   bool failed(const char *code, uint32_t now) {

@@ -96,7 +96,8 @@
       "milestone": "M8",
       "stage": "blocked",
       "commits": [],
-      "evidence": "No C124 available; requires physical board and authorization to flash."
+      "evidence": "No C124 available; requires physical board and authorization to flash.",
+      "blocker": "No C124 board is available here, and flashing is not authorized."
     },
     {
       "id": "ESP-005",
@@ -120,7 +121,8 @@
       "milestone": "M4",
       "stage": "blocked",
       "commits": [],
-      "evidence": "Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required."
+      "evidence": "Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required.",
+      "blocker": "Gateway 0.1.0 has no authenticated LAN or TLS device endpoint to build on."
     },
     {
       "id": "ESP-006",
@@ -142,7 +144,8 @@
       "milestone": "M8",
       "stage": "blocked",
       "commits": [],
-      "evidence": "Independent tester and physical board unavailable."
+      "evidence": "Independent tester and physical board unavailable.",
+      "blocker": "Needs an independent person and a physical board (ESP-004)."
     },
     {
       "id": "ESP-007",
@@ -202,7 +205,7 @@
       "evidence": [
         "docs/verification/hardening.md: installed ArduinoJson reproduced valid ACK, valid ACK, true, true, true with execution count 1",
         "Library and actual firmware retry regressions fail against original3988061; corrected CTest3/3, format/lint, contract, PTY four redeliveries and C124 build pass",
-        "Clean integrated main08bfa69: host3/3, contract, repeated PTY ACK, hub validation and real C124 compile pass; four artifacts rebuilt from clean source and hashes/toolchain recorded in docs/build-checksums.json. Physical/Grok remain external gates."
+        "Clean integrated main bca5d4e75123034a973be6b3837d75ac2c02a2c2 (reachable): host tests, contract, repeated PTY ACK, and real C124 compile passed. Historical package hashes are in docs/verification/hardening.md. Physical/Grok remain external gates."
       ],
       "blocker": null
     },
@@ -298,7 +301,7 @@
       "repository": "grok-gadgets-esp32-sdk",
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "Session logic lives in the C124 example; event, loss and parse defects (ESP-01/02/07/08/09/10/11/15/18/19)",
-      "stage": "in-progress",
+      "stage": "done",
       "labels": [
         "bug",
         "sdk",
@@ -322,15 +325,20 @@
         "ESP-003"
       ],
       "blocker": null,
-      "commits": [],
-      "evidence": []
+      "commits": [
+        "1df48db"
+      ],
+      "evidence": [
+        "Host session tests cover stable history_lost IDs, rejected events including invalid_state, full-size commands, strict lines, reply shape, registration limits, and setRxBufferSize before begin",
+        "ESP-08 RX buffer size is set in source and host stubs; it is unverified on hardware (ESP-004)"
+      ]
     },
     {
       "id": "REVIEW-ESP-002",
       "repository": "grok-gadgets-esp32-sdk",
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "Contract check validated a hand-written transcript, not SDK output (ESP-14)",
-      "stage": "in-progress",
+      "stage": "done",
       "labels": [
         "test",
         "protocol",
@@ -344,15 +352,19 @@
       ],
       "dependencies": [],
       "blocker": null,
-      "commits": [],
-      "evidence": []
+      "commits": [
+        "1df48db"
+      ],
+      "evidence": [
+        "tools/check_contract.py validates frames printed by transcript_c124 and transcript_led_button, which compile src/main.cpp and examples/led-button/main.cpp"
+      ]
     },
     {
       "id": "REVIEW-ESP-003",
       "repository": "grok-gadgets-esp32-sdk",
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "Optional PTY integration can hang forever on Python >= 3.12 (ESP-06)",
-      "stage": "in-progress",
+      "stage": "done",
       "labels": [
         "test",
         "esp32",
@@ -367,8 +379,13 @@
         "GW-001"
       ],
       "blocker": null,
-      "commits": [],
-      "evidence": []
+      "commits": [
+        "3f5c867"
+      ],
+      "evidence": [
+        "tools/check_gateway.py bounds server close and the whole run",
+        "Gateway DeviceServer.close closes clients before wait_closed in the gateway repository"
+      ]
     },
     {
       "id": "REVIEW-ESP-004",
@@ -398,7 +415,7 @@
       "repository": "grok-gadgets-esp32-sdk",
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "README and guides are long, and some steps are wrong or missing (ESP-13/15/16/19/21, enroll/serve)",
-      "stage": "in-progress",
+      "stage": "done",
       "labels": [
         "docs",
         "esp32",
@@ -414,14 +431,19 @@
       "dependencies": [],
       "blocker": null,
       "commits": [],
-      "evidence": []
+      "evidence": [
+        "README states compile-only status and unverified Grok Bot reach via grok-gadgets-gateway serve plus an operator tunnel",
+        "docs/sdk.md documents the global Gadget rule, name limits, and event schemas",
+        "docs/build-flash.md documents enroll, serve, GROK_GADGETS_DEVICE_TOKEN, bridge restart after unplug, MAC-order device IDs, and flash offsets",
+        "docs/board-sources.md warns that RGB_BUILTIN and LED_BUILTIN are GPIO48"
+      ]
     },
     {
       "id": "REVIEW-ESP-006",
       "repository": "grok-gadgets-esp32-sdk",
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "Ledger cites unreachable commits and blocked issues have null blockers (ESP-17)",
-      "stage": "in-progress",
+      "stage": "done",
       "labels": [
         "docs",
         "maintenance",
@@ -436,7 +458,10 @@
       "dependencies": [],
       "blocker": null,
       "commits": [],
-      "evidence": []
+      "evidence": [
+        "HARD-ESP-001 cites reachable 851ffab and bca5d4e",
+        "ESP-004, ESP-005, and ESP-006 name their external blockers"
+      ]
     },
     {
       "id": "REVIEW-ESP-007",
