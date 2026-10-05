@@ -443,7 +443,7 @@
       ],
       "evidence": [
         "README states compile-only status. Grok Bot reach was not run",
-        "grok-gadgets-gateway enroll and serve are named as intended host commands and were not run. The USB bridge reads GROK_GADGETS_DEVICE_TOKEN",
+        "grok-gadgets-gateway enroll prints the device token, and serve keeps the loopback listener running. Both exist on the gateway branch. They were not run from this SDK and are not Grok-verified. The USB bridge reads GROK_GADGETS_DEVICE_TOKEN",
         "docs/sdk.md documents the global Gadget rule, name limits, and event schemas",
         "docs/build-flash.md documents device IDs, PlatformIO flash offsets, and restarting the bridge after unplug",
         "docs/board-sources.md warns that RGB_BUILTIN and LED_BUILTIN are GPIO48"
