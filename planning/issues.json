@@ -392,7 +392,7 @@
       "repository": "grok-gadgets-esp32-sdk",
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "Recorded firmware hashes are not reproducible and records disagree; package lacks flash offsets (ESP-05/16)",
-      "stage": "in-progress",
+      "stage": "done",
       "labels": [
         "build",
         "esp32",
@@ -407,8 +407,15 @@
       ],
       "dependencies": [],
       "blocker": null,
-      "commits": [],
-      "evidence": []
+      "commits": [
+        "f618df1"
+      ],
+      "evidence": [
+        "docs/build-checksums.json current record is clean f618df1, toolchain system darwin_x86_64, firmware.bin 284544 bytes",
+        "Older verification tables are labeled historical",
+        "package_build.py records host machine, Python, toolchain system, boot_app0.bin, and flash offsets",
+        "A different toolchain package system still changes firmware.bin"
+      ]
     },
     {
       "id": "REVIEW-ESP-005",
