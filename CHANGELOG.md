@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 (unreleased local alpha)
+
+- New `grok::Gadget` (`GrokSession.h`): declare commands, events and a button, then call `begin()` and `loop()`. The C124 firmware is now a short sketch; `examples/led-button` is a second, generic ESP32-S3 sketch.
+- Custom events with optional data schemas, sent with `"x-grok-gadgets-kind": "event"` in `capability_schemas`.
+- `history_lost` retries reuse one event ID and count. Rejected events are dropped and counted instead of blocking polls. Backoff resets only after real traffic.
+- Any reply frame up to the 2048-byte limit parses; too-deep commands get a failed ACK. Replies must be one JSON object of the expected shape. Request timeout is 13 s, longer than the bridge's worst case.
+- Registration rejects reserved names (`button`, `state`, `history_lost`), duplicates and more than 16 hello names.
+- Device ID prints MAC bytes in order (`c124-<mac>`). Firmware version 0.2.0.
+- The contract check validates frames written by the real sketches.
+
 ## 0.1.0 (unreleased local alpha)
 
 - Portable C++14 bounded framing, queue and button debounce utilities.

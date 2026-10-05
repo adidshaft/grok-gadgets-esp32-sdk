@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+#undef NDEBUG // Tests are assertions.
 #include "GrokGadgets.h"
 #include <cassert>
 #include <iostream>
@@ -124,6 +125,8 @@ int main() {
   assert(!device.capability("rgb.set", rgb, &app));
   assert(device.capability("counter.bump", counter, &count));
   assert(!device.capability("bad name", counter, &count));
+  for (const char *reserved : {"button", "state", "history_lost"})
+    assert(!device.capability(reserved, counter, &count));
   DynamicJsonDocument cmd(2048), ack(2048);
   deserializeJson(
       cmd,

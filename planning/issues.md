@@ -14,3 +14,10 @@ Canonical structured ledger: [issues.json](issues.json). Owner: grok-gadgets-esp
 | HARD-ESP-001 | Preserve ACKs across repeated retries | done | Fixad89e7a, canonical pin08bfa69; clean main CTest3/3, contract, PTY four identical retry ACKs and C124 compile pass. Rebuilt clean-source artifacts and hashes/toolchain verified. See [hardening evidence](../docs/verification/hardening.md). |
 
 | LAUNCH-DOCS-ESP-001 | Standalone C124 SDK guide and public contributor/support policies | done | Documentation 304c518; fresh source/env pip installation, host3/3, contract and C124 compilation pass; clean build hashes recorded; [launch evidence](../docs/verification/launch.md). Physical/Grok pending. |
+| REVIEW-ESP-001 | Reusable `grok::Gadget` session; event, loss, parse and registration fixes (review ESP-01/02/07/08/09/10/11/15/18/19) | in-progress | Host session/firmware tests and both sketch builds. ESP-08 RX buffer unverified on hardware. |
+| REVIEW-ESP-002 | Contract check validates real sketch output (ESP-14) | in-progress | Transcript binaries compile the real sketches. |
+| REVIEW-ESP-003 | Optional PTY integration fails instead of hanging (ESP-06) | in-progress | Gateway close deadlock is fixed in the gateway repository. |
+| REVIEW-ESP-004 | Reproducible firmware hashes, one checksum record, flash offsets (ESP-05/16) | in-progress | Host toolchain variant still changes the hash. |
+| REVIEW-ESP-005 | Plain README and corrected guides (ESP-13/15/16/19/21, enroll/serve) | in-progress | Documentation only. |
+| REVIEW-ESP-006 | Ledger citations and blocker fields (ESP-17) | in-progress | Ledger only. |
+| REVIEW-ESP-007 | Deferred: boot_id counter (ESP-12), float RGB (ESP-03, gateway), protocol request IDs | ready | Needs NVS work or coordinated protocol/gateway changes. |

@@ -44,7 +44,7 @@ async def until(condition, seconds=8):
 
 
 async def main():
-    device_id = "c124-123456789abc"
+    device_id = "c124-bc9a78563412"  # Simulated MAC bc:9a:78:56:34:12
     token = "local-test-token-not-a-live-secret"
     master, slave = pty.openpty()
     serial_port = os.ttyname(slave)

@@ -292,6 +292,173 @@
         "2026-10-05: tools/check.sh passed Ruff, clang-format and all 3 CTest suites. tools/check_contract.py accepted pinned and generated frames. git diff --check passed. No firmware change or new firmware compilation claim."
       ],
       "blocker": null
+    },
+    {
+      "id": "REVIEW-ESP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Session logic lives in the C124 example; event, loss and parse defects (ESP-01/02/07/08/09/10/11/15/18/19)",
+      "stage": "in-progress",
+      "labels": [
+        "bug",
+        "sdk",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "grok::Gadget in lib/GrokGadgets owns hello, polling, ACKs, events, loss reports and recovery; a gadget is declarations plus begin()/loop()",
+        "history_lost retries reuse one event_id and count (ESP-01)",
+        "Permanently rejected events are dropped, counted as lost and polling continues; unknown failures drop after 5 attempts; backoff resets only after non-hello traffic (ESP-02)",
+        "Any compact frame up to 2047 bytes parses; deeper-than-limit commands get a failed ACK (ESP-07)",
+        "Serial RX buffer is set to two frames (ESP-08; unverified on hardware)",
+        "Request timeout exceeds the bridge worst case and replies must match the pending request shape (ESP-09)",
+        "Registrations that would exceed 16 hello names, duplicate names or reuse button/state/history_lost are rejected (ESP-10)",
+        "Lines with NUL, trailing bytes or extra keys are rejected (ESP-11)",
+        "Device ID prints MAC bytes in transmission order (ESP-15)",
+        "Generic examples/led-button sketch with a custom annotated event compiles as esp32s3-led-button"
+      ],
+      "dependencies": [
+        "ESP-003"
+      ],
+      "blocker": null,
+      "commits": [],
+      "evidence": []
+    },
+    {
+      "id": "REVIEW-ESP-002",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Contract check validated a hand-written transcript, not SDK output (ESP-14)",
+      "stage": "in-progress",
+      "labels": [
+        "test",
+        "protocol",
+        "esp32",
+        "P2"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "check_contract.py validates every frame written by the real C124 and led-button sketches compiled on the host",
+        "Asserts all request kinds, declared events, unique event IDs, one history_lost and executed/failed ACKs"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [],
+      "evidence": []
+    },
+    {
+      "id": "REVIEW-ESP-003",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Optional PTY integration can hang forever on Python >= 3.12 (ESP-06)",
+      "stage": "in-progress",
+      "labels": [
+        "test",
+        "esp32",
+        "P2"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "tools/check_gateway.py bounds each server close and the whole run and fails with a message instead of hanging",
+        "The gateway shutdown deadlock itself is fixed in the gateway repository"
+      ],
+      "dependencies": [
+        "GW-001"
+      ],
+      "blocker": null,
+      "commits": [],
+      "evidence": []
+    },
+    {
+      "id": "REVIEW-ESP-004",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Recorded firmware hashes are not reproducible and records disagree; package lacks flash offsets (ESP-05/16)",
+      "stage": "in-progress",
+      "labels": [
+        "build",
+        "esp32",
+        "P2"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "Builds map project and PlatformIO paths with -ffile-prefix-map so the image hash does not depend on checkout location",
+        "Manifest records host machine, Python architecture and toolchain package system",
+        "docs/build-checksums.json is the one tracked record; older records are marked historical",
+        "Package includes boot_app0.bin and flash_args with offsets"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [],
+      "evidence": []
+    },
+    {
+      "id": "REVIEW-ESP-005",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "README and guides are long, and some steps are wrong or missing (ESP-13/15/16/19/21, enroll/serve)",
+      "stage": "in-progress",
+      "labels": [
+        "docs",
+        "esp32",
+        "P1"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "Plain README with honest Grok Bot status and a four-step quickstart",
+        "SDK guide shows the Gadget API, limits and the global-object rule",
+        "Build guide covers enroll, bridge token, bridge restart after unplug, device ID format and flash offsets",
+        "Board sources warn about RGB_BUILTIN/LED_BUILTIN GPIO48"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [],
+      "evidence": []
+    },
+    {
+      "id": "REVIEW-ESP-006",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Ledger cites unreachable commits and blocked issues have null blockers (ESP-17)",
+      "stage": "in-progress",
+      "labels": [
+        "docs",
+        "maintenance",
+        "esp32",
+        "P3"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "HARD-ESP-001 cites reachable 851ffab/804f64f",
+        "ESP-004/005/006 name their external blockers"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [],
+      "evidence": []
+    },
+    {
+      "id": "REVIEW-ESP-007",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Deferred review items: guaranteed boot_id uniqueness (ESP-12), integral-float RGB (ESP-03), protocol request IDs (ESP-09 long term)",
+      "stage": "ready",
+      "labels": [
+        "enhancement",
+        "esp32",
+        "P3"
+      ],
+      "milestone": "PUBLIC-ALPHA",
+      "acceptance": [
+        "NVS boot counter in boot_id, or documented acceptance of the pseudo-random risk",
+        "Gateway canonicalises integral float RGB channels (gateway-owned)",
+        "Protocol 0.2 request_id echo coordinated through the canonical gateway protocol"
+      ],
+      "dependencies": [],
+      "blocker": null,
+      "commits": [],
+      "evidence": []
     }
   ]
 }
