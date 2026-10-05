@@ -1,14 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-#include "Arduino.h"
-namespace fake {
-uint32_t now = 0;
-int pin = 1;
-uint32_t pixel = 0;
-int shows = 0;
-} // namespace fake
-FakeSerial Serial;
-FakeEsp ESP;
 #include "../src/main.cpp"
+#include "host_board.h"
 #include <cassert>
 #include <iostream>
 DynamicJsonDocument frame(4096);
@@ -41,23 +33,26 @@ std::string ackJson() {
 }
 int main() {
   setup();
-  assert(fake::pixel == 0);
+  assert(fake::pixel == 0 && Serial.rxBuffer >= 2 * grok::MaxFrame);
   advance(500);
   take("hello");
   assert(frame["protocol_version"] == "0.1.0");
   assert(frame["device"]["model"] == grok::c124::Model);
-  bool declaresLoss = false;
-  for (const char *capability : frame["device"]["capabilities"].as<JsonArrayConst>())
-    declaresLoss |= !strcmp(capability, "history_lost");
-  assert(declaresLoss);
+  // Device ID prints MAC bytes in transmission order (FakeEsp MAC bc:9a:78:56:34:12).
+  assert(frame["device"]["device_id"] == "c124-bc9a78563412");
+  std::string caps;
+  serializeJson(frame["device"]["capabilities"], caps);
+  assert(caps == R"(["rgb.set","button","state","history_lost"])");
+  assert(!frame["device"].containsKey("capability_schemas"));
   reply(R"({"ok":true,"session_id":"session-1","protocol_version":"0.1.0"})");
-  assert(connected && !waiting);
+  assert(gadget.connected() && !gadget.waiting());
   advance(100);
   take("poll");
   reply(
       R"({"ok":true,"commands":[{"command_id":"cmd-1","capability":"rgb.set","arguments":{"r":0,"g":255,"b":0,"on":true}}]})");
   take("ack");
   assert(frame["status"] == "executed" && fake::pixel == 0xff00);
+  assert(frame["state"]["button"]["pressed"] == false);
   int shows = fake::shows;
   auto original = ackJson();
   const char *green =
@@ -85,7 +80,7 @@ int main() {
   loop();
   advance(30);
   take("event");
-  assert(frame["data"]["pressed"] == true);
+  assert(frame["name"] == "button" && frame["data"]["pressed"] == true);
   reply(R"({"ok":true})");
   fake::pin = 1;
   loop();
@@ -100,14 +95,13 @@ int main() {
   take("ack");
   assert(frame["status"] == "failed" && fake::shows == shows);
   // Lost acknowledgement starts a fresh session; no action is replayed.
-  advance(3001);
-  assert(!connected && !haveAck && !waiting && fake::shows == shows);
+  advance(grok::RequestTimeoutMs + 1);
+  assert(!gadget.connected() && !gadget.pendingAck() && !gadget.waiting() && fake::shows == shows);
   advance(500);
   take("hello");
   reply(R"({"ok":true,"session_id":"session-2","protocol_version":"0.1.0"})");
-  Serial.output.clear();
-  if (waiting)
-    reply(R"({"ok":true,"commands":[]})");
+  take("state"); // The state interval elapsed during the timeout.
+  reply(R"({"ok":true})");
   advance(100);
   take("poll");
   // Hold one poll response while 20 debounced edges fill the bounded queue.
@@ -116,7 +110,7 @@ int main() {
     loop();
     advance(30);
   }
-  assert(edges.size() == 16 && lost == 4);
+  assert(gadget.queued() == 16 && gadget.lost() == 4);
   reply(R"({"ok":true,"commands":[]})");
   for (int i = 0; i < 16; ++i) {
     take("event");
@@ -126,11 +120,11 @@ int main() {
   take("event");
   assert(frame["name"] == "history_lost" && frame["data"]["dropped"] == 4);
   reply(R"({"ok":true})");
-  assert(lost == 0 && edges.size() == 0 && connected);
+  assert(gadget.lost() == 0 && gadget.queued() == 0 && gadget.connected());
   advance(100);
   take("poll");
   reply(R"({"ok":false,"error":{"code":"revoked","message":"Credential revoked"}})");
-  assert(!connected);
+  assert(!gadget.connected());
   std::cout << "firmware host simulation: hello/poll/ACK, repeated success/failure retries and "
                "interleaved/conflicting commands, invalid RGB, real "
                "consumer button edges/overflow recovery, lost ACK and revocation recovery passed\n";

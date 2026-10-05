@@ -1,1 +1,1 @@
-{"name":"GrokGadgets","version":"0.1.0","description":"Portable Grok Gadgets capability SDK","license":"Apache-2.0","frameworks":"arduino","dependencies":{"bblanchon/ArduinoJson":"6.21.5"}}
+{"name":"GrokGadgets","version":"0.2.0","description":"Grok Gadgets device SDK: capabilities, events and a serial session for Arduino-ESP32","license":"Apache-2.0","frameworks":"arduino","dependencies":{"bblanchon/ArduinoJson":"6.21.5"}}
