@@ -137,6 +137,8 @@ public:
   bool pendingAck() const { return haveAck_; }
   size_t queued() const { return queue_.size(); }
   uint32_t lost() const { return lost_; }
+  // ACKs the gateway answered with late_ack or unknown_command; the session stayed open.
+  uint32_t droppedAcks() const { return droppedAcks_; }
   const char *deviceId() const { return deviceId_; }
   const char *bootId() const { return bootId_; }
 
@@ -415,8 +417,19 @@ private:
            !strcmp(code, "invalid_request") || !strcmp(code, "unsupported_capability") ||
            !strcmp(code, "invalid_state");
   }
+  // Protocol 0.1.0: the gateway keeps the session for these ACK replies.
+  static bool droppableAck(const char *code) {
+    return !strcmp(code, "late_ack") || !strcmp(code, "unknown_command");
+  }
   // A rejected event never blocks polling: drop it (counted as lost) and continue.
   bool failed(const char *code, uint32_t now) {
+    if (pending_ == Kind::Ack && droppableAck(code)) {
+      // The command already closed or is not ours: drop this ACK and keep polling.
+      haveAck_ = false;
+      ack_.clear();
+      ++droppedAcks_;
+      return true;
+    }
     bool event = pending_ == Kind::Event || pending_ == Kind::Loss;
     bool drop = event && (permanent(code) || ++attempts_ >= MaxEventAttempts);
     if (drop) {
@@ -492,6 +505,7 @@ private:
   bool connected_ = false, waiting_ = false, haveAck_ = false;
   Kind pending_ = Kind::Hello;
   uint8_t attempts_ = 0;
+  uint32_t droppedAcks_ = 0;
   uint32_t sequence_ = 0, lost_ = 0, reportedLost_ = 0, lossSequence_ = 0;
   uint32_t lastRequest_ = 0, lastState_ = 0, retryAt_ = 0, backoff_ = 500;
   char deviceId_[80] = {}, bootId_[32] = {};

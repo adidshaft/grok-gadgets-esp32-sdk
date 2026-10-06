@@ -305,6 +305,32 @@ void largeCommands() {
   assert(gadget.connected());
 }
 
+// M3: late_ack and unknown_command replies to an ACK keep the session; others reset it.
+void lateAcks() {
+  int before = executions;
+  for (const char *code : {"late_ack", "unknown_command"}) {
+    awaitPoll();
+    std::string id = std::string("late-") + code;
+    reply(pollWith(R"({"command_id":")" + id + R"(","capability":"any.set","arguments":{}})"));
+    advance(1);
+    take("ack");
+    assert(frame["command_id"] == id);
+    uint32_t dropped = gadget.droppedAcks();
+    reply(error(code));
+    assert(gadget.connected() && gadget.droppedAcks() == dropped + 1);
+    idlePoll(); // Same session: the dropped ACK is never resent.
+    assert(gadget.connected());
+  }
+  assert(executions == before + 2);
+  awaitPoll();
+  reply(pollWith(R"({"command_id":"late-x","capability":"any.set","arguments":{}})"));
+  advance(1);
+  take("ack");
+  reply(error("stale_session"));
+  assert(!gadget.connected());
+  connect();
+}
+
 int main() {
   registration();
   Serial.output.clear();
@@ -322,6 +348,8 @@ int main() {
   correlation();
   strictLines();
   largeCommands();
+  lateAcks();
   std::cout << "session: registration limits, event schemas, stable loss IDs, rejected-event "
-               "recovery, reply correlation, strict lines and full-size commands passed\n";
+               "recovery, reply correlation, strict lines and full-size commands and non-fatal "
+               "late ACKs passed\n";
 }
