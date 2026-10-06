@@ -2,6 +2,7 @@
 
 ## 0.2.0 (unreleased local alpha)
 
+- `late_ack` and `unknown_command` replies to an ACK no longer reset the session: the firmware drops that ACK and keeps polling. New `droppedAcks()` counter. Protocol README re-pinned from gateway `d82bc91` (wire format unchanged).
 - CI runs the README Quickstart in a fresh checkout and the simulated-firmware USB integration against gateway `main`, on push, pull request and nightly.
 - New `grok::Gadget` (`GrokSession.h`): declare commands, events and a button, then call `begin()` and `loop()`. The C124 firmware is now a short sketch; `examples/led-button` is a second, generic ESP32-S3 sketch.
 - Custom events with optional data schemas, sent with `"x-grok-gadgets-kind": "event"` in `capability_schemas`.

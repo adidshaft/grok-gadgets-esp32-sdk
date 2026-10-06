@@ -49,6 +49,8 @@ A reply must be one JSON object whose fields match the outstanding request. Trai
 
 A permanently rejected queued event (`duplicate_conflict`, `invalid_event`, `invalid_request`, `unsupported_capability`, `invalid_state`) is dropped, counted in `history_lost`, and polling continues. Other event failures reconnect. After five failures the event is dropped.
 
+If the gateway answers an acknowledgement with `late_ack` (the command already closed as timed out or unconfirmed) or `unknown_command`, the firmware drops that acknowledgement and keeps polling on the same session. It does not resend it or reconnect. `gadget.droppedAcks()` counts these. See the [canonical protocol](../protocol/0.1.0/README.md#late-acknowledgements-late_ack).
+
 Firmware never treats an acknowledgement as a command. It does not automatically retry an action. Correct credentials or protocol settings after authorization, revocation or version errors. Then reconnect. Firmware does not print secrets.
 
 ## Button events
