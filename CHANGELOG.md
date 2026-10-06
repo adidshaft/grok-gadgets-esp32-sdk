@@ -2,6 +2,7 @@
 
 ## 0.2.0 (unreleased local alpha)
 
+- Prepare PlatformIO and Arduino Library Manager packaging (not published): fuller `library.json`, a new `library.properties`, LICENSE and NOTICE inside the library, and `tools/check_package.py` in CI.
 - Protocol README re-pinned from gateway `111a6c8`: capability `description` and 16 KiB TCP hellos are documented. USB firmware keeps its 2048-byte frames; wire format unchanged.
 - `late_ack` and `unknown_command` replies to an ACK no longer reset the session: the firmware drops that ACK and keeps polling. New `droppedAcks()` counter. Protocol README re-pinned from gateway `d82bc91` (wire format unchanged).
 - CI runs the README Quickstart in a fresh checkout and the simulated-firmware USB integration against gateway `main`, on push, pull request and nightly.
