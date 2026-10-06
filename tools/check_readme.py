@@ -20,8 +20,12 @@ def main():
     match = re.search(r"```sh\n(.*?)```", section, re.S)
     if not match:
         raise SystemExit("README Quickstart has no sh block")
-    print(match[1], flush=True)
-    subprocess.run(["bash", "-euo", "pipefail", "-c", match[1]], cwd=ROOT, check=True)
+    # This checkout is the clone: skip the README's clone and cd lines.
+    commands = "\n".join(
+        line for line in match[1].splitlines() if not line.startswith(("git clone", "cd "))
+    )
+    print(commands, flush=True)
+    subprocess.run(["bash", "-euo", "pipefail", "-c", commands], cwd=ROOT, check=True)
     print("README Quickstart passed (software build and host tests; no board).")
 
 

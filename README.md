@@ -1,16 +1,17 @@
 # Grok Gadgets ESP32 SDK
 
-Build USB gadgets for your existing **Grok Bot**. Define commands and events in an Arduino sketch; `grok::Gadget` handles the connection to the local Grok Gadgets gateway. This is an experimental alpha. Original code is Apache-2.0.
-
-## What works with Grok Bot today
-
-**You can build and test the software now. Hardware and Grok Bot control remain unverified.** Two examples compile: the M5Stack AtomS3 Lite C124 RGB LED/button and a [generic ESP32-S3 LED/button](examples/led-button/main.cpp). Neither has been flashed here. Wi-Fi, hosted pairing, and button-triggered Bot tasks are not provided.
+Build USB gadgets for your Grok Bot in an Arduino sketch: declare commands and events, and
+`grok::Gadget` talks to the local [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway).
+Two examples compile; neither has been flashed here. Experimental alpha: see the
+[project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
 
 ## Quickstart
 
-You need Python 3.11+, CMake 3.16+, Git, and a C++14 compiler. From this repository, run:
+You need Python 3.11+, CMake 3.16+, Git and a C++14 compiler. No board or account.
 
 ```sh
+git clone https://github.com/adidshaft/grok-gadgets-esp32-sdk.git
+cd grok-gadgets-esp32-sdk
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.lock
 .venv/bin/pio pkg install
@@ -19,7 +20,13 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-Expected: four host test suites pass, both sketch transcripts pass the contract check, and the C124 firmware compiles. No board or account is needed. This means **build verified, hardware pending**.
+Expected: four host test suites pass, both sketch transcripts pass the contract check, and the
+C124 firmware compiles: **build verified, hardware pending**. Next,
+[create your own gadget](docs/sdk.md).
+
+## What works with Grok Bot today
+
+**You can build and test the software now. Hardware and Grok Bot control remain unverified.** Two examples compile: the M5Stack AtomS3 Lite C124 RGB LED/button and a [generic ESP32-S3 LED/button](examples/led-button/main.cpp). Neither has been flashed here. Wi-Fi, hosted pairing, and button-triggered Bot tasks are not provided.
 
 Next, [create your own gadget](docs/sdk.md), or [flash C124 and connect its USB bridge](docs/build-flash.md). The gateway and bridge run on the same computer. `enroll` issues a device token; `serve` keeps the local gateway running. Grok Bot needs a separately verified, authenticated remote route. A tunnel alone does not establish Bot compatibility.
 
