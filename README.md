@@ -89,6 +89,7 @@ Show your build, ask for help and share ideas on
 here? Pick a [good first issue](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 and read [CONTRIBUTING](CONTRIBUTING.md). Build errors: [SUPPORT](SUPPORT.md).
 Vulnerabilities: [SECURITY](SECURITY.md).
+Contribute on the `dev` branch; `main` holds tagged stable releases ([branches](CONTRIBUTING.md#branches)).
 
 ## License and affiliation
 
