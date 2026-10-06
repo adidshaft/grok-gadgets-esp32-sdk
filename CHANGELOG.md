@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.2.0 (unreleased local alpha)
+## Unreleased
+
+## 0.2.0-alpha.1 — 6 October 2026
 
 - Prepare PlatformIO and Arduino Library Manager packaging (not published): fuller `library.json`, a new `library.properties`, LICENSE and NOTICE inside the library, and `tools/check_package.py` in CI.
 - Protocol README re-pinned from gateway `111a6c8`: capability `description` and 16 KiB TCP hellos are documented. USB firmware keeps its 2048-byte frames; wire format unchanged.
