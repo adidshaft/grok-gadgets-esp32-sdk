@@ -27,7 +27,7 @@ You do not need a board to improve host tests, documentation or custom-capabilit
 
 The [canonical protocol](https://github.com/adidshaft/grok-gadgets-gateway/tree/main/protocol/0.1.0) belongs to the gateway. Coordinate schema changes and consumer pins together; never edit this SDK's copy in isolation. The hub records the tested component combination.
 
-Optional USB/gateway integration uses a separate gateway checkout as a sibling, its pinned environment installed, and `../grok-gadgets-gateway/.venv/bin/python tools/check_gateway.py`. This is a development workspace command, not a standalone build requirement. The host simulation reports simulated identity; a firmware ACK is not physical verification.
+Optional USB/gateway integration uses a separate gateway checkout as a sibling, its pinned environment installed, and `../grok-gadgets-gateway/.venv/bin/python tools/check_gateway.py`. This is a development workspace command, not a standalone build requirement. CI runs it against gateway `main`, and runs the README Quickstart with `python3 tools/check_readme.py`, on every push, pull request and night. The host simulation reports simulated identity; a firmware ACK is not physical verification.
 
 Original contributions use Apache-2.0 without an additional CLA or sign-off requirement. You remain responsible for AI-assisted code, citations and claimed test results. Follow the shared [Code of Conduct](https://github.com/adidshaft/grok-gadgets/blob/main/CODE_OF_CONDUCT.md) and [governance](https://github.com/adidshaft/grok-gadgets/blob/main/GOVERNANCE.md). For private conduct reports email [adidshaft@kyokasuigetsu.xyz](mailto:adidshaft@kyokasuigetsu.xyz); use [Security](SECURITY.md) for vulnerabilities.
 
