@@ -1,1 +1,37 @@
-{"name":"GrokGadgets","version":"0.2.0","description":"Grok Gadgets device SDK: capabilities, events and a serial session for Arduino-ESP32","license":"Apache-2.0","frameworks":"arduino","dependencies":{"bblanchon/ArduinoJson":"6.21.5"}}
+{
+  "name": "GrokGadgets",
+  "version": "0.2.0",
+  "description": "Grok Gadgets device SDK: capabilities, events and a serial session for Arduino-ESP32",
+  "license": "Apache-2.0",
+  "frameworks": "arduino",
+  "dependencies": {
+    "bblanchon/ArduinoJson": "6.21.5"
+  },
+  "keywords": [
+    "grok",
+    "mcp",
+    "gadgets",
+    "iot",
+    "usb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adidshaft/grok-gadgets-esp32-sdk.git"
+  },
+  "homepage": "https://grok-gadgets.pages.dev/",
+  "authors": [
+    {
+      "name": "adidshaft",
+      "maintainer": true
+    }
+  ],
+  "platforms": [
+    "espressif32"
+  ],
+  "headers": [
+    "GrokSession.h",
+    "GrokGadgets.h",
+    "GrokCore.h",
+    "C124.h"
+  ]
+}
