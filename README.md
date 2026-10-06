@@ -4,6 +4,7 @@ Build USB gadgets for your Grok Bot in an Arduino sketch: declare commands and e
 `grok::Gadget` talks to the local [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway).
 Two examples compile; neither has been flashed here. Experimental alpha: see the
 [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
+Independent project, not affiliated with SpaceXAI or xAI.
 
 ## Quickstart
 
@@ -24,27 +25,75 @@ Expected: four host test suites pass, both sketch transcripts pass the contract 
 C124 firmware compiles: **build verified, hardware pending**. Next,
 [create your own gadget](docs/sdk.md).
 
-## What works with Grok Bot today
+## What a gadget looks like
 
-**You can build and test the software now. Hardware and Grok Bot control remain unverified.** Two examples compile: the M5Stack AtomS3 Lite C124 RGB LED/button and a [generic ESP32-S3 LED/button](examples/led-button/main.cpp). Neither has been flashed here. Wi-Fi, hosted pairing, and button-triggered Bot tasks are not provided.
+```cpp
+#include <GrokSession.h>
 
-Next, [create your own gadget](docs/sdk.md), or [flash C124 and connect its USB bridge](docs/build-flash.md). The gateway and bridge run on the same computer. `enroll` issues a device token; `serve` keeps the local gateway running. Grok Bot needs a separately verified, authenticated remote route. A tunnel alone does not establish Bot compatibility.
+bool on = false;
+grok::Gadget gadget("Desk LED", "0.1.0", "esp32s3");
 
-## Details
+void report(JsonObject state, void *) { state["led"]["on"] = on; }
+grok::Error setLed(JsonObjectConst args, void *) {
+  on = args["on"];
+  digitalWrite(4, on ? HIGH : LOW);  // your hardware
+  return {};
+}
+void setup() {
+  pinMode(4, OUTPUT);
+  gadget.state(report);
+  gadget.command("led.set", setLed, nullptr,
+                 R"({"description":"Turn the desk LED on or off","type":"object",)"
+                 R"("properties":{"on":{"type":"boolean"}},"required":["on"]})");
+  gadget.button(0);
+  gadget.begin();
+}
+void loop() { gadget.loop(); }
+```
 
-| Next step | Guide |
+The schema's `description` tells the model what the command does. Declare the gadget as a
+global (it uses about 40 KB). The full version is [`examples/led-button`](examples/led-button/main.cpp);
+names, events and limits are in the [library guide](docs/sdk.md).
+
+## Flash a board
+
+The gadget talks over USB to a bridge on your computer, and the bridge talks to the
+[gateway](https://github.com/adidshaft/grok-gadgets-gateway). [Build, flash and recovery](docs/build-flash.md)
+covers flash offsets, the device ID, `grok-gadgets-gateway enroll`, `usb-bridge` and unplug
+recovery. No board has been flashed for this project yet, so hardware results are welcome.
+
+## Grok Bot today
+
+Today the gateway works with local MCP clients. A cloud Grok Bot cannot reach your computer
+yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
+and a button press does not wake the Bot. See the
+[hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
+
+## Learn more
+
+| Topic | Guide |
 | --- | --- |
-| Flash offsets, device ID, token, and unplug recovery | [Build, flash and recovery](docs/build-flash.md) |
-| Commands, events, and limits | [Library](docs/sdk.md) |
-| Retries, loss reports, and reconnects | [Protocol and recovery](docs/protocol-recovery.md) |
+| Commands, events and limits | [Library](docs/sdk.md) |
+| Retries, loss reports and reconnects | [Protocol and recovery](docs/protocol-recovery.md) |
 | C124 pins, and the GPIO48 `RGB_BUILTIN` trap | [Board sources](docs/board-sources.md) |
-| What was checked, and what is still open | [Verification](docs/verification.md) |
-| The one firmware checksum record | [build-checksums.json](docs/build-checksums.json) |
+| What was checked, and what is still open | [Verification](docs/verification.md) and [build-checksums.json](docs/build-checksums.json) |
+| Dependency licenses before you share firmware | [Dependencies](docs/dependencies.md) and [NOTICE](NOTICE) |
 
-Host tests compile the sketches against a simulated board. They do not open a serial port. The contract check validates frames those sketches write, plus the pinned protocol fixture. `firmware.bin` hashes also depend on the Xtensa toolchain host variant; see the checksum record.
+Host tests compile the sketches against a simulated board; they never open a serial port.
 
-The gateway device port is authenticated loopback on the same computer. Cloud access needs a separate authenticated HTTPS MCP route (`HARD-GROK-REMOTE-001`). See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
+## Community
 
-For build errors see [Support](SUPPORT.md). Report defects through the [issue chooser](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/new/choose). Vulnerabilities go through [Security](SECURITY.md). [Contributing](CONTRIBUTING.md) covers software, docs, and hardware evidence. [Dependency licenses](docs/dependencies.md) and [NOTICE](NOTICE) apply before any firmware redistribution. This project is unaffiliated with xAI and M5Stack.
+Show your build, ask for help and share ideas on
+[r/GrokGadgets](https://www.reddit.com/r/GrokGadgets/). Report bugs through the
+[issue chooser](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/new/choose). New
+here? Pick a [good first issue](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+and read [CONTRIBUTING](CONTRIBUTING.md). Build errors: [SUPPORT](SUPPORT.md).
+Vulnerabilities: [SECURITY](SECURITY.md).
 
-Pre-publication commit dates were reconstructed across 29 September–5 October 2026. Verification records keep their execution dates. See the [history and privacy record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
+## License and affiliation
+
+Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Grok Gadgets is an independent
+open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXAI or
+xAI**, which make Grok and Grok Bot, nor with M5Stack. Pre-publication commit dates were
+reconstructed; see the
+[history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
