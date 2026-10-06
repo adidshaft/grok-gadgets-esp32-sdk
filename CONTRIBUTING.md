@@ -9,7 +9,7 @@ You do not need a board to improve host tests, documentation or custom-capabilit
 ## Make one focused change
 
 1. Choose a [ready issue](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22), or discuss an interface/protocol/large feature first. Typo fixes can go directly to a PR. The [local ledger](planning/issues.json) records preparation work.
-2. Fork the repository. Clone your fork and create a short branch. For example: `git switch -c docs/clarify-build`.
+2. Fork the repository. Clone your fork and create a short branch. For example: `git switch dev && git switch -c docs/ESP-123-clarify-build`.
 3. Follow the standalone [README setup](README.md#start-without-hardware). Change one behavior or procedure. Keep protocol and dependency pins unless the issue requires coordinated changes.
 4. Run relevant checks from the repository root:
 
@@ -21,7 +21,11 @@ You do not need a board to improve host tests, documentation or custom-capabilit
 
    Host checks cover formatting, lint and CTest; contract validation checks the SDK-generated wire frames. Firmware changes require the exact target compile. Documentation changes should rehearse the edited steps and check links. Record any unrun physical or Linux USB steps.
 5. In the PR, link the issue and explain the behavior before/after, commands/results, docs updates and remaining limitations. Keep tokens, household data, device identifiers and raw account captures out of logs.
-6. Respond to review with focused commits. The maintainer integrates the tested change into `main` and credits documentation, tests and code contributions. Do not force-push shared work or imply agent review is independent human reproduction.
+6. Respond to review with focused commits. The maintainer squash-merges the tested change into `dev` and credits documentation, tests and code contributions. Do not force-push shared work or imply agent review is independent human reproduction.
+
+## Branches
+
+Branch from `dev` and open your PR into `dev`; it is the default branch and is squash-merged when checks pass. `main` holds only tagged stable releases and changes through release or hotfix PRs. Name branches `<type>/<ISSUE-ID>-<short-slug>`, for example `fix/ESP-021-short-name`. The shared [branch and release policy](https://github.com/adidshaft/grok-gadgets/blob/main/CONTRIBUTING.md#branches-and-releases) covers releases, hotfixes and cross-repository changes.
 
 ## Integration and protocol changes
 
