@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.2 — 7 October 2026
+
+- Clarify Grok Bot as the sole assistant target and document the local rehearsal path.
+- Retain the existing C124 firmware and library package version; no protocol change.
+
 ## 0.2.0-alpha.1 — 6 October 2026
 
 - Prepare PlatformIO and Arduino Library Manager packaging (not published): fuller `library.json`, a new `library.properties`, LICENSE and NOTICE inside the library, and `tools/check_package.py` in CI.
