@@ -4,7 +4,7 @@ Build USB gadgets for your Grok Bot in an Arduino sketch: declare commands and e
 `grok::Gadget` talks to the local [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway).
 Two examples compile; nobody has flashed either of them yet. Experimental alpha: see the
 [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
-Independent project, not affiliated with SpaceXAI or xAI.
+Independent project, not affiliated with SpaceXAI.
 
 ## Quickstart
 
@@ -64,8 +64,8 @@ recovery. Nobody has flashed a board for this project yet, so we welcome hardwar
 
 ## Grok Bot today
 
-Today you test the gateway locally. A cloud Grok Bot cannot reach
-your computer yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
+Run `grok-gadgets-gateway rehearse` to check the local simulated path for Grok Bot. A cloud
+Grok Bot cannot reach your computer yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
 and a button press does not wake the Bot. See the
 [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
 
