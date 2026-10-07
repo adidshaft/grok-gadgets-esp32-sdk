@@ -37,7 +37,7 @@ jobs:
           version: '0.12.3'
       - run: python tools/check_readme.py
       - name: Plain language (ASD-STE100 sentence limit)
-        run: python tools/check_ste.py README.md
+        run: python tools/check_ste.py README.md CONTRIBUTING.md SUPPORT.md
       - name: Library manifests agree and pack (nothing is published)
         run: .venv/bin/python tools/check_package.py
       - name: Simulated firmware over a PTY USB link to gateway main
