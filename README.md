@@ -2,9 +2,9 @@
 
 Build USB gadgets for your Grok Bot in an Arduino sketch: declare commands and events, and
 `grok::Gadget` talks to the local [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway).
-Two examples compile; neither has been flashed here. Experimental alpha: see the
+Two examples compile; nobody has flashed either of them yet. Experimental alpha: see the
 [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
-Independent project, not affiliated with SpaceXAI or xAI.
+Independent project, not affiliated with SpaceXAI.
 
 ## Quickstart
 
@@ -60,12 +60,12 @@ names, events and limits are in the [library guide](docs/sdk.md).
 The gadget talks over USB to a bridge on your computer, and the bridge talks to the
 [gateway](https://github.com/adidshaft/grok-gadgets-gateway). [Build, flash and recovery](docs/build-flash.md)
 covers flash offsets, the device ID, `grok-gadgets-gateway enroll`, `usb-bridge` and unplug
-recovery. No board has been flashed for this project yet, so hardware results are welcome.
+recovery. Nobody has flashed a board for this project yet, so we welcome hardware results.
 
 ## Grok Bot today
 
-Today the gateway works with local MCP clients. A cloud Grok Bot cannot reach your computer
-yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
+Run `grok-gadgets-gateway rehearse` to check the local simulated path for Grok Bot. A cloud
+Grok Bot cannot reach your computer yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
 and a button press does not wake the Bot. See the
 [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
 
@@ -95,6 +95,5 @@ Contribute on the `dev` branch; `main` holds tagged stable releases ([branches](
 
 Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Grok Gadgets is an independent
 open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXAI or
-xAI**, which make Grok and Grok Bot, nor with M5Stack. Pre-publication commit dates were
-reconstructed; see the
+xAI**, which make Grok and Grok Bot, nor with M5Stack. We reconstructed the pre-publication commit dates; see the
 [history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).

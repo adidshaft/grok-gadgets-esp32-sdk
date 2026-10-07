@@ -4,7 +4,7 @@ Local correction for retained command acknowledgements. Electrical board simulat
 
 ## Source and environment
 
-Started from clean SDK `41ee9635efeef553197e3d15363e02146d87e773`, except the coordinator-created HARD-ESP-001 local issue. Branch `fix/ack-retry-hard-esp-001`; exclusive firmware subagent ownership. Delegated to a bounded agent with its own context, confirmed by the coordinator. Initial checks ran against this base plus the correction's uncommitted source; final checks ran against clean integrated main `bca5d4e75123034a973be6b3837d75ac2c02a2c2`.
+Started from clean SDK `41ee9635efeef553197e3d15363e02146d87e773`, except the coordinator-created HARD-ESP-001 local issue. Branch `fix/ack-retry-hard-esp-001`; exclusive firmware subagent ownership. Delegated to a bounded firmware agent with its own context, confirmed by the coordinator. Initial checks ran against this base plus the correction's uncommitted source; final checks ran against clean integrated main `bca5d4e75123034a973be6b3837d75ac2c02a2c2`.
 
 macOS 27.0 arm64; AppleClang 21.0.0 C++14; PlatformIO Core 6.1.18; espressif32 6.10.0; Arduino-ESP32 package 3.20017.0 (framework 2.0.17); Xtensa ESP32-S3 and RISC-V 8.4.0+2021r2-patch5; esptool 1.40501.0 (4.5.1); SCons 4.40801.0 (4.8.1); ArduinoJson 6.21.5; NeoPixel 1.12.3. ArduinoJson headers are the actual installed `.pio/libdeps/atoms3-lite-usb/ArduinoJson/src`, shared by host checks and board compilation.
 
