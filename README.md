@@ -64,8 +64,8 @@ recovery. Nobody has flashed a board for this project yet, so we welcome hardwar
 
 ## Grok Bot today
 
-Today the gateway works with local MCP clients. A cloud Grok Bot cannot reach your computer
-yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
+Today you test the gateway locally. A cloud Grok Bot cannot reach
+your computer yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
 and a button press does not wake the Bot. See the
 [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
 
