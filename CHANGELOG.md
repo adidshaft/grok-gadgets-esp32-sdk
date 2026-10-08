@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.3 — 8 October 2026
+
+- Dependabot opens weekly grouped update PRs into `dev`.
+- CONTRIBUTING starts fork branches from `upstream/dev`. CI also runs the plain-language check on CONTRIBUTING and SUPPORT.
+
 ## 0.2.0-alpha.2 — 7 October 2026
 
 - Clarify Grok Bot as the sole assistant target and document the local rehearsal path.
