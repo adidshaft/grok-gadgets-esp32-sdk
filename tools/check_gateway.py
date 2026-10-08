@@ -169,8 +169,10 @@ async def main():
             await until(lambda: not gateway.devices[device_id]["connected"])
             server = await DeviceServer(gateway, Credentials(credentials), port=port).start()
             await until(
-                lambda: gateway.devices[device_id]["connected"]
-                and gateway.devices[device_id]["session_id"] != old_session
+                lambda: (
+                    gateway.devices[device_id]["connected"]
+                    and gateway.devices[device_id]["session_id"] != old_session
+                )
             )
             gateway.command(
                 device_id, "rgb.set", {"r": 0, "g": 0, "b": 0, "on": False}, "integration-off"

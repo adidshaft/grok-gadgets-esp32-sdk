@@ -1,5 +1,5 @@
-platformio==6.1.18
+platformio==6.2.0
 pyserial==3.5
-jsonschema==4.23.0
-clang-format==18.1.8
-ruff==0.14.14
+jsonschema==4.26.0
+clang-format==23.1.2
+ruff==0.16.10
