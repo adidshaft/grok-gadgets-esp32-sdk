@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.5 — 8 October 2026
+
+- `.gitignore` ignores `dist` as a file as well as a folder, so a stray `pio pkg pack -o dist` output no longer shows as untracked.
+
 ## 0.2.0-alpha.4 — 8 October 2026
 
 - Tooling: PlatformIO Core 6.2.0, `clang-format` 23.1.2, `ruff` 0.16.10 and `jsonschema` 4.26.0. `requirements.lock` is regenerated from these pins. Sources need no reformatting; firmware and library are unchanged.
