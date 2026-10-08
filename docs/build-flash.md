@@ -22,7 +22,7 @@ The pinned tools and libraries are:
 
 | Dependency | Version |
 | --- | --- |
-| PlatformIO | 6.1.18 |
+| PlatformIO | 6.2.0 |
 | espressif32 | 6.10.0 |
 | Arduino-ESP32 | 2.0.17 |
 | Xtensa compiler | 8.4.0+2021r2-patch5 |

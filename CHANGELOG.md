@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Tooling: PlatformIO Core 6.2.0, `clang-format` 23.1.2, `ruff` 0.16.10 and `jsonschema` 4.26.0. `requirements.lock` is regenerated from these pins. Sources need no reformatting; firmware and library are unchanged.
+
 ## 0.2.0-alpha.3 — 8 October 2026
 
 - Dependabot opens weekly grouped update PRs into `dev`.
