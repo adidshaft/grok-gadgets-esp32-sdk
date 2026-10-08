@@ -30,7 +30,7 @@ __pycache__/
 htmlcov/
 *.egg-info/
 node_modules/
-dist/
+dist
 build/
 .pio/
 /artifacts/
