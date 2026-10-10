@@ -11,7 +11,7 @@ The C124 sketch and `examples/led-button` both use `grok::Gadget`. A second boar
 
 ## Declare a global gadget
 
-`grok::Gadget` holds about 40 KB (ACK cache, line buffer, parse documents, and the event queue). `grok::Device` alone is about 33 KB. `Device::execute` uses a 2 KB stack buffer. The Arduino `loop` task stack is 8 KB. Declare the gadget as a global or static object. A local in `setup()` or `loop()` overflows that stack.
+With the default eight-entry ACK cache, `grok::Gadget` holds about 40 KB (cache, line buffer, parse documents, and event queue). `grok::Device` alone is about 33 KB. `Device::execute` uses a 2 KB stack buffer. The Arduino `loop` task stack is 8 KB. Declare the gadget as a global or static object. A local with the default cache in `setup()` or `loop()` overflows that stack.
 
 ```cpp
 #include <GrokSession.h>
@@ -62,7 +62,15 @@ A reply may be one JSON object of at most 2047 bytes plus LF. The parse document
 
 The request timeout is 13 seconds, longer than the USB bridge's connect-plus-reply wait. A reply whose shape does not match the outstanding request resets the session. Protocol 0.1.0 has no request id.
 
-Within one boot the device retains eight acknowledgements. The same command id and the same compact arguments return the cached result and do not run the handler again. Changed arguments return `duplicate_conflict`. Reboot clears the cache. A timeout means the result is uncertain: do not repeat a physical action under a new id.
+Within one boot the device retains eight acknowledgements by default. The same command id and the same compact arguments return the cached result and do not run the handler again. Changed arguments return `duplicate_conflict`. Reboot clears the cache. A timeout means the result is uncertain: do not repeat a physical action under a new id.
+
+### ACK cache size
+
+Set `GROK_ACK_CACHE_ENTRIES` to a positive integer at compile time. The default is `8`; zero does not disable the cache. Add `-DGROK_ACK_CACHE_ENTRIES=2` to your compiler flags for a two-entry cache. In PlatformIO, add this flag to the environment's `build_flags`, preserving its existing flags. Use the same value in every translation unit that includes the SDK headers.
+
+Each entry stores a 65-byte ID and two 2048-byte buffers: 4161 bytes in total. Reducing eight entries to two saves 24,966 bytes of cache storage. Object sizes also include other members and alignment. The stack buffer size does not change.
+
+Fewer entries retain fewer command IDs and therefore provide less replay protection. The cache replaces the oldest entry when it stores a new ID. Replaying a retained ID or reporting `duplicate_conflict` does not refresh or evict entries. Once an ID is evicted, receiving that command again can run its handler again. Successful and failed results use the same cache.
 
 `readRgb` accepts integer `r`, `g`, and `b` from 0 to 255, plus boolean `on`. A float such as `255.0` is rejected. The gateway's own numeric check is a separate code path.
 
