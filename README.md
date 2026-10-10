@@ -21,7 +21,7 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-Expected: four host test suites pass, both sketch transcripts pass the contract check, and the
+Expected: six host test suites pass, both sketch transcripts pass the contract check, and the
 C124 firmware compiles: **build verified, hardware pending**. Next,
 [create your own gadget](docs/sdk.md).
 

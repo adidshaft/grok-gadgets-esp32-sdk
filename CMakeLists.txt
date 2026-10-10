@@ -17,6 +17,14 @@ target_include_directories(device_tests PRIVATE lib/GrokGadgets/src "${ARDUINOJS
 target_compile_options(device_tests PRIVATE -Wall -Wextra -Werror)
 add_test(NAME device COMMAND device_tests)
 
+foreach(cache_entries 1 2)
+ add_executable(ack_cache_${cache_entries}_tests tests/ack_cache_tests.cpp)
+ target_include_directories(ack_cache_${cache_entries}_tests PRIVATE lib/GrokGadgets/src "${ARDUINOJSON_INCLUDE}")
+ target_compile_options(ack_cache_${cache_entries}_tests PRIVATE -Wall -Wextra -Werror)
+ target_compile_definitions(ack_cache_${cache_entries}_tests PRIVATE GROK_ACK_CACHE_ENTRIES=${cache_entries})
+ add_test(NAME ack_cache_${cache_entries} COMMAND ack_cache_${cache_entries}_tests)
+endforeach()
+
 # Targets below compile Arduino sketches against the simulated board in tests/stubs.
 function(host_sketch name source)
  add_executable(${name} ${source})

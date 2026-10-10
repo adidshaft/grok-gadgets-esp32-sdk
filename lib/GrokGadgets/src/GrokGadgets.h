@@ -2,6 +2,10 @@
 #pragma once
 #include "GrokCore.h"
 #include <ArduinoJson.h>
+#ifndef GROK_ACK_CACHE_ENTRIES
+#define GROK_ACK_CACHE_ENTRIES 8
+#endif
+static_assert(GROK_ACK_CACHE_ENTRIES > 0, "GROK_ACK_CACHE_ENTRIES must be positive");
 namespace grok {
 struct Error {
   const char *code = nullptr;
@@ -121,7 +125,7 @@ public:
     }
     if (validId(id) && !errorConflict(error)) {
       auto &entry = cache_[next_];
-      next_ = (next_ + 1) % 8;
+      next_ = (next_ + 1) % GROK_ACK_CACHE_ENTRIES;
       strcpy(entry.id, id);
       if (measureJson(command) <= MaxFrame)
         serializeJson(command, entry.command, sizeof(entry.command));
@@ -144,7 +148,7 @@ private:
     char id[65] = {};
     char command[MaxFrame + 1] = {};
     char ack[MaxFrame + 1] = {};
-  } cache_[8];
+  } cache_[GROK_ACK_CACHE_ENTRIES];
   size_t count_ = 0, next_ = 0;
   StateWriter writer_;
   void *context_;
