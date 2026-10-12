@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.6 — 12 October 2026
+
+- `GROK_ACK_CACHE_ENTRIES` sets the number of cached ACK entries at compile time. The default stays 8; zero or a negative value fails to compile. Host tests cover one-entry and two-entry caches (#59, contributed by @Hellz0wnzJ00).
+- Docs: the ordered ESP32-S3 and OLED kit is the first physical experiment, with a software rehearsal (#60).
+
 ## 0.2.0-alpha.5 — 8 October 2026
 
 - `.gitignore` ignores `dist` as a file as well as a folder, so a stray `pio pkg pack -o dist` output no longer shows as untracked.
