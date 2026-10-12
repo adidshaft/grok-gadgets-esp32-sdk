@@ -604,12 +604,13 @@
         "esp32",
         "P2"
       ],
-      "stage": "review",
+      "stage": "done",
       "commits": [],
-      "blocker": "Owner observation of the 48x48 face on the physical OLED is pending.",
+      "blocker": null,
       "evidence": [
         "Owner on 12 Oct 2026: the 24x24 build (8e4a9b4) was too small.",
-        "sh tools/check.sh: CTest 8/8 passed; tests/wifi_link_tests.cpp covers the 36-tile face, the Grok Bot label, rows 6-7 word and character wrap, change-only redraws and 16-column text without the face"
+        "sh tools/check.sh: CTest 8/8 passed; tests/wifi_link_tests.cpp covers the 36-tile face, the Grok Bot label, rows 6-7 word and character wrap, change-only redraws and 16-column text without the face",
+        "Owner on 12 Oct 2026, ESP32 cedeeff (firmware.bin sha256 8a4a372e...3379): the 48x48 face and Grok Bot label looked right on the kit. Text on rows 6-7 was not checked on hardware."
       ]
     }
   ]

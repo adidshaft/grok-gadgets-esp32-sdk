@@ -93,8 +93,8 @@ The pixel face follows the project's
 [Grok Bot reference](https://github.com/adidshaft/grok-gadgets/blob/dev/website/media/grok-bot-mark.svg).
 It is a small display interpretation of the user-supplied artwork, not an official logo asset.
 The animation writes tiles only when the face changes, with no added delay or full-screen refresh.
-On 12 October 2026 the owner saw the first 16×16 face move and blink on the kit. The 48×48 face
-and `Grok Bot` label have host-test and compile evidence only.
+On 12 October 2026 the owner checked the 48×48 face and `Grok Bot` label on the kit
+(`dev` `cedeeff`). Text on rows 6 and 7 beside it is host-tested only.
 
 ### Flash and provision
 

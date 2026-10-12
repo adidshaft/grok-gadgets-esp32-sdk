@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- OLED Wi-Fi build: while `Online`, show a 48×48 Grok Bot face on the right of the screen and `Grok Bot` on the second row. The face moves one pixel and blinks every 3.6 s. Message text uses the bottom two rows. Connection errors and reset messages replace the face and label ([#91](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/91), [#93](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/93)). The owner saw the first 16×16 version move and blink on the kit; the 48×48 version is host-tested and compiled.
+- OLED Wi-Fi build: while `Online`, show a 48×48 Grok Bot face on the right of the screen and `Grok Bot` on the second row. The face moves one pixel and blinks every 3.6 s. Message text uses the bottom two rows. Connection errors and reset messages replace the face and label ([#91](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/91), [#93](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/93)). The owner checked the 48×48 face and label on the kit on 12 October 2026; text on rows 6–7 is host-tested only.
 
 ## 0.2.0-alpha.10 — 12 October 2026
 
