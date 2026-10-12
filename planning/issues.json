@@ -556,6 +556,34 @@
       ],
       "stage": "done",
       "evidence": "GitHub #73, PR #86; tests/wifi_link_tests.cpp and tests/wifi_console_tests.cpp. Owner's kit on 12 Oct 2026: wrong password showed Wrong password / Check password; the check found and fixed a provisioning stack overflow (docs/verification/wifi-join-failure-2026-10-12.md). No network and Join timeout are host-tested only."
+    },
+    {
+      "id": "ESP-OLED-ONLINE-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "The OLED Online status has no animated Grok Bot face",
+      "acceptance": [
+        "Keep the Online label readable and animate a Grok Bot face within the 128x64 display header",
+        "Preserve command text, clear behavior, link failure messages and reset countdowns",
+        "Use bounded timed tile writes without animation delays or additional console output",
+        "Pass host tests and USB/Wi-Fi OLED target compilation; record physical verification separately"
+      ],
+      "dependencies": [],
+      "labels": [
+        "enhancement",
+        "esp32",
+        "P2"
+      ],
+      "stage": "review",
+      "commits": [],
+      "blocker": "Owner observation of the animation on the physical OLED remains pending. No device has been flashed with this change.",
+      "evidence": [
+        "sh tools/check.sh: lint and format passed, CTest 8/8 and OLED model tests 4/4 passed",
+        "tools/check_contract.py: all four sketch transcripts and pinned protocol hashes passed",
+        "PlatformIO esp32s3-oled-kit and esp32s3-oled-kit-wifi both compiled with pinned dependencies",
+        "tests/wifi_link_tests.cpp covers frame deadlines, message retention, clear, disconnect/reconnect, TLS/token failures, reset countdowns, blink/cycle behavior and clock wraparound",
+        "tools/check_ste.py passed for the OLED guide; this is a sentence-length check, not certified compliance"
+      ]
     }
   ]
 }

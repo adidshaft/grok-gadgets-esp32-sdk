@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- OLED Wi-Fi build: add a small Grok Bot face beside `Online`. It moves one pixel and blinks occasionally. Connection errors and reset messages replace it. Text and clear commands preserve the status area (ESP-OLED-ONLINE-001). Host tests and both OLED builds pass; physical animation checks remain pending.
+
 ## 0.2.0-alpha.10 — 12 October 2026
 
 - Wi-Fi build: when the board cannot join, the OLED top row says why (`No network`, `Wrong password`, `Join timeout`) and the second row says what to check (`2.4GHz? Name?`, `Check password`, `Check router`). The console prints the same cause, and the `status` reply adds `wifi_failure` and `wifi_hint`. Neither shows the network name or password ([#73](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/73)).

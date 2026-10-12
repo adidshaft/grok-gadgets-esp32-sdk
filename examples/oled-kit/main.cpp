@@ -10,6 +10,7 @@
 // console, a status line on the top row, and BOOT held for 10 seconds as a factory reset.
 #include <GrokSession.h>
 #ifdef OLED_KIT_WIFI
+#include "OnlineLogo.h"
 #include <GrokWifi.h>
 #endif
 #include <U8x8lib.h>
@@ -50,6 +51,7 @@ grok::WifiLink wifiLink(settings);
 grok::Console console(Serial, store, gadget.deviceId());
 char shownStatus[Columns + 1] = {}; // What the status row shows now.
 char shownHint[Columns + 1] = {};   // Row 1: what to check after a failed Wi-Fi join.
+oledkit::OnlineLogo onlineLogo;
 uint32_t bootHeldSince = 0;
 bool bootHeld = false;
 
@@ -77,6 +79,8 @@ void drawStatus() {
   oled->drawString(0, 0, row);
   snprintf(row, sizeof(row), "%-16s", shownHint);
   oled->drawString(0, 1, row);
+  if (!strcmp(shownStatus, "Online"))
+    onlineLogo.draw(*oled);
 }
 void consoleStatus(JsonObject reply, void *) {
   reply["firmware"] = FirmwareVersion;
@@ -222,6 +226,7 @@ void loop() {
   if (strcmp(status, shownStatus) || strcmp(hint, shownHint)) {
     strcpy(shownStatus, status);
     strcpy(shownHint, hint);
+    onlineLogo.reset(now);
     drawStatus();
     // The console line explains a failed join; it never names the network.
     const char *advice = hint[0] ? grok::describe(wifiLink.failure()).advice : nullptr;
@@ -229,6 +234,8 @@ void loop() {
     size_t size = advice ? snprintf(line, sizeof(line), "status: %s. %s\n", status, advice)
                          : snprintf(line, sizeof(line), "status: %s\n", status);
     Serial.write(reinterpret_cast<const uint8_t *>(line), size);
+  } else if (oled && !strcmp(shownStatus, "Online") && onlineLogo.advance(now)) {
+    onlineLogo.draw(*oled); // No delay, full-screen clear, text redraw or console output.
   }
   if (console.restartRequested()) {
     delay(300); // Let the console reply and the last status leave the USB buffer.
