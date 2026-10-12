@@ -106,29 +106,35 @@ inline bool printableToken(const char *token) {
       return false;
   return true;
 }
-// Validate a `provision` console command. Error messages never contain a value.
-inline Error readSettings(JsonObjectConst in, WifiSettings &out) {
+// Validate a `provision` console command into `next`, which is wiped on any error. Error
+// messages never contain a value. WifiSettings is about 3.4 KB: keep it off the 8 KB loop
+// stack (a stack copy here crashed the board on every provision line).
+inline Error readSettingsInto(JsonObjectConst in, WifiSettings &next) {
   static constexpr const char *Begin = "-----BEGIN CERTIFICATE-----";
-  WifiSettings next;
-  if (in.size() != 7)
-    return {"invalid_settings", "Expected type, ssid, password, token, host, port and ca"};
-  if (!copyString(in["ssid"], next.ssid, sizeof(next.ssid), 1))
-    return {"invalid_settings", "Wi-Fi name must be 1-32 bytes"};
-  if (!copyString(in["password"], next.password, sizeof(next.password), 0) ||
-      (next.password[0] && strlen(next.password) < 8))
-    return {"invalid_settings", "Wi-Fi password must be empty or 8-64 bytes"};
-  if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
-    return {"invalid_settings", "Token must be 16-256 printable characters"};
-  if (!copyString(in["host"], next.host, sizeof(next.host), 7) || !validIpv4(next.host))
-    return {"invalid_settings", "Host must be an IPv4 address"};
-  if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
-    return {"invalid_settings", "Port must be 1-65535"};
-  next.port = in["port"].as<uint16_t>();
-  if (!copyString(in["ca"], next.ca, sizeof(next.ca), 64) ||
-      strncmp(next.ca, Begin, strlen(Begin)) || !strstr(next.ca, "-----END CERTIFICATE-----"))
-    return {"invalid_settings", "CA must be one PEM certificate up to 3072 bytes"};
-  out = next;
-  return {};
+  next.wipe();
+  Error error = [&]() -> Error {
+    if (in.size() != 7)
+      return {"invalid_settings", "Expected type, ssid, password, token, host, port and ca"};
+    if (!copyString(in["ssid"], next.ssid, sizeof(next.ssid), 1))
+      return {"invalid_settings", "Wi-Fi name must be 1-32 bytes"};
+    if (!copyString(in["password"], next.password, sizeof(next.password), 0) ||
+        (next.password[0] && strlen(next.password) < 8))
+      return {"invalid_settings", "Wi-Fi password must be empty or 8-64 bytes"};
+    if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
+      return {"invalid_settings", "Token must be 16-256 printable characters"};
+    if (!copyString(in["host"], next.host, sizeof(next.host), 7) || !validIpv4(next.host))
+      return {"invalid_settings", "Host must be an IPv4 address"};
+    if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
+      return {"invalid_settings", "Port must be 1-65535"};
+    next.port = in["port"].as<uint16_t>();
+    if (!copyString(in["ca"], next.ca, sizeof(next.ca), 64) ||
+        strncmp(next.ca, Begin, strlen(Begin)) || !strstr(next.ca, "-----END CERTIFICATE-----"))
+      return {"invalid_settings", "CA must be one PEM certificate up to 3072 bytes"};
+    return {};
+  }();
+  if (error.code)
+    next.wipe();
+  return error;
 }
 
 class SettingsStore {
@@ -309,8 +315,8 @@ private:
     if (!strcmp(type, "status")) {
       reply(true);
     } else if (!strcmp(type, "provision")) {
-      WifiSettings settings;
-      Error error = readSettings(doc.as<JsonObjectConst>(), settings);
+      WifiSettings &settings = pending_; // A member, not a 3.4 KB stack copy.
+      Error error = readSettingsInto(doc.as<JsonObjectConst>(), settings);
       if (error.code)
         fail(error.code, error.message);
       else if (!store_.save(settings))
@@ -362,6 +368,7 @@ private:
   const char *deviceId_;
   Status status_ = nullptr;
   void *context_ = nullptr;
+  WifiSettings pending_; // Validated provisioning input; wiped after each command.
   char line_[MaxConsoleLine + 1] = {};
   size_t used_ = 0;
   bool dropping_ = false, restart_ = false;
