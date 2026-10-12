@@ -151,6 +151,30 @@ int main() {
   online(); // A re-enrolled token would be provisioned over USB; here the gateway accepts.
   assert(!gadget.rejected());
 
+  // BOOT held past 3 seconds: the status row counts down. Letting go keeps the settings.
+  auto holdFor = [&](uint32_t ms) {
+    for (uint32_t start = fake::now; fake::now - start < ms;) {
+      advance(1);
+      if (tls.output.find('\n') != std::string::npos) {
+        std::string kind = next(1);
+        answer(kind == "poll" ? R"({"ok":true,"commands":[]})" : R"({"ok":true})");
+      }
+    }
+  };
+  Serial.output.clear();
+  fake::pin = 0;
+  holdFor(2900);
+  assert(fake::screen[0].rfind("Online", 0) == 0);
+  holdFor(200);
+  assert(fake::screen[0].rfind("Reset in 7s", 0) == 0);
+  holdFor(2000);
+  assert(fake::screen[0].rfind("Reset in 5s", 0) == 0);
+  assert(Serial.output.find("status: Reset in 7s") != std::string::npos);
+  fake::pin = 1;
+  holdFor(200);
+  assert(fake::screen[0].rfind("Online", 0) == 0);
+  assert(ESP.restarts == 0 && fake::nvs.count("grok-wifi/token"));
+
   // BOOT held for 10 seconds: factory reset and restart.
   fake::pin = 0;
   for (int i = 0; i < 10100 && !ESP.restarts; ++i) {
