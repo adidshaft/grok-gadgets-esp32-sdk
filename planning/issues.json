@@ -121,10 +121,10 @@
         "P2"
       ],
       "milestone": "M4",
-      "stage": "review",
+      "stage": "done",
       "commits": [],
-      "evidence": "Hub ADR 005; gateway GW-LAN-001 (LAN TLS listener). SDK: grok::Link, GrokWifi.h (pinned-CA TLS link, NVS settings, provisioning console), esp32s3-oled-kit-wifi build. Host tests wifi_console/wifi_link and the Wi-Fi contract transcript pass; firmware compiles. Physical Wi-Fi acceptance pending.",
-      "blocker": "Physical acceptance on the owner's kit over Wi-Fi"
+      "evidence": "docs/verification/oled-kit-wifi-2026-10-12.md: owner's kit on a USB charger, 12 Oct 2026, all eight items Pass (Wi-Fi recovery after fix #74) and one Grok Bot local-route rehearse over Wi-Fi, each paired with the gateway request log. Hub ADR 005; gateway GW-LAN-001 (#80, #81); SDK #71, #74.",
+      "blocker": null
     },
     {
       "id": "ESP-006",
