@@ -574,15 +574,43 @@
         "esp32",
         "P2"
       ],
-      "stage": "review",
+      "stage": "done",
       "commits": [],
-      "blocker": "Owner observation of the animation on the physical OLED remains pending. No device has been flashed with this change.",
+      "blocker": null,
       "evidence": [
         "sh tools/check.sh: lint and format passed, CTest 8/8 and OLED model tests 4/4 passed",
         "tools/check_contract.py: all four sketch transcripts and pinned protocol hashes passed",
         "PlatformIO esp32s3-oled-kit and esp32s3-oled-kit-wifi both compiled with pinned dependencies",
         "tests/wifi_link_tests.cpp covers frame deadlines, message retention, clear, disconnect/reconnect, TLS/token failures, reset countdowns, blink/cycle behavior and clock wraparound",
-        "tools/check_ste.py passed for the OLED guide; this is a sentence-length check, not certified compliance"
+        "tools/check_ste.py passed for the OLED guide; this is a sentence-length check, not certified compliance",
+        "Owner observation on 12 Oct 2026, ESP32 dev bdc4db3 (firmware.bin sha256 8d88c225...1c48): the 16x16 face moved and blinked beside Online. Superseded by ESP-OLED-ONLINE-002."
+      ]
+    },
+    {
+      "id": "ESP-OLED-ONLINE-002",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "The owner asked for a bigger Online face with the words Grok Bot; a 24x24 face was still too small on the kit",
+      "acceptance": [
+        "48x48 face in tile columns 10-15 of rows 0-5 and Grok Bot on row 1 while Online",
+        "Text uses rows 6-7 at 16 columns while Online; all 32 characters stay visible",
+        "Leaving or entering Online redraws once with no stale face pixels; tiles are written only when the face changes"
+      ],
+      "dependencies": [
+        "ESP-OLED-ONLINE-001"
+      ],
+      "labels": [
+        "enhancement",
+        "esp32",
+        "P2"
+      ],
+      "stage": "done",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "Owner on 12 Oct 2026: the 24x24 build (8e4a9b4) was too small.",
+        "sh tools/check.sh: CTest 8/8 passed; tests/wifi_link_tests.cpp covers the 36-tile face, the Grok Bot label, rows 6-7 word and character wrap, change-only redraws and 16-column text without the face",
+        "Owner on 12 Oct 2026, ESP32 cedeeff (firmware.bin sha256 8a4a372e...3379): the 48x48 face and Grok Bot label looked right on the kit. Text on rows 6-7 was not checked on hardware."
       ]
     }
   ]
