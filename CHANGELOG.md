@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Wi-Fi transport (hub ADR 005, ESP-005, #5). `grok::Link` lets a gadget own its connection: the session opens it before each hello, adds the device token to the hello and closes it on every reset. After `unauthorized` or `revoked` the next hello waits 60 s. `Gadget::rejected()` reports the code. Frames are written with one `write` call, so a TLS link sends one record per frame. USB behaviour and frames are unchanged.
+- `GrokWifi.h`: a TLS link that trusts only the provisioned gateway CA, Wi-Fi settings in NVS namespace `grok-wifi`, and a one-line JSON serial console (`status`, `provision`, `factory_reset`) that never prints a stored value.
+- `examples/oled-kit` gains the `esp32s3-oled-kit-wifi` build: a status row, provisioning over USB with the gateway's `wifi-provision`, and a 10-second BOOT hold as a factory reset. Physical acceptance over Wi-Fi is pending.
+- Host tests `wifi_console` and `wifi_link`, and the `transcript_oled_kit_wifi` contract transcript. CI compiles the Wi-Fi build.
+
 ## 0.2.0-alpha.7 — 12 October 2026
 
 - `examples/oled-kit`: firmware for the ESP32-S3-N16R8 board (YD-ESP32-23 v1.3) with a 1.3-inch SH1106 I²C OLED. Commands `display.text`, `display.clear` and `rgb.set`, plus `BOOT` button events. It finds the display at 0x3c or 0x3d with either data-pin order and reports the pins and address. Build it with the new `esp32s3-oled-kit` environment (16 MB flash, octal PSRAM, U8g2 2.36.18) (#65).

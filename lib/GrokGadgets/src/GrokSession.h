@@ -22,8 +22,22 @@ constexpr size_t IncomingCapacity = JSON_ARRAY_SIZE(MaxFrame / 2 + 8) + MaxFrame
 // attributed to the next request. Protocol 0.1.0 has no request ID.
 constexpr uint32_t RequestTimeoutMs = 13000;
 constexpr uint32_t PollIntervalMs = 100, StateIntervalMs = 3000, MaxBackoffMs = 5000;
+// After `unauthorized` or `revoked` on a link, wait this long before the next hello.
+constexpr uint32_t RejectedBackoffMs = 60000;
 constexpr uint8_t MaxEventAttempts = 5;
 constexpr size_t SerialRxBuffer = 2 * (MaxFrame + 1);
+
+// A connection the gadget opens itself, such as TLS over Wi-Fi (hub ADR 005). Over USB the
+// bridge owns the connection and the token, so a plain Stream needs no Link.
+class Link {
+public:
+  virtual ~Link() = default;
+  virtual bool open() = 0;  // Connect now. False: retry after the backoff.
+  virtual bool alive() = 0; // Still connected.
+  virtual void close() = 0;
+  virtual Stream &stream() = 0;
+  virtual const char *token() const = 0; // Device token sent in the hello.
+};
 
 // One gadget per firmware. Declare it as a global or static object: it holds about 40 KB
 // (retained ACK cache, line buffer and event queue) and would overflow the 8 KB loop stack.
@@ -92,6 +106,11 @@ public:
     Serial.begin(115200);
     return begin(Serial);
   }
+  // A gadget-owned connection: opened before each hello, closed on every session reset.
+  bool begin(Link &link) {
+    link_ = &link;
+    return begin(link.stream());
+  }
   // Custom transports: configure the stream (and its RX buffer) before calling.
   bool begin(Stream &port) {
     port_ = &port;
@@ -118,6 +137,8 @@ public:
     }
     uint32_t now = millis();
     sampleButton(now);
+    if (link_ && (connected_ || waiting_) && !link_->alive())
+      resetSession(now); // The link dropped; its replies can never arrive.
     receive(now);
     if (waiting_) {
       if (uint32_t(now - lastRequest_) > RequestTimeoutMs)
@@ -139,6 +160,8 @@ public:
   uint32_t lost() const { return lost_; }
   // ACKs the gateway answered with late_ack or unknown_command; the session stayed open.
   uint32_t droppedAcks() const { return droppedAcks_; }
+  // `unauthorized` or `revoked` from the last rejected hello or frame; null after a new session.
+  const char *rejected() const { return rejected_; }
   const char *deviceId() const { return deviceId_; }
   const char *bootId() const { return bootId_; }
 
@@ -219,6 +242,8 @@ private:
     outgoing_.clear();
     outgoing_["type"] = "hello";
     outgoing_["protocol_version"] = ProtocolVersion;
+    if (link_ && link_->token())
+      outgoing_["token"] = link_->token();
     auto d = outgoing_.createNestedObject("device");
     d["device_id"] = deviceId_;
     d["model"] = model_;
@@ -258,6 +283,10 @@ private:
     return !outgoing_.overflowed() && measureJson(outgoing_) <= MaxFrame;
   }
   void hello(uint32_t now) {
+    if (link_ && !link_->open()) {
+      resetSession(now);
+      return;
+    }
     if (buildHello())
       transmit(Kind::Hello, now);
     else
@@ -304,8 +333,10 @@ private:
       resetSession(now);
       return;
     }
-    serializeJson(outgoing_, *port_);
-    port_->write('\n');
+    // One write per frame, so a TLS link sends one record instead of one per byte.
+    size_t size = serializeJson(outgoing_, wire_, sizeof(wire_) - 1);
+    wire_[size++] = '\n';
+    port_->write(reinterpret_cast<const uint8_t *>(wire_), size);
     pending_ = kind;
     waiting_ = true;
     lastRequest_ = now;
@@ -387,6 +418,7 @@ private:
     switch (pending_) {
     case Kind::Hello:
       connected_ = true;
+      rejected_ = nullptr;
       break;
     case Kind::Ack:
       haveAck_ = false;
@@ -423,6 +455,10 @@ private:
   }
   // A rejected event never blocks polling: drop it (counted as lost) and continue.
   bool failed(const char *code, uint32_t now) {
+    if (!strcmp(code, "unauthorized"))
+      rejected_ = "unauthorized";
+    else if (!strcmp(code, "revoked"))
+      rejected_ = "revoked";
     if (pending_ == Kind::Ack && droppableAck(code)) {
       // The command already closed or is not ours: drop this ACK and keep polling.
       haveAck_ = false;
@@ -484,7 +520,9 @@ private:
     connected_ = waiting_ = haveAck_ = false;
     ack_.clear();
     lines_.reset();
-    retryAt_ = now + backoff_;
+    if (link_)
+      link_->close();
+    retryAt_ = now + (link_ && rejected_ ? RejectedBackoffMs : backoff_);
     backoff_ = backoff_ * 2 < MaxBackoffMs ? backoff_ * 2 : MaxBackoffMs;
   }
 
@@ -499,6 +537,9 @@ private:
   StateWriter writer_ = nullptr;
   void *writerContext_ = nullptr;
   Stream *port_ = nullptr;
+  Link *link_ = nullptr;
+  const char *rejected_ = nullptr;
+  char wire_[MaxFrame + 2] = {};
   Button button_;
   int buttonPin_ = -1;
   bool activeLow_ = true, began_ = false, ready_ = false;

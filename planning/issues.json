@@ -78,7 +78,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128×64 advertised SPI/I²C 4-pin OLED",
         "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
         "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
         "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
@@ -121,10 +121,10 @@
         "P2"
       ],
       "milestone": "M4",
-      "stage": "blocked",
+      "stage": "review",
       "commits": [],
-      "evidence": "Canonical gateway 0.1.0 binds loopback-only, without LAN/TLS endpoint; plain network credentials/exposure excluded. Secure endpoint/provisioning contract required.",
-      "blocker": "Gateway 0.1.0 has no authenticated LAN or TLS device endpoint to build on."
+      "evidence": "Hub ADR 005; gateway GW-LAN-001 (LAN TLS listener). SDK: grok::Link, GrokWifi.h (pinned-CA TLS link, NVS settings, provisioning console), esp32s3-oled-kit-wifi build. Host tests wifi_console/wifi_link and the Wi-Fi contract transcript pass; firmware compiles. Physical Wi-Fi acceptance pending.",
+      "blocker": "Physical acceptance on the owner's kit over Wi-Fi"
     },
     {
       "id": "ESP-006",

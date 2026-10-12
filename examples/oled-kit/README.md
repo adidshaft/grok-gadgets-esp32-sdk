@@ -49,3 +49,62 @@ python3 -m unittest discover -s examples/oled-kit -p 'test_*.py' -v
 ```
 
 The model emits JSON with `simulated: true`. It uses no GPIO, USB or credentials.
+
+## Wi-Fi build
+
+The `esp32s3-oled-kit-wifi` environment runs the same commands over your home Wi-Fi, so
+the board needs only a USB charger. The design is hub
+[ADR 005](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/decisions/005-wifi-device-route.md).
+The gateway setup is in its [Wi-Fi devices guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/wifi-devices.md).
+Physical acceptance over Wi-Fi is pending.
+
+- The board connects with TLS to the gateway's LAN listener (`serve --lan-listen`). It trusts
+  only the gateway CA that provisioning stored. It never uses a public CA bundle or skips
+  verification.
+- The hello carries the device token. The frames are the same protocol 0.1.0 frames as USB.
+- The ESP32-S3 joins 2.4 GHz networks only.
+- The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
+  `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
+  text and keeps the status row.
+- After Wi-Fi or gateway loss, the board reconnects with a fresh hello. The wait starts at
+  0.5 s and doubles up to 5 s. After `unauthorized` or `revoked` it waits 60 s. A command is
+  never replayed into a new session.
+
+### Flash and provision
+
+Provisioning uses the USB data cable once. Stop any `usb-bridge` first.
+
+```sh
+.venv/bin/pio run -e esp32s3-oled-kit-wifi -t upload
+grok-gadgets-gateway wifi-provision /dev/cu.usbmodem101 --device oledkit-0123456789ab --lan 192.168.1.20
+```
+
+`wifi-provision` prompts for the Wi-Fi name and password, without echo for the password. It
+sends them with the device token, the listener address and the gateway CA in one line on
+the serial console. The board stores them in NVS namespace `grok-wifi` and restarts. The
+console never prints a stored value.
+
+The serial console in this build takes one-line JSON commands:
+
+| Command | Reply |
+| --- | --- |
+| `{"type":"status"}` | Device ID, firmware, `provisioned`, Wi-Fi and gateway state |
+| `{"type":"provision", ...}` | `ok` and `restarting`, or `invalid_settings` without any value |
+| `{"type":"factory_reset"}` | Erases the settings and restarts |
+
+Lines that start with `status:` report link changes as text.
+
+### Factory reset
+
+Hold BOOT for 10 seconds, or run `wifi-provision PORT --device ID --factory-reset`. The
+board erases its Wi-Fi settings and restarts as `Not provisioned`. Also run
+`grok-gadgets-gateway revoke ID`. `esptool erase_flash` erases everything.
+
+### Limits
+
+- Flash encryption is off. Whoever holds the board can read the Wi-Fi password and the token
+  from flash. If you lose the board, revoke its token and change the Wi-Fi password.
+- The board has no clock and does not check certificate dates. Replace trust with
+  `lan-ca rotate` and provision again.
+- The board knows the gateway by its IP address. Reserve that address on the router, or
+  provision again after it changes.
