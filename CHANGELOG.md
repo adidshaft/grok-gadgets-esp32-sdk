@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Wi-Fi build: while offline, start a fresh Wi-Fi join every 15 s. The core's auto-reconnect stopped retrying after the router was off for minutes in the Phase 4 physical test (#5).
+
 - Wi-Fi transport (hub ADR 005, ESP-005, #5). `grok::Link` lets a gadget own its connection: the session opens it before each hello, adds the device token to the hello and closes it on every reset. After `unauthorized` or `revoked` the next hello waits 60 s. `Gadget::rejected()` reports the code. Frames are written with one `write` call, so a TLS link sends one record per frame. USB behaviour and frames are unchanged.
 - `GrokWifi.h`: a TLS link that trusts only the provisioned gateway CA, Wi-Fi settings in NVS namespace `grok-wifi`, and a one-line JSON serial console (`status`, `provision`, `factory_reset`) that never prints a stored value.
 - `examples/oled-kit` gains the `esp32s3-oled-kit-wifi` build: a status row, provisioning over USB with the gateway's `wifi-provision`, and a 10-second BOOT hold as a factory reset. Physical acceptance over Wi-Fi is pending.

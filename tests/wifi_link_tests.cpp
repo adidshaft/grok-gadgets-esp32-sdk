@@ -107,6 +107,12 @@ int main() {
   assert(!gadget.connected() && !tls.open);
   advance(2000);
   assert(fake::screen[0].rfind("WiFi...", 0) == 0);
+  // A long outage: the firmware starts a fresh join itself, without waiting for the core.
+  int joins = WiFi.begins;
+  for (uint32_t start = fake::now; fake::now - start < 3 * grok::WifiRejoinMs + 5000;)
+    advance(1);
+  assert(WiFi.begins >= joins + 2 && WiFi.disconnects >= 2);
+  assert(WiFi.ssid == "home-net" && WiFi.password == "pass-word-1");
   tls.output.clear();
   WiFi.state = WL_CONNECTED;
   online(); // A fresh hello; the old ACK is never resent into the new session.
