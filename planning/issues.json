@@ -76,12 +76,14 @@
     {
       "id": "ESP-004",
       "owner": "grok-gadgets-esp32-sdk",
-      "problem": "Physical C124 acceptance",
+      "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Visibly verify green/colour/off",
-        "Read real button edges",
-        "Unplug/reconnect/reboot acceptance",
-        "Record versions/checksums and observations"
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
+        "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
+        "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
+        "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
+        "Observe display text and clear; check LED on/off and button edges if suitable built-in parts exist or external LED/resistor/button are added",
+        "Verify USB disconnect/reconnect/reboot and record versions/checksums and observations"
       ],
       "dependencies": [
         "ESP-003"
@@ -96,8 +98,8 @@
       "milestone": "M8",
       "stage": "blocked",
       "commits": [],
-      "evidence": "No C124 available; requires physical board and authorization to flash.",
-      "blocker": "No C124 board is available here, and flashing is not authorized."
+      "evidence": "Kit ordered. Controller-independent OLED model passes text/clear, invalid-input preservation, button edges and disconnect/reboot tests. No delivered hardware inspected; no OLED driver or gateway capability implemented. See docs/first-experiment.md. Existing C124 software evidence remains valid only for the optional example.",
+      "blocker": "Await kit delivery, inspection, confirmed wiring/controller and a tested kit-specific firmware implementation."
     },
     {
       "id": "ESP-005",

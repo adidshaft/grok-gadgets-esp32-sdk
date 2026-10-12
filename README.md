@@ -6,6 +6,15 @@ Two examples compile; nobody has flashed either of them yet. Experimental alpha:
 [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
 Independent project, not affiliated with SpaceXAI.
 
+## First physical experiment
+
+The ordered board is an **AYWHP ESP32-S3 DevKitC-style board** with **ESP32-S3-WROOM-1-N16R8 and USB-C**.
+The order includes an **ApTechDeals 840-point breadboard and jumper-wire set**.
+The display is a **Robocraze 0.96-inch 128×64 OLED**, advertised as **SPI/I²C, 4-pin**. Start with simulation. Inspect the board and OLED after
+delivery before selecting pins, a display driver or a flash profile.
+See the [first experiment](docs/first-experiment.md) for parts, wiring gates and acceptance.
+AtomS3 Lite is an optional example, not the first experiment.
+
 ## Quickstart
 
 You need Python 3.11+, CMake 3.16+, Git and a C++14 compiler. No board or account.
@@ -21,8 +30,8 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-Expected: four host test suites pass, both sketch transcripts pass the contract check, and the
-C124 firmware compiles: **build verified, hardware pending**. Next,
+Expected: six host test suites pass, both sketch transcripts pass the contract check, and the
+optional C124 firmware compiles: **build verified, hardware pending**. Next,
 [create your own gadget](docs/sdk.md).
 
 ## What a gadget looks like
@@ -58,7 +67,8 @@ names, events and limits are in the [library guide](docs/sdk.md).
 ## Flash a board
 
 The gadget talks over USB to a bridge on your computer, and the bridge talks to the
-[gateway](https://github.com/adidshaft/grok-gadgets-gateway). [Build, flash and recovery](docs/build-flash.md)
+[gateway](https://github.com/adidshaft/grok-gadgets-gateway). The [first experiment](docs/first-experiment.md) defines the ordered kit.
+[Optional C124 build, flash and recovery](docs/build-flash.md)
 covers flash offsets, the device ID, `grok-gadgets-gateway enroll`, `usb-bridge` and unplug
 recovery. Nobody has flashed a board for this project yet, so we welcome hardware results.
 
@@ -75,7 +85,7 @@ and a button press does not wake the Bot. See the
 | --- | --- |
 | Commands, events and limits | [Library](docs/sdk.md) |
 | Retries, loss reports and reconnects | [Protocol and recovery](docs/protocol-recovery.md) |
-| C124 pins, and the GPIO48 `RGB_BUILTIN` trap | [Board sources](docs/board-sources.md) |
+| Optional C124 pins, and the GPIO48 `RGB_BUILTIN` trap | [Board sources](docs/board-sources.md) |
 | What was checked, and what is still open | [Verification](docs/verification.md) and [build-checksums.json](docs/build-checksums.json) |
 | Dependency licenses before you share firmware | [Dependencies](docs/dependencies.md) and [NOTICE](NOTICE) |
 

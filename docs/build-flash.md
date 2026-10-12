@@ -1,4 +1,8 @@
-# Build, flash and recover C124
+# Optional example: build, flash and recover C124
+
+**This is not the ordered kit.** The first experiment uses the AYWHP ESP32-S3
+DevKitC-style board and a separate OLED. Use [first experiment](first-experiment.md).
+Do not transfer these pins, flash settings or recovery steps to that board.
 
 This example uses the reusable library in `lib/GrokGadgets`. It is standalone Arduino firmware, not an ESPHome integration.
 
@@ -122,7 +126,7 @@ That command writes the four images at the offsets above.
 
 For factory restoration, use the manufacturer's M5Burner or Easyloader route. Preserve its source and license. Verify the exact C124 target. No firmware was flashed during the recorded local phase.
 
-## First physical acceptance
+## Optional C124 physical acceptance
 
 Record SDK and gateway commits, firmware checksums, operating system, port, timestamps and observations.
 

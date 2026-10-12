@@ -1,5 +1,9 @@
 # Verification
 
+**Current first experiment:** [AYWHP ESP32-S3 and OLED kit](first-experiment.md).
+The C124 results below are historical software/build evidence for an optional
+example. They do not verify the ordered board, OLED controller, pins or wiring.
+
 Current newcomer build rehearsal: [standalone documentation verification](verification/launch.md). The exact account-free guide passed in a fresh source directory and Python environment.
 
 ## Historical local checkpoint — 4 October 2026
@@ -21,6 +25,6 @@ Gateway integration uses clean main `d2b1008c2f2a7474288bf3ae9aa83cd49c1e5554`; 
 
 A fresh Python virtual environment installed every dependency from requirements.lock successfully, reported PlatformIO 6.1.18 and passed generated frame contract validation; shared downloaded PlatformIO package cache is reused. This checks installation, not an independent person's reproduction or an empty-cache toolchain download on Linux. Prepared GitHub Linux workflows have not run or been activated.
 
-Open gates: physical C124/flashing authorization; real Grok account and authenticated reachable route; Linux serial permissions/USB acceptance; independent tester; publication permission; secure Wi-Fi endpoint/provisioning contract. See [issues](../planning/issues.json) and [physical procedure](build-flash.md).
+Open gates: ordered kit delivery, inspection, pin/controller selection and physical acceptance; real Grok account and authenticated reachable route; Linux serial permissions/USB acceptance; independent tester; publication permission; secure Wi-Fi endpoint/provisioning contract. See [issues](../planning/issues.json) and [physical procedure](build-flash.md).
 
 Independent review found that history_lost was emitted without being declared, causing gateway rejection and repeated firmware reconnects. ESP-007 declares that event capability in hello. A separate GPIO control file descriptor exists only in the host simulation harness; it supplies real consumer debounce inputs during a delayed serial response. It is absent from physical firmware and the device protocol. After 20 edges, the accepted loss report clears the queue-loss count and the same gateway session executes the next command.

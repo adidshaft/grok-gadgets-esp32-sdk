@@ -1,4 +1,7 @@
-# C124 source verification
+# Optional C124 source verification
+
+These sources apply only to the optional C124 example. See the
+[first experiment](first-experiment.md) for the ordered AYWHP board and OLED.
 
 Verified on 4 October 2026 from manufacturer sources:
 
