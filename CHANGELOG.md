@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The OLED kit passed physical acceptance over Wi-Fi on the owner's board on 12 October 2026: connect on boot, text and clear, `BOOT` events, Wi-Fi loss and recovery (after the rejoin fix), gateway restart, revoke and re-enroll, wrong-CA rejection and power cycle. Grok Bot showed text on it over Wi-Fi through local shell execution. See `docs/verification/oled-kit-wifi-2026-10-12.md` (#5).
+
 - Wi-Fi build: while offline, start a fresh Wi-Fi join every 15 s. The core's auto-reconnect stopped retrying after the router was off for minutes in the Phase 4 physical test (#5).
 
 - Wi-Fi transport (hub ADR 005, ESP-005, #5). `grok::Link` lets a gadget own its connection: the session opens it before each hello, adds the device token to the hello and closes it on every reset. After `unauthorized` or `revoked` the next hello waits 60 s. `Gadget::rejected()` reports the code. Frames are written with one `write` call, so a TLS link sends one record per frame. USB behaviour and frames are unchanged.

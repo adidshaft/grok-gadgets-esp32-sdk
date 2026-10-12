@@ -56,7 +56,8 @@ The `esp32s3-oled-kit-wifi` environment runs the same commands over your home Wi
 the board needs only a USB charger. The design is hub
 [ADR 005](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/decisions/005-wifi-device-route.md).
 The gateway setup is in its [Wi-Fi devices guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/wifi-devices.md).
-Physical acceptance over Wi-Fi is pending.
+It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
+([record](../../docs/verification/oled-kit-wifi-2026-10-12.md)).
 
 - The board connects with TLS to the gateway's LAN listener (`serve --lan-listen`). It trusts
   only the gateway CA that provisioning stored. It never uses a public CA bundle or skips
