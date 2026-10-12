@@ -15,6 +15,8 @@ int led = 0;
 uint32_t neopixel = 0;
 uint8_t i2cAddress = 0x3c;
 std::map<int, std::string> screen;
+std::map<std::pair<int, int>, std::array<uint8_t, 8>> displayTiles;
+int tileWrites = 0, textDraws = 0, displayClears = 0;
 std::map<std::string, std::string> nvs;
 bool nvsFails = false;
 } // namespace fake

@@ -52,6 +52,7 @@ int main() {
     loop();
   }
   assert(fake::screen[0].rfind("Not provisioned", 0) == 0);
+  assert(fake::tileWrites == 0); // The Online logo never runs before provisioning.
   assert(Serial.output.find("status: Not provisioned") != std::string::npos);
   Serial.output.clear();
   assert(Serial.rxBuffer >= grok::MaxConsoleLine);
