@@ -1,14 +1,47 @@
-# Ordered OLED kit: demo specification
+# Ordered OLED kit
 
-Target: AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board,
-ApTechDeals 840-point breadboard/jumpers, and Robocraze 0.96-inch 128×64
-advertised SPI/I²C 4-pin OLED. See [inspection and setup](../../docs/first-experiment.md).
+Firmware for the ESP32-S3-N16R8 DevKitC-style board (YD-ESP32-23 v1.3) with a 1.3-inch 128×64 I²C OLED.
+It passed physical acceptance on the owner's kit on 12 October 2026
+([record](../../docs/verification/oled-kit-2026-10-12.md)).
 
-This folder contains a runnable, controller-independent software model for the
-next example. It contains no flashable sketch, OLED driver or gateway integration.
-Do not copy the optional C124 pins or generic LED/button pins into this kit.
+| Command | Effect |
+| --- | --- |
+| `display.text` | Shows 1–32 printable ASCII characters, 16 per line. Other text fails and the screen stays unchanged. |
+| `display.clear` | Blanks the screen. |
+| `rgb.set` | Sets the onboard RGB pixel (GPIO48). |
+| `button` event | Press and release of the BOOT button, read after boot. |
+
+The state reports `display.ready`, the drawn text, and the I²C pins and address found at boot.
+It reports what the firmware drew, not what anyone saw.
+
+## Wiring
+
+Unplug USB first. Use the board's **USB** port, not **COM**.
+
+| OLED pin | Board pin |
+| --- | --- |
+| VCC | 3V3 |
+| GND | GND |
+| SCK | GPIO9 |
+| SDA | GPIO8 |
+
+The firmware also finds the display with SCK and SDA swapped.
+The delivered module is an SH1106. For an SSD1306 module, add `-DOLED_KIT_SSD1306`.
+For a board whose RGB pixel is on GPIO38, add `-DOLED_KIT_RGB_PIN=38`.
+
+## Build and flash
+
+```sh
+.venv/bin/pio run -e esp32s3-oled-kit
+.venv/bin/pio run -e esp32s3-oled-kit -t upload
+```
+
+If the first upload cannot connect, hold BOOT, plug the cable into **USB**, wait two
+seconds and release BOOT. Then upload again.
 
 ## Run without hardware
+
+The software model checks the same commands without a board:
 
 ```sh
 python3 examples/oled-kit/rehearse.py
@@ -16,22 +49,3 @@ python3 -m unittest discover -s examples/oled-kit -p 'test_*.py' -v
 ```
 
 The model emits JSON with `simulated: true`. It uses no GPIO, USB or credentials.
-It accepts up to 32 printable ASCII characters. This is a logical limit, not a
-claim about the display font or physical layout. Button edges are injected
-inputs. A reconnect retains model state; a reboot clears it and increments the
-model boot counter. These choices do not predict the physical USB behavior.
-
-## Logical behavior
-
-| Action | Expected logical result | Physical check after delivery |
-| --- | --- | --- |
-| Set short text: `Grok Bot ready` | Display state contains the accepted text | OLED shows the same text |
-| Clear | Display text is empty | OLED is blank |
-| Invalid text type or unsupported length | Error; previous display state stays unchanged | Previous display remains unchanged |
-| Reconnect or reboot | Read fresh state; do not claim the old text is still displayed | Observe the screen after recovery |
-| Optional LED on/off | Report the commanded boolean state | Observe built-in or external LED |
-| Optional button press/release | Retain ordered edge events | Operate the selected physical button |
-
-Confirm the text length and character set again when implementing the renderer. Command names and schemas must match the
-canonical gateway contract before adding a runnable simulator fixture. The model methods are not registered gateway commands. A successful software
-acknowledgement does not prove that the physical screen changed.

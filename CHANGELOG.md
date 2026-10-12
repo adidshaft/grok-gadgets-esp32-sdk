@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.7 — 12 October 2026
+
+- `examples/oled-kit`: firmware for the ESP32-S3-N16R8 board (YD-ESP32-23 v1.3) with a 1.3-inch SH1106 I²C OLED. Commands `display.text`, `display.clear` and `rgb.set`, plus `BOOT` button events. It finds the display at 0x3c or 0x3d with either data-pin order and reports the pins and address. Build it with the new `esp32s3-oled-kit` environment (16 MB flash, octal PSRAM, U8g2 2.36.18) (#65).
+- The kit passed physical acceptance on the owner's board on 12 October 2026: text, clear, rejected text, RGB light, `BOOT` events, unplug/replug and gateway restart. Grok Bot showed text on it through local shell execution. See `docs/verification/oled-kit-2026-10-12.md` (#65, #66).
+
 ## 0.2.0-alpha.6 — 12 October 2026
 
 - `GROK_ACK_CACHE_ENTRIES` sets the number of cached ACK entries at compile time. The default stays 8; zero or a negative value fails to compile. Host tests cover one-entry and two-entry caches (#59, contributed by @Hellz0wnzJ00).

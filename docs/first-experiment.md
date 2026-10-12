@@ -1,7 +1,8 @@
 # First experiment: ESP32-S3 and OLED
 
 Use this plan for the first physical experiment. Keep the simulator-first stage.
-The kit is ordered. No physical result is recorded yet.
+The owner's kit passed physical acceptance on 12 October 2026. See the
+[verification record](verification/oled-kit-2026-10-12.md) for the inspected parts and wiring.
 
 ## Parts
 
