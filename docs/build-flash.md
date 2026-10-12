@@ -1,7 +1,6 @@
 # Optional example: build, flash and recover C124
 
-**This is not the ordered kit.** The first experiment uses the AYWHP ESP32-S3
-DevKitC-style board and a separate OLED. Use [first experiment](first-experiment.md).
+**This is not the tested OLED kit.** The first experiment uses the YD-ESP32-23 v1.3 ESP32-S3 N16R8 board and SH1106 display. Use [first experiment](first-experiment.md).
 Do not transfer these pins, flash settings or recovery steps to that board.
 
 This example uses the reusable library in `lib/GrokGadgets`. It is standalone Arduino firmware, not an ESPHome integration.
@@ -12,7 +11,7 @@ Builds and local software tests need no public hosting. For the USB route, run t
 and gateway on the same computer. That computer must remain on during use.
 The gateway offers local stdio or authenticated HTTP MCP through `serve` at
 `http://127.0.0.1:8766/mcp`. Its separate device port is authenticated loopback TCP.
-Public HTTPS, OAuth, and actual Grok Bot use remain separate gates. Do not expose the device port through a tunnel.
+Public HTTPS, OAuth and Grok Bot operation with C124 remain separate gates. Do not expose the device port through a tunnel.
 See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
 for who operates each process and the `HARD-GROK-REMOTE-001` remote-access gate.
 
@@ -84,7 +83,7 @@ The example sends no debug logs on the protocol CDC channel.
 | `boot_app0.bin` | `0xe000` |
 | `firmware.bin` | `0x10000` |
 
-PlatformIO uploads this Arduino board as DIO, 80 MHz, 8 MB. It rewrites the board file's QIO mode to DIO. No board was flashed in this repository. `flash_args` in the local package records the same offsets for inspection.
+PlatformIO uploads this Arduino board as DIO, 80 MHz, 8 MB. It rewrites the board file's QIO mode to DIO. No C124 board has a physical flash result in this project. `flash_args` in the local package records the same offsets for inspection.
 
 ## Connect the USB bridge
 

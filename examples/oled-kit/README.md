@@ -1,4 +1,4 @@
-# Ordered OLED kit
+# ESP32-S3 OLED kit
 
 Firmware for the ESP32-S3-N16R8 DevKitC-style board (YD-ESP32-23 v1.3) with a 1.3-inch 128×64 I²C OLED.
 It passed physical acceptance on the owner's kit on 12 October 2026
@@ -53,7 +53,8 @@ The model emits JSON with `simulated: true`. It uses no GPIO, USB or credentials
 ## Wi-Fi build
 
 The `esp32s3-oled-kit-wifi` environment runs the same commands over your home Wi-Fi, so
-the board needs only a USB charger. The design is hub
+the board needs only a USB charger. Keep the Mac gateway running. This is not a computer-free system.
+The design is hub
 [ADR 005](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/decisions/005-wifi-device-route.md).
 The gateway setup is in its [Wi-Fi devices guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/wifi-devices.md).
 It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
