@@ -78,6 +78,14 @@ int main() {
     serializeJson(reply, json);
     secretFree(json);
   }
+  // A rejected line leaves no partial value behind in the console's settings buffer.
+  {
+    DynamicJsonDocument doc(2048);
+    assert(!deserializeJson(doc, provision("home-net", "pass-word-1", "short")));
+    grok::WifiSettings scratch;
+    assert(grok::readSettingsInto(doc.as<JsonObjectConst>(), scratch).code);
+    assert(!scratch.ssid[0] && !scratch.password[0] && !scratch.token[0]);
+  }
   command(R"({"type":"provision","ssid":"home-net"})");
   assert(reply["error"]["code"] == "invalid_settings");
   assert(fake::nvs.empty() && ESP.restarts == 0);

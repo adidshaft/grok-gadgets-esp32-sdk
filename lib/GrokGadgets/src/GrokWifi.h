@@ -18,6 +18,40 @@ constexpr uint32_t WifiRejoinMs = 15000;
 constexpr int TlsVerifyFailed = -0x2700;
 constexpr const char *WifiNamespace = "grok-wifi";
 
+// Why the station could not join, from the core's disconnect reason codes (ESP-IDF
+// wifi_err_reason_t). None of these carries the network name or password.
+enum class JoinFailure { None, NoNetwork, WrongPassword, Timeout };
+inline JoinFailure classifyDisconnect(uint8_t reason) {
+  switch (reason) {
+  case 201: // NO_AP_FOUND: name not seen. Includes 5 GHz-only networks and a name typo.
+    return JoinFailure::NoNetwork;
+  case 15:  // 4WAY_HANDSHAKE_TIMEOUT: the usual result of a wrong WPA2 password.
+  case 202: // AUTH_FAIL
+  case 204: // HANDSHAKE_TIMEOUT
+    return JoinFailure::WrongPassword;
+  default:
+    return JoinFailure::None;
+  }
+}
+struct JoinFailureText {
+  const char *code, *status, *hint, *advice; // status and hint fit one 16-column OLED row.
+};
+inline JoinFailureText describe(JoinFailure failure) {
+  switch (failure) {
+  case JoinFailure::NoNetwork:
+    return {"no_network", "No network", "2.4GHz? Name?",
+            "Network not found. Use a 2.4 GHz network and check the name's upper and lower case."};
+  case JoinFailure::WrongPassword:
+    return {"wrong_password", "Wrong password", "Check password",
+            "The network rejected the password. Provision the board again."};
+  case JoinFailure::Timeout:
+    return {"join_timeout", "Join timeout", "Check router",
+            "No answer from the network. Check that the router is on and in range."};
+  default:
+    return {nullptr, "WiFi...", "", nullptr};
+  }
+}
+
 struct WifiSettings {
   char ssid[33] = {};
   char password[65] = {};
@@ -72,29 +106,35 @@ inline bool printableToken(const char *token) {
       return false;
   return true;
 }
-// Validate a `provision` console command. Error messages never contain a value.
-inline Error readSettings(JsonObjectConst in, WifiSettings &out) {
+// Validate a `provision` console command into `next`, which is wiped on any error. Error
+// messages never contain a value. WifiSettings is about 3.4 KB: keep it off the 8 KB loop
+// stack (a stack copy here crashed the board on every provision line).
+inline Error readSettingsInto(JsonObjectConst in, WifiSettings &next) {
   static constexpr const char *Begin = "-----BEGIN CERTIFICATE-----";
-  WifiSettings next;
-  if (in.size() != 7)
-    return {"invalid_settings", "Expected type, ssid, password, token, host, port and ca"};
-  if (!copyString(in["ssid"], next.ssid, sizeof(next.ssid), 1))
-    return {"invalid_settings", "Wi-Fi name must be 1-32 bytes"};
-  if (!copyString(in["password"], next.password, sizeof(next.password), 0) ||
-      (next.password[0] && strlen(next.password) < 8))
-    return {"invalid_settings", "Wi-Fi password must be empty or 8-64 bytes"};
-  if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
-    return {"invalid_settings", "Token must be 16-256 printable characters"};
-  if (!copyString(in["host"], next.host, sizeof(next.host), 7) || !validIpv4(next.host))
-    return {"invalid_settings", "Host must be an IPv4 address"};
-  if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
-    return {"invalid_settings", "Port must be 1-65535"};
-  next.port = in["port"].as<uint16_t>();
-  if (!copyString(in["ca"], next.ca, sizeof(next.ca), 64) ||
-      strncmp(next.ca, Begin, strlen(Begin)) || !strstr(next.ca, "-----END CERTIFICATE-----"))
-    return {"invalid_settings", "CA must be one PEM certificate up to 3072 bytes"};
-  out = next;
-  return {};
+  next.wipe();
+  Error error = [&]() -> Error {
+    if (in.size() != 7)
+      return {"invalid_settings", "Expected type, ssid, password, token, host, port and ca"};
+    if (!copyString(in["ssid"], next.ssid, sizeof(next.ssid), 1))
+      return {"invalid_settings", "Wi-Fi name must be 1-32 bytes"};
+    if (!copyString(in["password"], next.password, sizeof(next.password), 0) ||
+        (next.password[0] && strlen(next.password) < 8))
+      return {"invalid_settings", "Wi-Fi password must be empty or 8-64 bytes"};
+    if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
+      return {"invalid_settings", "Token must be 16-256 printable characters"};
+    if (!copyString(in["host"], next.host, sizeof(next.host), 7) || !validIpv4(next.host))
+      return {"invalid_settings", "Host must be an IPv4 address"};
+    if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
+      return {"invalid_settings", "Port must be 1-65535"};
+    next.port = in["port"].as<uint16_t>();
+    if (!copyString(in["ca"], next.ca, sizeof(next.ca), 64) ||
+        strncmp(next.ca, Begin, strlen(Begin)) || !strstr(next.ca, "-----END CERTIFICATE-----"))
+      return {"invalid_settings", "CA must be one PEM certificate up to 3072 bytes"};
+    return {};
+  }();
+  if (error.code)
+    next.wipe();
+  return error;
 }
 
 class SettingsStore {
@@ -153,6 +193,12 @@ public:
     WiFi.mode(WIFI_STA);
     WiFi.setSleep(false); // Lower latency for 100 ms polling.
     WiFi.setAutoReconnect(true);
+    // Runs on the Wi-Fi event task: store only the reason code.
+    WiFi.onEvent(
+        [this](arduino_event_id_t, arduino_event_info_t info) {
+          lastReason_ = info.wifi_sta_disconnected.reason;
+        },
+        ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
     WiFi.begin(s_.ssid, s_.password);
     joinedAt_ = millis();
     client_.setCACert(s_.ca);
@@ -168,13 +214,21 @@ public:
     if (WiFi.status() != WL_CONNECTED) {
       state_ = State::WifiConnecting;
       uint32_t now = millis();
+      JoinFailure seen = classifyDisconnect(lastReason_);
+      if (seen != JoinFailure::None)
+        failure_ = seen;
       if (uint32_t(now - joinedAt_) >= WifiRejoinMs) {
+        if (failure_ == JoinFailure::None)
+          failure_ = JoinFailure::Timeout; // A whole attempt with no reason we recognise.
+        lastReason_ = 0;
         WiFi.disconnect();
         WiFi.begin(s_.ssid, s_.password);
         joinedAt_ = now;
       }
       return false;
     }
+    failure_ = JoinFailure::None;
+    lastReason_ = 0;
     if (client_.connect(s_.host, s_.port)) {
       state_ = State::GatewayConnecting;
       return true;
@@ -197,11 +251,17 @@ public:
       return State::WifiConnecting;
     return state_;
   }
+  // The last reason the station could not join; None once Wi-Fi is up.
+  JoinFailure failure() const {
+    return WiFi.status() == WL_CONNECTED ? JoinFailure::None : failure_;
+  }
 
 private:
   const WifiSettings &s_;
   WiFiClientSecure client_;
   State state_ = State::NotProvisioned;
+  JoinFailure failure_ = JoinFailure::None;
+  volatile uint8_t lastReason_ = 0;
   uint32_t joinedAt_ = 0;
 };
 
@@ -255,8 +315,8 @@ private:
     if (!strcmp(type, "status")) {
       reply(true);
     } else if (!strcmp(type, "provision")) {
-      WifiSettings settings;
-      Error error = readSettings(doc.as<JsonObjectConst>(), settings);
+      WifiSettings &settings = pending_; // A member, not a 3.4 KB stack copy.
+      Error error = readSettingsInto(doc.as<JsonObjectConst>(), settings);
       if (error.code)
         fail(error.code, error.message);
       else if (!store_.save(settings))
@@ -308,6 +368,7 @@ private:
   const char *deviceId_;
   Status status_ = nullptr;
   void *context_ = nullptr;
+  WifiSettings pending_; // Validated provisioning input; wiped after each command.
   char line_[MaxConsoleLine + 1] = {};
   size_t used_ = 0;
   bool dropping_ = false, restart_ = false;
