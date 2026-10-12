@@ -23,6 +23,15 @@ struct WifiSettings {
   uint16_t port = 0;
   char ca[MaxCaPem + 1] = {};
   bool complete() const { return ssid[0] && token[0] && host[0] && port && ca[0]; }
+  // Overwrite every secret-bearing field, for copies that are no longer needed.
+  void wipe() {
+    memset(ssid, 0, sizeof(ssid));
+    memset(password, 0, sizeof(password));
+    memset(token, 0, sizeof(token));
+    memset(host, 0, sizeof(host));
+    memset(ca, 0, sizeof(ca));
+    port = 0;
+  }
 };
 
 inline bool copyString(JsonVariantConst value, char *out, size_t capacity, size_t minimum) {
@@ -245,7 +254,7 @@ private:
         restart_ = true;
         reply(false);
       }
-      memset(&settings, 0, sizeof(settings));
+      settings.wipe();
     } else if (!strcmp(type, "factory_reset")) {
       if (factoryReset())
         reply(false);
