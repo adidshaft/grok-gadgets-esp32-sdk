@@ -49,16 +49,16 @@ void online() {
   assert(gadget.connected());
 }
 int logoPixels() {
-  assert(fake::displayTiles.size() == 4);
+  assert(fake::displayTiles.size() == 9); // 24x24: tile columns 13-15, rows 0-2.
   int lit = 0;
   for (const auto &entry : fake::displayTiles) {
-    assert(entry.first.first >= 14 && entry.first.first <= 15);
-    assert(entry.first.second >= 0 && entry.first.second <= 1);
+    assert(entry.first.first >= 13 && entry.first.first <= 15);
+    assert(entry.first.second >= 0 && entry.first.second <= 2);
     for (uint8_t column : entry.second)
       for (int bit = 0; bit < 8; ++bit)
         lit += (column >> bit) & 1;
   }
-  assert(lit > 100 && lit < 196); // Visible face with black space and eye cutouts.
+  assert(lit > 300 && lit < 400); // A 22-pixel disc with eye cutouts, inside 576 pixels.
   return lit;
 }
 
@@ -120,7 +120,8 @@ int main() {
   WiFi.state = WL_CONNECTED;
   online();
   assert(tls.host == "192.168.1.20" && tls.port == 8767);
-  assert(blank(fake::screen[1])); // Joining clears the failure hint.
+  // Joining replaces the failure hint with the Grok Bot label.
+  assert(fake::screen[1].rfind("Grok Bot", 0) == 0);
   assert(frame["device"]["device_id"] == "oledkit-bc9a78563412");
   assert(frame["device"]["firmware_version"] == "0.2.0-wifi");
   advance(10);
@@ -135,7 +136,7 @@ int main() {
   advance(250);
   logoPixels();
   assert(fake::displayTiles != firstLogo); // The face moves while the link stays online.
-  assert(fake::tileWrites > writes && fake::tileWrites <= writes + 10);
+  assert(fake::tileWrites > writes && fake::tileWrites <= writes + 5 * oledkit::OnlineLogo::Rows);
   assert(fake::screen == onlineRows && fake::textDraws == strings);
   assert(fake::displayClears == clears && Serial.output.empty());
 
@@ -145,13 +146,14 @@ int main() {
          R"("arguments":{"text":"Hello over Wi-Fi"}}]})");
   assert(next() == "ack" && frame["status"] == "executed");
   answer(R"({"ok":true})");
-  assert(fake::screen[2] == "Hello over Wi-Fi" && fake::screen[0].rfind("Online", 0) == 0);
+  assert(fake::screen[2] == "Hello over" && fake::screen[4] == "Wi-Fi");
+  assert(fake::screen[0].rfind("Online", 0) == 0);
   logoPixels();
   writes = fake::tileWrites;
   strings = fake::textDraws;
   clears = fake::displayClears;
   advance(450);
-  assert(fake::tileWrites > writes && fake::screen[2] == "Hello over Wi-Fi");
+  assert(fake::tileWrites > writes && fake::screen[2] == "Hello over");
   assert(fake::textDraws == strings && fake::displayClears == clears);
   untilPoll();
   answer(R"({"ok":true,"commands":[{"command_id":"c2","capability":"display.clear",)"
@@ -295,5 +297,21 @@ int main() {
   assert(!clock.advance(50));
   assert(clock.advance(86400050));
   assert(!clock.advance(86400050));
+  // Beside the Online face, text wraps at 13 columns: by word when three lines suffice,
+  // otherwise by character. All 32 characters stay visible and clear of columns 13-15.
+  strcpy(shownStatus, "Online");
+  strcpy(text, "aaaaaaa bbbbbbb ccccccc ddddddd"); // Four lines by word: falls back.
+  draw();
+  assert(fake::screen[2] == "aaaaaaa bbbbb" && fake::screen[4] == "bb ccccccc dd");
+  assert(fake::screen[6] == "ddddd" && fake::displayTiles.size() == 9);
+  strcpy(text, "abcdefghijklmnopqrstuvwxyz012345");
+  draw();
+  assert(fake::screen[2] == "abcdefghijklm" && fake::screen[4] == "nopqrstuvwxyz");
+  assert(fake::screen[6] == "012345");
+  // Without the face, text keeps all 16 columns and no face pixels remain.
+  strcpy(shownStatus, "WiFi...");
+  draw();
+  assert(fake::screen[2] == "abcdefghijklmnop" && fake::screen[4] == "qrstuvwxyz012345");
+  assert(!fake::screen.count(6) && fake::displayTiles.empty());
   std::cout << "Wi-Fi link tests passed\n";
 }

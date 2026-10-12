@@ -68,10 +68,11 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
   `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
   text and keeps the status row.
-- While the status says `Online`, a small Grok Bot face moves one pixel up and down beside it.
-  It blinks once every 3.6 seconds. The 16×16 pixel area occupies the right end of the first two rows.
-  The animation stops when a failure, connection message or reset countdown appears.
-  Text commands and `display.clear` keep the face and link label visible.
+- While the status says `Online`, the second row says `Grok Bot`. A 24×24 Grok Bot face
+  fills the right end of the first three rows. It moves one pixel up and down and blinks once
+  every 3.6 seconds. Text then wraps at 13 columns beside it, by word when three lines are
+  enough. A failure, connection message or reset countdown replaces the face and label, and
+  text goes back to 16 columns. `display.clear` keeps the face and labels.
 - If the board cannot join Wi-Fi, the top row says why and the second row says what to
   check. The console prints the same reason and answers `status` with `wifi_failure` and
   `wifi_hint`. Neither ever shows the network name or password.
@@ -92,7 +93,8 @@ The pixel face follows the project's
 [Grok Bot reference](https://github.com/adidshaft/grok-gadgets/blob/dev/website/media/grok-bot-mark.svg).
 It is a small display interpretation of the user-supplied artwork, not an official logo asset.
 The animation uses timed tile writes, with no added delay or full-screen refresh.
-The new animation has host-test and compile evidence only. It still needs a check on the physical OLED.
+On 12 October 2026 the owner saw the first 16×16 face move and blink on the kit. The 24×24 face
+and `Grok Bot` label have host-test and compile evidence only.
 
 ### Flash and provision
 
