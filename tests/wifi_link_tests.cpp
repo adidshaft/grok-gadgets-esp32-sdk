@@ -48,6 +48,19 @@ void online() {
   answer(helloOk);
   assert(gadget.connected());
 }
+int logoPixels() {
+  assert(fake::displayTiles.size() == 4);
+  int lit = 0;
+  for (const auto &entry : fake::displayTiles) {
+    assert(entry.first.first >= 14 && entry.first.first <= 15);
+    assert(entry.first.second >= 0 && entry.first.second <= 1);
+    for (uint8_t column : entry.second)
+      for (int bit = 0; bit < 8; ++bit)
+        lit += (column >> bit) & 1;
+  }
+  assert(lit > 100 && lit < 196); // Visible face with black space and eye cutouts.
+  return lit;
+}
 
 int main() {
   fake::nvs = {{"grok-wifi/ssid", "home-net"}, {"grok-wifi/pass", "pass-word-1"},
@@ -60,6 +73,7 @@ int main() {
   // No Wi-Fi yet: no TLS attempt, status "WiFi...".
   advance(3000);
   assert(tls.connects == 0 && fake::screen[0].rfind("WiFi...", 0) == 0);
+  assert(fake::tileWrites == 0);
 
   // Join failures (#73). Reason codes map to a cause; anything else stays unclassified.
   using grok::JoinFailure;
@@ -111,6 +125,19 @@ int main() {
   assert(frame["device"]["firmware_version"] == "0.2.0-wifi");
   advance(10);
   assert(fake::screen[0].rfind("Online", 0) == 0);
+  logoPixels();
+  const auto firstLogo = fake::displayTiles;
+  const auto onlineRows = fake::screen;
+  int writes = fake::tileWrites, strings = fake::textDraws, clears = fake::displayClears;
+  Serial.output.clear();
+  advance(50); // Each iteration also includes the session's existing 1 ms delay.
+  assert(fake::tileWrites == writes); // No writes between frame deadlines.
+  advance(250);
+  logoPixels();
+  assert(fake::displayTiles != firstLogo); // The face moves while the link stays online.
+  assert(fake::tileWrites > writes && fake::tileWrites <= writes + 10);
+  assert(fake::screen == onlineRows && fake::textDraws == strings);
+  assert(fake::displayClears == clears && Serial.output.empty());
 
   // Text and clear; the status row stays.
   untilPoll();
@@ -119,12 +146,20 @@ int main() {
   assert(next() == "ack" && frame["status"] == "executed");
   answer(R"({"ok":true})");
   assert(fake::screen[2] == "Hello over Wi-Fi" && fake::screen[0].rfind("Online", 0) == 0);
+  logoPixels();
+  writes = fake::tileWrites;
+  strings = fake::textDraws;
+  clears = fake::displayClears;
+  advance(450);
+  assert(fake::tileWrites > writes && fake::screen[2] == "Hello over Wi-Fi");
+  assert(fake::textDraws == strings && fake::displayClears == clears);
   untilPoll();
   answer(R"({"ok":true,"commands":[{"command_id":"c2","capability":"display.clear",)"
          R"("arguments":{}}]})");
   assert(next() == "ack" && frame["status"] == "executed");
   answer(R"({"ok":true})");
   assert(!fake::screen.count(2) && fake::screen[0].rfind("Online", 0) == 0);
+  logoPixels(); // A display.clear redraw restores the current logo frame.
 
   // BOOT press and release become button events over Wi-Fi.
   fake::pin = 0;
@@ -144,11 +179,14 @@ int main() {
   answer(R"({"ok":true,"commands":[{"command_id":"c3","capability":"display.text",)"
          R"("arguments":{"text":"Before the drop"}}]})");
   assert(next() == "ack");
+  writes = fake::tileWrites;
   WiFi.state = WL_DISCONNECTED;
   advance(5);
   assert(!gadget.connected() && !tls.open);
+  assert(fake::displayTiles.empty()); // The failure status erases the whole logo area.
   advance(2000);
   assert(fake::screen[0].rfind("WiFi...", 0) == 0);
+  assert(fake::tileWrites == writes && fake::screen[2] == "Before the drop");
   // A long outage: the firmware starts a fresh join itself, without waiting for the core.
   int joins = WiFi.begins;
   for (uint32_t start = fake::now; fake::now - start < 3 * grok::WifiRejoinMs + 5000;)
@@ -158,6 +196,7 @@ int main() {
   tls.output.clear();
   WiFi.state = WL_CONNECTED;
   online(); // A fresh hello; the old ACK is never resent into the new session.
+  assert(fake::displayTiles == firstLogo); // Reconnection starts a fresh animation cycle.
   untilPoll();
   answer(R"({"ok":true,"commands":[]})");
 
@@ -175,6 +214,7 @@ int main() {
   int before = tls.connects;
   advance(12000);
   assert(tls.connects > before + 1 && fake::screen[0].rfind("TLS rejected", 0) == 0);
+  assert(fake::displayTiles.empty());
   tls.accept = true;
   tls.output.clear();
   online();
@@ -185,6 +225,7 @@ int main() {
   advance(5);
   assert(!gadget.connected() && gadget.rejected());
   assert(fake::screen[0].rfind("Token rejected", 0) == 0);
+  assert(fake::displayTiles.empty());
   before = tls.connects;
   for (uint32_t start = fake::now; fake::now - start < 59000;)
     advance(1);
@@ -209,12 +250,16 @@ int main() {
   assert(fake::screen[0].rfind("Online", 0) == 0);
   holdFor(200);
   assert(fake::screen[0].rfind("Reset in 7s", 0) == 0);
+  assert(fake::displayTiles.empty());
+  writes = fake::tileWrites;
   holdFor(2000);
   assert(fake::screen[0].rfind("Reset in 5s", 0) == 0);
+  assert(fake::tileWrites == writes);
   assert(Serial.output.find("status: Reset in 7s") != std::string::npos);
   fake::pin = 1;
   holdFor(200);
   assert(fake::screen[0].rfind("Online", 0) == 0);
+  logoPixels();
   assert(ESP.restarts == 0 && fake::nvs.count("grok-wifi/token"));
 
   // BOOT held for 10 seconds: factory reset and restart.
@@ -227,5 +272,28 @@ int main() {
     }
   }
   assert(ESP.restarts == 1 && fake::nvs.empty());
+
+  // Every frame fits inside the header, a blink changes the eyes, and the cycle repeats.
+  oledkit::OnlineLogo clock;
+  clock.reset(0);
+  clock.draw(*oled);
+  const auto neutral = fake::displayTiles;
+  const int openEyes = logoPixels();
+  bool moved = false, blinked = false;
+  for (uint32_t time = 150; time <= 3600; time += 150) {
+    assert(clock.advance(time));
+    clock.draw(*oled);
+    blinked = blinked || logoPixels() > openEyes;
+    moved = moved || fake::displayTiles != neutral;
+  }
+  assert(moved && blinked && fake::displayTiles == neutral);
+
+  // The frame clock survives millis() wraparound and catches up without replaying frames.
+  clock.reset(UINT32_MAX - 99);
+  assert(!clock.advance(49));
+  assert(clock.advance(50));
+  assert(!clock.advance(50));
+  assert(clock.advance(86400050));
+  assert(!clock.advance(86400050));
   std::cout << "Wi-Fi link tests passed\n";
 }
