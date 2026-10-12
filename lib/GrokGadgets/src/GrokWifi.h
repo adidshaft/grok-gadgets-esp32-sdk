@@ -11,6 +11,9 @@
 namespace grok {
 constexpr size_t MaxCaPem = 3072, MaxConsoleLine = 4096;
 constexpr uint32_t TlsConnectSeconds = 5, TlsHandshakeSeconds = 8;
+// While offline, start a fresh join this often. The core's auto-reconnect can stop retrying
+// after a long access-point outage (seen in the Phase 4 router-off test).
+constexpr uint32_t WifiRejoinMs = 15000;
 // mbedTLS: the server certificate did not verify against the pinned CA.
 constexpr int TlsVerifyFailed = -0x2700;
 constexpr const char *WifiNamespace = "grok-wifi";
@@ -151,6 +154,7 @@ public:
     WiFi.setSleep(false); // Lower latency for 100 ms polling.
     WiFi.setAutoReconnect(true);
     WiFi.begin(s_.ssid, s_.password);
+    joinedAt_ = millis();
     client_.setCACert(s_.ca);
     client_.setTimeout(TlsConnectSeconds);
     client_.setHandshakeTimeout(TlsHandshakeSeconds);
@@ -163,6 +167,12 @@ public:
     }
     if (WiFi.status() != WL_CONNECTED) {
       state_ = State::WifiConnecting;
+      uint32_t now = millis();
+      if (uint32_t(now - joinedAt_) >= WifiRejoinMs) {
+        WiFi.disconnect();
+        WiFi.begin(s_.ssid, s_.password);
+        joinedAt_ = now;
+      }
       return false;
     }
     if (client_.connect(s_.host, s_.port)) {
@@ -192,6 +202,7 @@ private:
   const WifiSettings &s_;
   WiFiClientSecure client_;
   State state_ = State::NotProvisioned;
+  uint32_t joinedAt_ = 0;
 };
 
 // One-line JSON console on the USB serial port: `status`, `provision`, `factory_reset`.
