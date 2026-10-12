@@ -68,6 +68,15 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
   `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
   text and keeps the status row.
+- If the board cannot join Wi-Fi, the top row says why and the second row says what to
+  check. The console prints the same reason and answers `status` with `wifi_failure` and
+  `wifi_hint`. Neither ever shows the network name or password.
+
+  | Top row | Second row | Cause | Fix |
+  | --- | --- | --- | --- |
+  | `No network` | `2.4GHz? Name?` | The board cannot see the network name. | Use a 2.4 GHz network; the ESP32-S3 has no 5 GHz radio. Check the name's upper and lower case. Provision again. |
+  | `Wrong password` | `Check password` | The network refused the password. | Provision again with the correct password. |
+  | `Join timeout` | `Check router` | A join attempt got no answer for 15 seconds. | Check that the router is on and the board is in range. |
 - After Wi-Fi or gateway loss, the board reconnects with a fresh hello. The wait starts at
   0.5 s and doubles up to 5 s. After `unauthorized` or `revoked` it waits 60 s. A command is
   never replayed into a new session.

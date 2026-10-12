@@ -49,6 +49,7 @@ grok::NvsStore store;
 grok::WifiLink wifiLink(settings);
 grok::Console console(Serial, store, gadget.deviceId());
 char shownStatus[Columns + 1] = {}; // What the status row shows now.
+char shownHint[Columns + 1] = {};   // Row 1: what to check after a failed Wi-Fi join.
 uint32_t bootHeldSince = 0;
 bool bootHeld = false;
 
@@ -61,7 +62,7 @@ const char *linkStatus() {
     return "Token rejected";
   switch (wifiLink.state()) {
   case grok::WifiLink::State::WifiConnecting:
-    return "WiFi...";
+    return grok::describe(wifiLink.failure()).status; // "WiFi..." or why the join failed.
   case grok::WifiLink::State::TlsRejected:
     return "TLS rejected";
   default:
@@ -74,12 +75,19 @@ void drawStatus() {
   char row[Columns + 1];
   snprintf(row, sizeof(row), "%-16s", shownStatus);
   oled->drawString(0, 0, row);
+  snprintf(row, sizeof(row), "%-16s", shownHint);
+  oled->drawString(0, 1, row);
 }
 void consoleStatus(JsonObject reply, void *) {
   reply["firmware"] = FirmwareVersion;
   reply["provisioned"] = settings.complete();
   reply["wifi"] = WiFi.status() == WL_CONNECTED ? "connected" : "disconnected";
   reply["gateway"] = linkStatus();
+  grok::JoinFailureText failure = grok::describe(wifiLink.failure());
+  if (failure.code) {
+    reply["wifi_failure"] = failure.code;
+    reply["wifi_hint"] = failure.advice;
+  }
 }
 #endif
 
@@ -198,7 +206,7 @@ void loop() {
     bootHeldSince = now;
   bootHeld = pressed;
   uint32_t held = bootHeld ? uint32_t(now - bootHeldSince) : 0;
-  char status[Columns + 1];
+  char status[Columns + 1], hint[Columns + 1] = {};
   if (console.restartRequested())
     snprintf(status, sizeof(status), "%s", shownStatus); // Keep the last message.
   else if (held >= FactoryResetHoldMs && console.factoryReset())
@@ -206,13 +214,20 @@ void loop() {
   else if (held >= FactoryResetWarnMs)
     snprintf(status, sizeof(status), "Reset in %cs", // 7 down to 1
              char('0' + (FactoryResetHoldMs - held + 999) / 1000));
-  else
+  else {
     snprintf(status, sizeof(status), "%s", linkStatus());
-  if (strcmp(status, shownStatus)) {
+    if (wifiLink.state() == grok::WifiLink::State::WifiConnecting)
+      snprintf(hint, sizeof(hint), "%s", grok::describe(wifiLink.failure()).hint);
+  }
+  if (strcmp(status, shownStatus) || strcmp(hint, shownHint)) {
     strcpy(shownStatus, status);
+    strcpy(shownHint, hint);
     drawStatus();
-    char line[40];
-    size_t size = snprintf(line, sizeof(line), "status: %s\n", status);
+    // The console line explains a failed join; it never names the network.
+    const char *advice = hint[0] ? grok::describe(wifiLink.failure()).advice : nullptr;
+    char line[160];
+    size_t size = advice ? snprintf(line, sizeof(line), "status: %s. %s\n", status, advice)
+                         : snprintf(line, sizeof(line), "status: %s\n", status);
     Serial.write(reinterpret_cast<const uint8_t *>(line), size);
   }
   if (console.restartRequested()) {
