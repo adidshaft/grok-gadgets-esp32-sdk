@@ -55,4 +55,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m venv .venv && .venv/bin/pip install -r requirements.lock
-      - run: .venv/bin/pio run -e atoms3-lite-usb -e esp32s3-led-button -e esp32s3-oled-kit
+      - run: .venv/bin/pio run -e atoms3-lite-usb -e esp32s3-led-button -e esp32s3-oled-kit -e esp32s3-oled-kit-wifi

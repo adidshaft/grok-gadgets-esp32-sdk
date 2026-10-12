@@ -1,13 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 // Prints every frame an example sketch writes while a scripted gateway answers it.
 // Arguments are command objects delivered one per poll. tools/check_contract.py validates
-// the output against the pinned schema.
+// the output against the pinned schema. GROK_WIFI_TRANSCRIPT runs the Wi-Fi build of the OLED kit,
+// provisioned with a test token, and scripts the gateway on its TLS link instead of USB serial.
 #define GROK_HOST_SIMULATION
+#ifdef GROK_WIFI_TRANSCRIPT
+#define OLED_KIT_WIFI
+#endif
 #include "host_board.h"
 #include <iostream>
 #include <string>
 #include <vector>
 #include GROK_EXAMPLE
+
+#ifdef GROK_WIFI_TRANSCRIPT
+std::string &wireOut() { return static_cast<WiFiClientSecure &>(wifiLink.stream()).output; }
+std::string &wireIn() { return static_cast<WiFiClientSecure &>(wifiLink.stream()).input; }
+#else
+std::string &wireOut() { return Serial.output; }
+std::string &wireIn() { return Serial.input; }
+#endif
 
 namespace script {
 std::vector<std::string> commands;
@@ -30,9 +42,9 @@ void step(uint32_t ms) {
   for (uint32_t i = 0; i < ms; ++i) {
     loop();
     size_t end;
-    while ((end = Serial.output.find('\n')) != std::string::npos) {
-      std::string line = Serial.output.substr(0, end);
-      Serial.output.erase(0, end + 1);
+    while ((end = wireOut().find('\n')) != std::string::npos) {
+      std::string line = wireOut().substr(0, end);
+      wireOut().erase(0, end + 1);
       std::cout << line << '\n';
       StaticJsonDocument<256> filter;
       filter["type"] = true;
@@ -42,7 +54,7 @@ void step(uint32_t ms) {
       if (holding)
         held = answer;
       else
-        Serial.input += answer + "\n";
+        wireIn() += answer + "\n";
     }
   }
 }
@@ -51,6 +63,18 @@ int main(int argc, char **argv) {
   using script::holding;
   using script::step;
   script::commands.assign(argv + 1, argv + argc);
+#ifdef GROK_WIFI_TRANSCRIPT
+  fake::nvs = {
+      {"grok-wifi/ssid", "transcript-net"},
+      {"grok-wifi/pass", "transcript-pass"},
+      {"grok-wifi/token", "transcript-device-token"},
+      {"grok-wifi/host", "192.168.1.20"},
+      {"grok-wifi/port", "8767"},
+      {"grok-wifi/ca",
+       "-----BEGIN CERTIFICATE-----\nMIIBtranscriptOnlyNotARealCertificate0123456789abcdef\n"
+       "-----END CERTIFICATE-----\n"}};
+  WiFi.state = WL_CONNECTED;
+#endif
   setup();
   step(1000 + 400 * argc);
   fake::pin = 0; // Press and hold, then release.
@@ -65,7 +89,7 @@ int main(int argc, char **argv) {
   }
   fake::pin = 1;
   holding = false;
-  Serial.input += script::held + "\n";
+  wireIn() += script::held + "\n";
   step(3000);
   step(4000);
 }

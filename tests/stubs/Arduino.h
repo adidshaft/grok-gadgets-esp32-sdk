@@ -20,6 +20,7 @@ struct Stream {
   virtual int read() = 0;
   virtual size_t write(uint8_t ch) = 0;
   virtual size_t write(const uint8_t *data, size_t size) = 0;
+  virtual void flush() {}
 };
 struct FakeSerial : Stream {
   std::string input, output;
@@ -51,6 +52,8 @@ inline void neopixelWrite(int, uint8_t r, uint8_t g, uint8_t b) {
   fake::neopixel = (uint32_t(r) << 16) | (uint32_t(g) << 8) | b;
 }
 struct FakeEsp {
+  int restarts = 0;
   uint64_t getEfuseMac() const { return 0x123456789abcULL; }
+  void restart() { ++restarts; }
 };
 extern FakeEsp ESP;

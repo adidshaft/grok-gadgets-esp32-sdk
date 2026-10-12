@@ -75,8 +75,9 @@ recovery. Nobody has flashed a board for this project yet, so we welcome hardwar
 ## Grok Bot today
 
 Run `grok-gadgets-gateway rehearse` to check the local simulated path for Grok Bot. A cloud
-Grok Bot cannot reach your computer yet, Wi-Fi is not built ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)),
-and a button press does not wake the Bot. See the
+Grok Bot cannot reach your computer yet, and a button press does not wake the Bot. The OLED
+kit has a Wi-Fi build ([examples/oled-kit](examples/oled-kit/README.md#wi-fi-build)); its
+physical acceptance is pending ([#5](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/5)). See the
 [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
 
 ## Learn more

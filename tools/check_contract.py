@@ -42,11 +42,14 @@ sketches = {
         command("t-clear", "display.clear", {}),
     ],
 }
+# The Wi-Fi build sends the same frames over TLS, with the device token in its hello.
+sketches["transcript_oled_kit_wifi"] = sketches["transcript_oled_kit"]
 expected_acks = {
     "transcript_c124": {"t-green": "executed", "t-bad": "failed"},
     "transcript_led_button": {"t-on": "executed", "t-bad": "failed"},
     "transcript_oled_kit": {"t-text": "executed", "t-bad": "failed", "t-clear": "executed"},
 }
+expected_acks["transcript_oled_kit_wifi"] = expected_acks["transcript_oled_kit"]
 for binary, commands in sketches.items():
     output = subprocess.run(
         [root / "build" / binary, *commands], check=True, capture_output=True, text=True, timeout=60
@@ -59,6 +62,9 @@ for binary, commands in sketches.items():
         frames.append(frame)
     kinds = {frame["type"] for frame in frames}
     assert kinds == {"hello", "poll", "ack", "event", "state"}, (binary, kinds)
+    assert frames[0]["type"] == "hello", binary
+    wifi = binary.endswith("_wifi")
+    assert (frames[0].get("token") == "transcript-device-token") == wifi, (binary, "hello token")
     hello = frames[0]["device"]
     names = hello["capabilities"]
     assert names[-2:] == ["state", "history_lost"] and "button" in names, (binary, names)
@@ -74,7 +80,7 @@ for binary, commands in sketches.items():
     assert losses == [{"dropped": 4}], (binary, losses)
     acks = {frame["command_id"]: frame["status"] for frame in frames if frame["type"] == "ack"}
     assert acks == expected_acks[binary], (binary, acks)
-    if binary == "transcript_oled_kit":
+    if binary in ("transcript_oled_kit", "transcript_oled_kit_wifi"):
         shown = {f["command_id"]: f["state"]["display"] for f in frames if f["type"] == "ack"}
         assert shown["t-text"] == {
             "ready": True,

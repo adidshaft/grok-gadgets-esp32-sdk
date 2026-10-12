@@ -1,0 +1,304 @@
+// SPDX-License-Identifier: Apache-2.0
+// Wi-Fi transport (hub ADR 005): TLS to the gateway's LAN listener with a pinned local CA,
+// settings in NVS, and a USB serial console for provisioning and factory reset.
+// The console never prints a stored value. The Wi-Fi password and token stay in NVS.
+#pragma once
+#include "GrokSession.h"
+#include <Preferences.h>
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+
+namespace grok {
+constexpr size_t MaxCaPem = 3072, MaxConsoleLine = 4096;
+constexpr uint32_t TlsConnectSeconds = 5, TlsHandshakeSeconds = 8;
+// mbedTLS: the server certificate did not verify against the pinned CA.
+constexpr int TlsVerifyFailed = -0x2700;
+constexpr const char *WifiNamespace = "grok-wifi";
+
+struct WifiSettings {
+  char ssid[33] = {};
+  char password[65] = {};
+  char token[257] = {};
+  char host[16] = {};
+  uint16_t port = 0;
+  char ca[MaxCaPem + 1] = {};
+  bool complete() const { return ssid[0] && token[0] && host[0] && port && ca[0]; }
+  // Overwrite every secret-bearing field, for copies that are no longer needed.
+  void wipe() {
+    memset(ssid, 0, sizeof(ssid));
+    memset(password, 0, sizeof(password));
+    memset(token, 0, sizeof(token));
+    memset(host, 0, sizeof(host));
+    memset(ca, 0, sizeof(ca));
+    port = 0;
+  }
+};
+
+inline bool copyString(JsonVariantConst value, char *out, size_t capacity, size_t minimum) {
+  if (!value.is<const char *>())
+    return false;
+  const char *text = value.as<const char *>();
+  size_t length = strlen(text);
+  if (length < minimum || length >= capacity)
+    return false;
+  memcpy(out, text, length + 1);
+  return true;
+}
+inline bool validIpv4(const char *text) {
+  int parts = 0;
+  const char *p = text;
+  while (*p) {
+    int value = 0, digits = 0;
+    while (*p >= '0' && *p <= '9') {
+      value = value * 10 + (*p++ - '0');
+      if (++digits > 3 || value > 255)
+        return false;
+    }
+    if (!digits || ++parts > 4)
+      return false;
+    if (*p == '.' && parts < 4)
+      ++p;
+    else if (*p)
+      return false;
+  }
+  return parts == 4;
+}
+inline bool printableToken(const char *token) {
+  for (const char *c = token; *c; ++c)
+    if (*c <= 0x20 || *c > 0x7e)
+      return false;
+  return true;
+}
+// Validate a `provision` console command. Error messages never contain a value.
+inline Error readSettings(JsonObjectConst in, WifiSettings &out) {
+  static constexpr const char *Begin = "-----BEGIN CERTIFICATE-----";
+  WifiSettings next;
+  if (in.size() != 7)
+    return {"invalid_settings", "Expected type, ssid, password, token, host, port and ca"};
+  if (!copyString(in["ssid"], next.ssid, sizeof(next.ssid), 1))
+    return {"invalid_settings", "Wi-Fi name must be 1-32 bytes"};
+  if (!copyString(in["password"], next.password, sizeof(next.password), 0) ||
+      (next.password[0] && strlen(next.password) < 8))
+    return {"invalid_settings", "Wi-Fi password must be empty or 8-64 bytes"};
+  if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
+    return {"invalid_settings", "Token must be 16-256 printable characters"};
+  if (!copyString(in["host"], next.host, sizeof(next.host), 7) || !validIpv4(next.host))
+    return {"invalid_settings", "Host must be an IPv4 address"};
+  if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
+    return {"invalid_settings", "Port must be 1-65535"};
+  next.port = in["port"].as<uint16_t>();
+  if (!copyString(in["ca"], next.ca, sizeof(next.ca), 64) ||
+      strncmp(next.ca, Begin, strlen(Begin)) || !strstr(next.ca, "-----END CERTIFICATE-----"))
+    return {"invalid_settings", "CA must be one PEM certificate up to 3072 bytes"};
+  out = next;
+  return {};
+}
+
+class SettingsStore {
+public:
+  virtual ~SettingsStore() = default;
+  virtual bool load(WifiSettings &settings) = 0;
+  virtual bool save(const WifiSettings &settings) = 0;
+  virtual bool erase() = 0;
+};
+
+// NVS namespace `grok-wifi`. Flash encryption is off: whoever holds the board can read it.
+class NvsStore : public SettingsStore {
+public:
+  bool load(WifiSettings &s) override {
+    if (!prefs_.begin(WifiNamespace, true))
+      return false;
+    prefs_.getString("ssid", s.ssid, sizeof(s.ssid));
+    prefs_.getString("pass", s.password, sizeof(s.password));
+    prefs_.getString("token", s.token, sizeof(s.token));
+    prefs_.getString("host", s.host, sizeof(s.host));
+    s.port = prefs_.getUShort("port", 0);
+    prefs_.getString("ca", s.ca, sizeof(s.ca));
+    prefs_.end();
+    return s.complete();
+  }
+  bool save(const WifiSettings &s) override {
+    if (!prefs_.begin(WifiNamespace, false))
+      return false;
+    bool ok = prefs_.clear() && prefs_.putString("ssid", s.ssid) &&
+              prefs_.putString("pass", s.password) == strlen(s.password) &&
+              prefs_.putString("token", s.token) && prefs_.putString("host", s.host) &&
+              prefs_.putUShort("port", s.port) && prefs_.putString("ca", s.ca);
+    prefs_.end();
+    return ok;
+  }
+  bool erase() override {
+    if (!prefs_.begin(WifiNamespace, false))
+      return false;
+    bool ok = prefs_.clear();
+    prefs_.end();
+    return ok;
+  }
+
+private:
+  Preferences prefs_;
+};
+
+// TLS to the gateway LAN listener. Trusts only the provisioned CA; never insecure mode.
+class WifiLink : public Link {
+public:
+  enum class State { NotProvisioned, WifiConnecting, GatewayConnecting, TlsRejected };
+  explicit WifiLink(const WifiSettings &settings) : s_(settings) {}
+  void begin() {
+    if (!s_.complete())
+      return;
+    WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false); // Lower latency for 100 ms polling.
+    WiFi.setAutoReconnect(true);
+    WiFi.begin(s_.ssid, s_.password);
+    client_.setCACert(s_.ca);
+    client_.setTimeout(TlsConnectSeconds);
+    client_.setHandshakeTimeout(TlsHandshakeSeconds);
+  }
+  bool open() override {
+    client_.stop();
+    if (!s_.complete()) {
+      state_ = State::NotProvisioned;
+      return false;
+    }
+    if (WiFi.status() != WL_CONNECTED) {
+      state_ = State::WifiConnecting;
+      return false;
+    }
+    if (client_.connect(s_.host, s_.port)) {
+      state_ = State::GatewayConnecting;
+      return true;
+    }
+    char reason[64];
+    state_ = client_.lastError(reason, sizeof(reason)) == TlsVerifyFailed
+                 ? State::TlsRejected
+                 : State::GatewayConnecting;
+    return false;
+  }
+  bool alive() override { return WiFi.status() == WL_CONNECTED && client_.connected(); }
+  void close() override { client_.stop(); }
+  Stream &stream() override { return client_; }
+  const char *token() const override { return s_.token; }
+  // Why the last open() failed or what it is waiting for.
+  State state() const {
+    if (!s_.complete())
+      return State::NotProvisioned;
+    if (WiFi.status() != WL_CONNECTED)
+      return State::WifiConnecting;
+    return state_;
+  }
+
+private:
+  const WifiSettings &s_;
+  WiFiClientSecure client_;
+  State state_ = State::NotProvisioned;
+};
+
+// One-line JSON console on the USB serial port: `status`, `provision`, `factory_reset`.
+class Console {
+public:
+  using Status = void (*)(JsonObject reply, void *context);
+  Console(Stream &port, SettingsStore &store, const char *deviceId)
+      : port_(port), store_(store), deviceId_(deviceId) {}
+  void status(Status writer, void *context) {
+    status_ = writer;
+    context_ = context;
+  }
+  // True once a reply asked for a restart (after provisioning or a factory reset).
+  bool restartRequested() const { return restart_; }
+  void loop() {
+    while (port_.available()) {
+      char ch = char(port_.read());
+      if (ch == '\r')
+        continue;
+      if (ch != '\n') {
+        if (used_ < MaxConsoleLine)
+          line_[used_++] = ch;
+        else
+          dropping_ = true;
+        continue;
+      }
+      line_[used_] = 0;
+      if (dropping_)
+        fail("invalid_request", "Line exceeds 4096 bytes");
+      else if (used_)
+        handle();
+      used_ = 0;
+      dropping_ = false;
+    }
+  }
+  bool factoryReset() {
+    restart_ = store_.erase();
+    return restart_;
+  }
+
+private:
+  void handle() {
+    // Zero-copy parse: strings stay in line_, which is wiped below.
+    StaticJsonDocument<512> doc;
+    if (deserializeJson(doc, line_, used_) || !doc.is<JsonObject>()) {
+      wipe();
+      return; // Not a console command; stay silent like the USB bridge.
+    }
+    const char *type = doc["type"] | "";
+    if (!strcmp(type, "status")) {
+      reply(true);
+    } else if (!strcmp(type, "provision")) {
+      WifiSettings settings;
+      Error error = readSettings(doc.as<JsonObjectConst>(), settings);
+      if (error.code)
+        fail(error.code, error.message);
+      else if (!store_.save(settings))
+        fail("storage_failed", "Could not write NVS");
+      else {
+        restart_ = true;
+        reply(false);
+      }
+      settings.wipe();
+    } else if (!strcmp(type, "factory_reset")) {
+      if (factoryReset())
+        reply(false);
+      else
+        fail("storage_failed", "Could not erase NVS");
+    } else {
+      fail("unknown_command", "Use status, provision or factory_reset");
+    }
+    wipe();
+  }
+  void wipe() { memset(line_, 0, sizeof(line_)); }
+  void reply(bool withStatus) {
+    StaticJsonDocument<384> out;
+    out["ok"] = true;
+    out["device_id"] = deviceId_;
+    if (restart_)
+      out["restarting"] = true;
+    if (withStatus && status_)
+      status_(out.as<JsonObject>(), context_);
+    send(out);
+  }
+  void fail(const char *code, const char *message) {
+    StaticJsonDocument<256> out;
+    out["ok"] = false;
+    auto error = out.createNestedObject("error");
+    error["code"] = code;
+    error["message"] = message;
+    send(out);
+  }
+  void send(JsonDocument &out) {
+    char text[512];
+    size_t size = serializeJson(out, text, sizeof(text) - 1);
+    text[size++] = '\n';
+    port_.write(reinterpret_cast<const uint8_t *>(text), size);
+    port_.flush();
+  }
+
+  Stream &port_;
+  SettingsStore &store_;
+  const char *deviceId_;
+  Status status_ = nullptr;
+  void *context_ = nullptr;
+  char line_[MaxConsoleLine + 1] = {};
+  size_t used_ = 0;
+  bool dropping_ = false, restart_ = false;
+};
+} // namespace grok
