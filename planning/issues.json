@@ -612,6 +612,30 @@
         "sh tools/check.sh: CTest 8/8 passed; tests/wifi_link_tests.cpp covers the 36-tile face, the Grok Bot label, rows 6-7 word and character wrap, change-only redraws and 16-column text without the face",
         "Owner on 12 Oct 2026, ESP32 cedeeff (firmware.bin sha256 8a4a372e...3379): the 48x48 face and Grok Bot label looked right on the kit. Text on rows 6-7 was not checked on hardware."
       ]
+    },
+    {
+      "id": "ESP-MDNS-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "The Wi-Fi build stored the gateway's IPv4 address; an address change broke the setup",
+      "acceptance": [
+        "Provisioning accepts NAME.local",
+        "Resolve with ESPmDNS before each connection; verify TLS by name",
+        "Clear status when the name does not answer"
+      ],
+      "dependencies": [],
+      "labels": [
+        "enhancement",
+        "esp32",
+        "P2"
+      ],
+      "stage": "done",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "GitHub #99, PR #100; tests/wifi_mdns_tests.cpp and tests/wifi_console_tests.cpp",
+        "Owner's kit 12-13 Oct 2026, dev 3ae0a13 (firmware sha256 6a79e214...275f): Online by name; two Mac address changes and a Mac restart without new settings (gateway docs/verification/always-on-2026-10-13.md)"
+      ]
     }
   ]
 }

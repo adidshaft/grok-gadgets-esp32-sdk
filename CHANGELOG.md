@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Wi-Fi build: the gateway can be provisioned as an mDNS name such as `my-mac.local`. Before each connection the board resolves it with `ESPmDNS` and verifies the TLS certificate against the name, so a new computer address needs no new settings. An unanswered name shows `Gateway name?`. IPv4 settings keep working ([#99](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/99), hub ADR 006).
+## 0.2.0-alpha.12 — 13 October 2026
+
+- Wi-Fi build: the gateway can be provisioned as an mDNS name such as `my-mac.local`. Before each connection the board resolves it with `ESPmDNS` and verifies the TLS certificate against the name, so a new computer address needs no new settings. An unanswered name shows `Gateway name?`. IPv4 settings keep working. On 12–13 October 2026 the owner's kit connected by name and followed two Mac address changes and a Mac restart without new settings ([gateway record](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/verification/always-on-2026-10-13.md)) ([#99](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/99), hub ADR 006).
 
 ## 0.2.0-alpha.11 — 12 October 2026
 
