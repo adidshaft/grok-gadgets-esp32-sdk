@@ -49,16 +49,16 @@ void online() {
   assert(gadget.connected());
 }
 int logoPixels() {
-  assert(fake::displayTiles.size() == 9); // 24x24: tile columns 13-15, rows 0-2.
+  assert(fake::displayTiles.size() == 36); // 48x48: tile columns 10-15, rows 0-5.
   int lit = 0;
   for (const auto &entry : fake::displayTiles) {
-    assert(entry.first.first >= 13 && entry.first.first <= 15);
-    assert(entry.first.second >= 0 && entry.first.second <= 2);
+    assert(entry.first.first >= 10 && entry.first.first <= 15);
+    assert(entry.first.second >= 0 && entry.first.second <= 5);
     for (uint8_t column : entry.second)
       for (int bit = 0; bit < 8; ++bit)
         lit += (column >> bit) & 1;
   }
-  assert(lit > 300 && lit < 400); // A 22-pixel disc with eye cutouts, inside 576 pixels.
+  assert(lit > 1300 && lit < 1700); // A 46-pixel disc with eye cutouts, inside 2304 pixels.
   return lit;
 }
 
@@ -146,14 +146,14 @@ int main() {
          R"("arguments":{"text":"Hello over Wi-Fi"}}]})");
   assert(next() == "ack" && frame["status"] == "executed");
   answer(R"({"ok":true})");
-  assert(fake::screen[2] == "Hello over" && fake::screen[4] == "Wi-Fi");
+  assert(fake::screen[6] == "Hello over Wi-Fi" && !fake::screen.count(2));
   assert(fake::screen[0].rfind("Online", 0) == 0);
   logoPixels();
   writes = fake::tileWrites;
   strings = fake::textDraws;
   clears = fake::displayClears;
   advance(450);
-  assert(fake::tileWrites > writes && fake::screen[2] == "Hello over");
+  assert(fake::tileWrites > writes && fake::screen[6] == "Hello over Wi-Fi");
   assert(fake::textDraws == strings && fake::displayClears == clears);
   untilPoll();
   answer(R"({"ok":true,"commands":[{"command_id":"c2","capability":"display.clear",)"
@@ -275,20 +275,23 @@ int main() {
   }
   assert(ESP.restarts == 1 && fake::nvs.empty());
 
-  // Every frame fits inside the header, a blink changes the eyes, and the cycle repeats.
+  // Every frame fits inside its area, a blink changes the eyes, and the cycle repeats. Only
+  // frames that look different are drawn.
   oledkit::OnlineLogo clock;
   clock.reset(0);
   clock.draw(*oled);
   const auto neutral = fake::displayTiles;
   const int openEyes = logoPixels();
   bool moved = false, blinked = false;
-  for (uint32_t time = 150; time <= 3600; time += 150) {
-    assert(clock.advance(time));
-    clock.draw(*oled);
-    blinked = blinked || logoPixels() > openEyes;
-    moved = moved || fake::displayTiles != neutral;
-  }
-  assert(moved && blinked && fake::displayTiles == neutral);
+  int draws = 0;
+  for (uint32_t time = 150; time <= 3600; time += 150)
+    if (clock.advance(time)) {
+      clock.draw(*oled);
+      ++draws;
+      blinked = blinked || logoPixels() > openEyes;
+      moved = moved || fake::displayTiles != neutral;
+    }
+  assert(moved && blinked && draws < 24 && fake::displayTiles == neutral);
 
   // The frame clock survives millis() wraparound and catches up without replaying frames.
   clock.reset(UINT32_MAX - 99);
@@ -297,17 +300,19 @@ int main() {
   assert(!clock.advance(50));
   assert(clock.advance(86400050));
   assert(!clock.advance(86400050));
-  // Beside the Online face, text wraps at 13 columns: by word when three lines suffice,
-  // otherwise by character. All 32 characters stay visible and clear of columns 13-15.
+  // Under the Online face, text uses rows 6 and 7: by word when two lines suffice,
+  // otherwise by character. All 32 characters stay visible.
   strcpy(shownStatus, "Online");
-  strcpy(text, "aaaaaaa bbbbbbb ccccccc ddddddd"); // Four lines by word: falls back.
+  strcpy(text, "aaaaaaa bbbbbbb ccccccc ddddddd");
   draw();
-  assert(fake::screen[2] == "aaaaaaa bbbbb" && fake::screen[4] == "bb ccccccc dd");
-  assert(fake::screen[6] == "ddddd" && fake::displayTiles.size() == 9);
+  assert(fake::screen[6] == "aaaaaaa bbbbbbb" && fake::screen[7] == "ccccccc ddddddd");
+  assert(fake::displayTiles.size() == 36);
+  strcpy(text, "Grok Gadgets says hello 12345678"); // Three lines by word: falls back.
+  draw();
+  assert(fake::screen[6] == "Grok Gadgets say" && fake::screen[7] == "s hello 12345678");
   strcpy(text, "abcdefghijklmnopqrstuvwxyz012345");
   draw();
-  assert(fake::screen[2] == "abcdefghijklm" && fake::screen[4] == "nopqrstuvwxyz");
-  assert(fake::screen[6] == "012345");
+  assert(fake::screen[6] == "abcdefghijklmnop" && fake::screen[7] == "qrstuvwxyz012345");
   // Without the face, text keeps all 16 columns and no face pixels remain.
   strcpy(shownStatus, "WiFi...");
   draw();

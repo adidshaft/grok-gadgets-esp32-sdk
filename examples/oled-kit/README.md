@@ -68,11 +68,11 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
   `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
   text and keeps the status row.
-- While the status says `Online`, the second row says `Grok Bot`. A 24×24 Grok Bot face
-  fills the right end of the first three rows. It moves one pixel up and down and blinks once
-  every 3.6 seconds. Text then wraps at 13 columns beside it, by word when three lines are
-  enough. A failure, connection message or reset countdown replaces the face and label, and
-  text goes back to 16 columns. `display.clear` keeps the face and labels.
+- While the status says `Online`, the second row says `Grok Bot`. A 48×48 Grok Bot face
+  fills the right side of the first six rows. It moves one pixel up and down and blinks once
+  every 3.6 seconds. Text then uses the bottom two rows, 16 columns each, by word when two
+  lines are enough. A failure, connection message or reset countdown replaces the face and
+  label, and text goes back to rows 2 and 4. `display.clear` keeps the face and labels.
 - If the board cannot join Wi-Fi, the top row says why and the second row says what to
   check. The console prints the same reason and answers `status` with `wifi_failure` and
   `wifi_hint`. Neither ever shows the network name or password.
@@ -92,8 +92,8 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
 The pixel face follows the project's
 [Grok Bot reference](https://github.com/adidshaft/grok-gadgets/blob/dev/website/media/grok-bot-mark.svg).
 It is a small display interpretation of the user-supplied artwork, not an official logo asset.
-The animation uses timed tile writes, with no added delay or full-screen refresh.
-On 12 October 2026 the owner saw the first 16×16 face move and blink on the kit. The 24×24 face
+The animation writes tiles only when the face changes, with no added delay or full-screen refresh.
+On 12 October 2026 the owner saw the first 16×16 face move and blink on the kit. The 48×48 face
 and `Grok Bot` label have host-test and compile evidence only.
 
 ### Flash and provision

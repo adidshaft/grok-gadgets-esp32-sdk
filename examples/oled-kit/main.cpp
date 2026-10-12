@@ -81,7 +81,7 @@ void drawStatus() {
   snprintf(row, sizeof(row), "%-16s", online ? "Grok Bot" : shownHint);
   oled->drawString(0, 1, row);
   if (online)
-    onlineLogo.draw(*oled); // Columns 13-15 of rows 0-2, over the padding above.
+    onlineLogo.draw(*oled); // Columns 10-15 of rows 0-5, over the padding above.
 }
 void consoleStatus(JsonObject reply, void *) {
   reply["firmware"] = FirmwareVersion;
@@ -100,13 +100,16 @@ bool probe(uint8_t candidate) {
   Wire.beginTransmission(candidate);
   return Wire.endTransmission() == 0;
 }
-// Split text into at most three lines of `width` columns. With `words`, break at spaces;
-// return false if the text then needs more than three lines.
-bool wrapText(size_t width, bool words, char lines[3][Columns + 1]) {
+// Split text into at most `count` lines of 16 columns. With `words`, break at spaces;
+// return false if the text then needs more lines.
+bool wrapText(bool words, int count, char lines[3][Columns + 1]) {
   const size_t length = strlen(text);
   size_t at = 0;
   for (int line = 0; line < 3; ++line) {
-    size_t end = at + width < length ? at + width : length;
+    memset(lines[line], 0, Columns + 1);
+    if (line >= count)
+      continue;
+    size_t end = at + Columns < length ? at + Columns : length;
     if (words && end < length) {
       size_t space = end;
       while (space > at && text[space] != ' ')
@@ -114,7 +117,6 @@ bool wrapText(size_t width, bool words, char lines[3][Columns + 1]) {
       if (space > at)
         end = space;
     }
-    memset(lines[line], 0, Columns + 1);
     memcpy(lines[line], text + at, end - at);
     at = end;
     while (words && at < length && text[at] == ' ')
@@ -124,18 +126,22 @@ bool wrapText(size_t width, bool words, char lines[3][Columns + 1]) {
 }
 void draw() {
   oled->clearDisplay();
-  size_t width = Columns;
-#ifdef OLED_KIT_WIFI
-  // While the Online face fills columns 13-15 of rows 0-2, text wraps beside it.
-  if (!strcmp(shownStatus, "Online"))
-    width = oledkit::OnlineLogo::Column;
-#endif
   char lines[3][Columns + 1];
-  if (width == Columns || !wrapText(width, true, lines))
-    wrapText(width, false, lines); // 3 x 13 columns still hold the 32-character maximum.
+  int firstRow = 2, rowStep = 2;
+#ifdef OLED_KIT_WIFI
+  // While Online the face fills columns 10-15 of rows 0-5, so text uses rows 6 and 7.
+  // Two full rows still hold the 32-character maximum.
+  if (!strcmp(shownStatus, "Online")) {
+    firstRow = 6;
+    rowStep = 1;
+    if (!wrapText(true, 2, lines))
+      wrapText(false, 2, lines);
+  } else
+#endif
+    wrapText(false, 3, lines);
   for (int row = 0; row < 3; ++row)
     if (lines[row][0])
-      oled->drawString(0, row * 2 + 2, lines[row]);
+      oled->drawString(0, firstRow + row * rowStep, lines[row]);
 #ifdef OLED_KIT_WIFI
   drawStatus(); // The status row survives text changes and clear.
 #endif
@@ -258,7 +264,7 @@ void loop() {
     strcpy(shownHint, hint);
     onlineLogo.reset(now);
     if (oled && wasOnline != !strcmp(shownStatus, "Online"))
-      draw(); // The text width changes and the face appears or goes: redraw once.
+      draw(); // The face appears or goes and the text moves: redraw once.
     else
       drawStatus();
     // The console line explains a failed join; it never names the network.
