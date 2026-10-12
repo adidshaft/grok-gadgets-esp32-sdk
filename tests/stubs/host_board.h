@@ -2,6 +2,7 @@
 // Definitions for the simulated board; include once per host executable.
 #undef NDEBUG // Tests are assertions.
 #include "Arduino.h"
+#include "ESPmDNS.h"
 #include "Preferences.h"
 #include "U8x8lib.h"
 #include "WiFi.h"
@@ -21,6 +22,7 @@ std::map<std::string, std::string> nvs;
 bool nvsFails = false;
 } // namespace fake
 FakeWiFi WiFi;
+FakeMDNS MDNS;
 const uint8_t u8x8_font_chroma48medium8_r[] = {0};
 FakeWire Wire;
 FakeSerial Serial;

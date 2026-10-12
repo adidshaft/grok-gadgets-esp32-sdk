@@ -14,6 +14,18 @@ extern int shows;
 extern int led;
 extern uint32_t neopixel;
 } // namespace fake
+// The parts of Arduino's IPAddress the firmware uses.
+struct IPAddress {
+  uint32_t value = 0;
+  IPAddress() = default;
+  IPAddress(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+      : value(a | uint32_t(b) << 8 | uint32_t(c) << 16 | uint32_t(d) << 24) {}
+  operator uint32_t() const { return value; }
+  std::string toString() const {
+    return std::to_string(value & 255) + "." + std::to_string(value >> 8 & 255) + "." +
+           std::to_string(value >> 16 & 255) + "." + std::to_string(value >> 24);
+  }
+};
 struct Stream {
   virtual ~Stream() = default;
   virtual int available() = 0;
