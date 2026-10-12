@@ -41,12 +41,14 @@ grok::Rgb colour;
 // Global or static only. Gadget is about 40 KB and overflows the 8 KB loop stack.
 grok::Gadget gadget("ESP32-S3 OLED kit", FirmwareVersion, "oledkit");
 #ifdef OLED_KIT_WIFI
-constexpr uint32_t FactoryResetHoldMs = 10000;
+// Holding BOOT this long erases the Wi-Fi settings. From FactoryResetWarnMs the status row
+// counts down, so a person waiting for feedback can let go in time.
+constexpr uint32_t FactoryResetHoldMs = 10000, FactoryResetWarnMs = 3000;
 grok::WifiSettings settings;
 grok::NvsStore store;
 grok::WifiLink wifiLink(settings);
 grok::Console console(Serial, store, gadget.deviceId());
-const char *shownStatus = nullptr;
+char shownStatus[Columns + 1] = {}; // What the status row shows now.
 uint32_t bootHeldSince = 0;
 bool bootHeld = false;
 
@@ -70,7 +72,7 @@ void drawStatus() {
   if (!oled)
     return;
   char row[Columns + 1];
-  snprintf(row, sizeof(row), "%-16s", shownStatus ? shownStatus : "");
+  snprintf(row, sizeof(row), "%-16s", shownStatus);
   oled->drawString(0, 0, row);
 }
 void consoleStatus(JsonObject reply, void *) {
@@ -195,24 +197,27 @@ void loop() {
   if (pressed && !bootHeld)
     bootHeldSince = now;
   bootHeld = pressed;
-  if (bootHeld && uint32_t(now - bootHeldSince) >= FactoryResetHoldMs &&
-      !console.restartRequested()) {
-    console.factoryReset();
-    shownStatus = "Factory reset";
-    drawStatus();
-  }
-  if (console.restartRequested()) {
-    delay(300); // Let the console reply leave the USB buffer.
-    ESP.restart();
-    return;
-  }
-  const char *status = linkStatus();
-  if (status != shownStatus) {
-    shownStatus = status;
+  uint32_t held = bootHeld ? uint32_t(now - bootHeldSince) : 0;
+  char status[Columns + 1];
+  if (console.restartRequested())
+    snprintf(status, sizeof(status), "%s", shownStatus); // Keep the last message.
+  else if (held >= FactoryResetHoldMs && console.factoryReset())
+    snprintf(status, sizeof(status), "Factory reset");
+  else if (held >= FactoryResetWarnMs)
+    snprintf(status, sizeof(status), "Reset in %cs", // 7 down to 1
+             char('0' + (FactoryResetHoldMs - held + 999) / 1000));
+  else
+    snprintf(status, sizeof(status), "%s", linkStatus());
+  if (strcmp(status, shownStatus)) {
+    strcpy(shownStatus, status);
     drawStatus();
     char line[40];
     size_t size = snprintf(line, sizeof(line), "status: %s\n", status);
     Serial.write(reinterpret_cast<const uint8_t *>(line), size);
+  }
+  if (console.restartRequested()) {
+    delay(300); // Let the console reply and the last status leave the USB buffer.
+    ESP.restart();
   }
 }
 #else

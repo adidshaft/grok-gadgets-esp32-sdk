@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.9 — 12 October 2026
+
+- Wi-Fi build: after BOOT is held for 3 s, the status row counts down to the 10 s factory reset (`Reset in 7s` … `Reset in 1s`). Letting go keeps the settings. In the Wi-Fi acceptance the owner reset the board by accident while waiting for feedback (#80). The countdown passed a physical check on the owner's kit (`docs/verification/oled-kit-wifi-2026-10-12.md`).
+
 ## 0.2.0-alpha.8 — 12 October 2026
 
 - The OLED kit passed physical acceptance over Wi-Fi on the owner's board on 12 October 2026: connect on boot, text and clear, `BOOT` events, Wi-Fi loss and recovery (after the rejoin fix), gateway restart, revoke and re-enroll, wrong-CA rejection and power cycle. Grok Bot showed text on it over Wi-Fi through local shell execution. See `docs/verification/oled-kit-wifi-2026-10-12.md` (#5).
