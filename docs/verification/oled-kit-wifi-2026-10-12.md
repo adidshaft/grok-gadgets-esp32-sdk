@@ -38,6 +38,22 @@ Items 1–3 ran on image A. Image B changes only how the board rejoins Wi-Fi. Te
 were checked again on image B (items 4b, 5 and the Grok Bot run). BOOT events were not
 repeated on image B.
 
+## Follow-up check: BOOT reset countdown
+
+After the acceptance run, image C added a countdown before the BOOT-hold factory reset
+([#81](https://github.com/adidshaft/grok-gadgets-esp32-sdk/pull/81)): `dev` `60044c1`,
+`firmware.bin` SHA-256 `f5f13edb6712cd38ddc623da1a11a42f466c046ad064cfbffafa4e6d16bc0aaf`,
+written to the app area only. The board reconnected without provisioning.
+
+| Check | Result | Owner observation | Gateway log |
+| --- | --- | --- | --- |
+| Hold BOOT, then let go | **Pass** (image C) | The top row showed **Reset in 7s** and counted down to **5s**, then returned to **Online**. | 13:16:05.846 `button` pressed, 13:16:10.240 released (4.4 s apart); no disconnect and no reset after it |
+
+By the event times, a 4.4 s hold would stop at **Reset in 6s**; the owner saw **5s**. The
+release event may have arrived slightly after the owner let go. At 13:15:58 the board
+restarted because the owner touched the jumpers; it reconnected with its stored settings.
+The full 10-second hold was not repeated on image C.
+
 ## Grok Bot
 
 **Pass (local route, no approval card).** The board was on the charger (image B). A message

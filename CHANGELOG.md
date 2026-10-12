@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Wi-Fi build: after BOOT is held for 3 s, the status row counts down to the 10 s factory reset (`Reset in 7s` … `Reset in 1s`). Letting go keeps the settings. In the Wi-Fi acceptance the owner reset the board by accident while waiting for feedback (#80).
+## 0.2.0-alpha.9 — 12 October 2026
+
+- Wi-Fi build: after BOOT is held for 3 s, the status row counts down to the 10 s factory reset (`Reset in 7s` … `Reset in 1s`). Letting go keeps the settings. In the Wi-Fi acceptance the owner reset the board by accident while waiting for feedback (#80). The countdown passed a physical check on the owner's kit (`docs/verification/oled-kit-wifi-2026-10-12.md`).
 
 ## 0.2.0-alpha.8 — 12 October 2026
 
