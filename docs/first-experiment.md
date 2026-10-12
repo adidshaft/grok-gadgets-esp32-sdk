@@ -1,77 +1,85 @@
 # First experiment: ESP32-S3 and OLED
 
-Use this plan for the first physical experiment. Keep the simulator-first stage.
-The owner's kit passed physical acceptance on 12 October 2026. See the
-[verification record](verification/oled-kit-2026-10-12.md) for the inspected parts and wiring.
+Start with simulation. Then repeat the owner's tested USB and Wi-Fi setup.
+The owner completed acceptance on 12 October 2026. These results cover one kit, one Mac and one router.
 
-## Parts
+## Parts that arrived
 
-| Part | Ordered item | Check after delivery |
-| --- | --- | --- |
-| Board | AYWHP ESP32-S3 DevKitC-style; ESP32-S3-WROOM-1-N16R8; USB-C | Module marking, board revision, headers, USB route, flash and PSRAM configuration |
-| Wiring | ApTechDeals 840-point breadboard and jumper-wire set | Header fit, jumper type, breadboard rail continuity |
-| Display | Robocraze 0.96-inch 128×64 OLED; advertised SPI/I²C, 4-pin | Controller, actual interface, pin order, voltage requirements and address |
-| Cable | USB-C data cable required; not confirmed in this order | Data transfer and connector fit |
-| Optional input/output | External LED, suitable series resistor and momentary button if built-in parts are unsuitable | Obtain separately if needed; these parts are not confirmed in the order |
+| Part | Tested item |
+| --- | --- |
+| Board | YD-ESP32-23 v1.3, ESP32-S3 N16R8; sold as an AYWHP DevKitC-style board |
+| Display | 1.3-inch 128×64 SH1106, marked RG1.30 IIC V2.2; I²C address `0x3c` |
+| Wiring | ApTechDeals 840-point breadboard and jumper wires |
+| Cable | USB-C data cable, connected to the board's native **USB** port |
+| Light and button | Onboard RGB pixel on GPIO48; BOOT button on GPIO0 |
 
-Do not infer the OLED controller from its size. Do not infer an I²C address or
-pin order from the four-pin advertisement. A DevKitC-style board can differ
-from the reference board. Do not use the reset control as the demo button.
+The ordered display was 0.96 inch. The delivered display is different. Do not use the order description to select a driver.
+Inspect your own board before wiring. Similar boards can have different pins or controllers.
 
-## Stage 1: software simulation
+## 1. Check the software
 
-1. Run the SDK host checks in the README. These test existing sketches.
-2. Run the gateway simulator rehearsal. This checks the existing transport path;
-   it does not verify an OLED implementation.
-3. Run [the OLED software model](../examples/oled-kit/README.md) and its tests.
-   Check text, clear, invalid input, button edges and recovery without a driver.
-4. Keep display state, transport acknowledgements and human observations separate.
+1. Run the host checks in the [README](../README.md#quickstart).
+2. Run the gateway simulator rehearsal.
+3. Run the [OLED software model](../examples/oled-kit/README.md#run-without-hardware).
+4. Check text, clear, invalid input, button edges and recovery.
 
-The OLED model is isolated software, not a display driver or a gateway command.
-Kit-specific firmware and end-to-end OLED gateway simulation remain pending. Existing RGB simulations remain
-regression tests, not an OLED demonstration.
+The model does not open a serial port or operate a display. Keep simulation results separate from physical observations.
 
-## Stage 2: inspect and wire
+## 2. Wire the display
 
-Disconnect power before wiring. Record photographs and readable part markings.
-Confirm the supply requirements from the delivered module documentation.
-Confirm whether the USB connector uses native USB or a USB-to-serial bridge.
-Confirm the flash/PSRAM settings before creating the board build profile.
+Disconnect power first. Check the printed pin names on both parts.
 
-| Signal | Connection plan | Current status |
-| --- | --- | --- |
-| OLED power | Board supply compatible with the delivered OLED | Voltage and pin order provisional |
-| OLED ground | Common board ground | Physical header pin provisional |
-| Display data/clock | Selected board GPIOs appropriate to the confirmed interface | GPIOs and interface provisional |
-| LED | Suitable built-in LED, or external LED with a series resistor | Type, polarity, pin and resistor provisional |
-| Button | Suitable user button, or external momentary button with defined pull-up/down | GPIO, polarity and wiring provisional |
+| OLED pin | Tested board pin |
+| --- | --- |
+| VCC | 3V3 |
+| GND | GND |
+| SCK | GPIO9 |
+| SDA | GPIO8 |
 
-Do not reserve flash/PSRAM, USB or boot-strapping pins without checking the
-board documentation. Record the final pin table before connection. If the OLED
-interface differs from its advertisement, stop and revise the driver and wiring.
-The existing 8 MB C124 build profile is not a verified N16R8 profile.
+The onboard light and button need no external wiring on this kit.
+Use an external LED, series resistor and button only if your board lacks suitable parts. Document their pins and polarity first.
 
-## Stage 3: physical acceptance
+## 3. Check USB operation
 
-1. Compile the inspected board profile and selected display driver. Record source
-   versions, settings and image checksums. Flash only the identified board.
-2. Connect the board over USB to the local bridge and gateway. Verify discovery
-   and the device identity from the running kit firmware.
-3. Send a display text command. Observe the exact text on the OLED. Send clear.
-   Observe an empty display. Compare both results with reported logical state.
-4. If LED/button parts are present, observe LED on/off and ordered button press
-   and release events. Otherwise record that subtest as blocked, not passed.
-5. Disconnect during a command. Check offline status, pending/error reporting and
-   reconnect. Reboot board and gateway. Check fresh state and session identity.
-6. Repeat through the user's existing Grok Bot only after its connection is
-   verified. Local simulation is not proof of Grok Bot operation.
+1. Follow [build and flash](../examples/oled-kit/README.md#build-and-flash). Use `esp32s3-oled-kit`, not the C124 profile.
+2. If the first upload cannot connect, hold BOOT while you connect the native **USB** port.
+3. Wait two seconds. Release BOOT, then upload again.
+4. Start the gateway and USB bridge. Confirm the device identity.
+5. Send `display.text`, then `display.clear`. Record what you see and compare it with reported state.
+6. Test the RGB light and BOOT press/release events.
+7. Test disconnect, reconnect and restart. Do not infer a physical effect from an acknowledgement.
 
-Record the OS, USB port, board revision, driver, wiring, firmware hash, commands,
-results and photographs. Keep credentials and local logs out of Git. No physical
-acceptance is complete until someone observes the delivered hardware.
+Use the [USB acceptance record](verification/oled-kit-2026-10-12.md) to compare results.
 
-## Optional examples
+## 4. Check Wi-Fi operation
 
-The AtomS3 Lite C124 and generic LED/button examples remain SDK examples.
-Their builds and prior test records remain useful. Neither provides a verified
-pin map, OLED driver or flash profile for this kit.
+1. Follow the [Wi-Fi build and provisioning steps](../examples/oled-kit/README.md#wi-fi-build).
+2. Use a 2.4 GHz network. Keep the gateway running on the Mac.
+3. Reserve the Mac's LAN address on the router. Its certificate must match that address.
+4. Provision the board over USB. Keep the network password and device token out of Git and public reports.
+5. Power the board from a USB charger. Check that the OLED shows **Online**.
+6. Repeat text, clear, button, network recovery, gateway restart and power-cycle checks.
+7. Compare results with the [Wi-Fi acceptance record](verification/oled-kit-wifi-2026-10-12.md).
+
+The board is wireless. The gateway still needs a running computer. A button press does not wake Grok Bot.
+The owner tested Grok Bot by running a local `rehearse` command. Native MCP access remains unverified.
+
+The board stores credentials without flash encryption. Revoke its token and change the Wi-Fi password if you lose it.
+
+## 5. Report your result
+
+Copy this table into a test report. Do not include credentials or private network addresses.
+
+| Item | Your result |
+| --- | --- |
+| OS, board revision and display marking | |
+| SDK and gateway versions | |
+| Build profile and firmware checksum | |
+| Pin map and USB port | |
+| Text, clear, light and button observations | |
+| Disconnect, restart and recovery | |
+| Wi-Fi status and power source | |
+| Grok Bot route and independent gateway log evidence | |
+| Failed, skipped or untested checks | |
+
+A second person's test remains open. AtomS3 Lite C124 is an optional build-tested example; it has no physical acceptance record here.

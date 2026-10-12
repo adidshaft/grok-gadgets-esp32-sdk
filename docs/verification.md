@@ -1,8 +1,10 @@
 # Verification
 
-**Current first experiment:** [AYWHP ESP32-S3 and OLED kit](first-experiment.md).
+**Current first experiment:** [ESP32-S3 (YD-ESP32-23 v1.3) and 1.3-inch SH1106 OLED kit](first-experiment.md).
 **Physical acceptance passed on the owner's kit on 12 October 2026:** [record](verification/oled-kit-2026-10-12.md).
 **Over Wi-Fi it passed on the same day:** [record](verification/oled-kit-wifi-2026-10-12.md).
+
+**Wi-Fi join failure reason:** the wrong-password message passed on the same kit; the check also found and fixed a provisioning crash ([record](verification/wifi-join-failure-2026-10-12.md)).
 The C124 results below are historical software/build evidence for an optional
 example. They do not verify the ordered board, OLED controller, pins or wiring.
 
@@ -25,8 +27,8 @@ Host firmware harness identifies `simulated:true`; actual compiled C124 USB firm
 
 Gateway integration uses clean main `d2b1008c2f2a7474288bf3ae9aa83cd49c1e5554`; canonical schema source is `9f65e48de6eb4b74d0b3ab18a34a19e29cb44f8b` plus SHA-256 manifest. SDK core first integrated as `097e1dbc72f01b579b0a150a665d7d427e342946`. C124 USB consumer initially integrated as `809f5b9f8cb90a8b505ed056a2fbc2e63e7ae36d`; overflow repair and regression integrated as `e5a672f3ff275ada4ac273500bd392af80ed42f9`. Compile/host logs are preserved in ignored build/. The program-flash figure in the table above is this 4 October checkpoint. The only current firmware checksum record is [build-checksums.json](build-checksums.json). Local artifacts are generated into ignored artifacts/c124-usb with a source-commit manifest. Python 3.14 produced one warning inside esptool's third-party Python source during its first build; compilation succeeded. It does not indicate that a physical device was reached.
 
-A fresh Python virtual environment installed every dependency from requirements.lock successfully, reported PlatformIO 6.1.18 and passed generated frame contract validation; shared downloaded PlatformIO package cache is reused. This checks installation, not an independent person's reproduction or an empty-cache toolchain download on Linux. Prepared GitHub Linux workflows have not run or been activated.
+A fresh Python environment installed every dependency from requirements.lock. It reported PlatformIO 6.1.18 and passed generated frame contract validation. It reused the downloaded PlatformIO package cache. This checks installation, not an independent person's reproduction or an empty-cache toolchain download on Linux. Prepared GitHub Linux workflows have not run or been activated.
 
-Open gates: ordered kit delivery, inspection, pin/controller selection and physical acceptance; real Grok account and authenticated reachable route; Linux serial permissions/USB acceptance; independent tester; publication permission; secure Wi-Fi endpoint/provisioning contract. See [issues](../planning/issues.json) and [physical procedure](build-flash.md).
+Gates at this historical checkpoint included kit delivery, inspection, pins, controller and physical acceptance. Other gates included the Grok Bot route, Linux USB, independent reproduction, publication approval and secure Wi-Fi setup. See [issues](../planning/issues.json) and [physical procedure](build-flash.md).
 
 Independent review found that history_lost was emitted without being declared, causing gateway rejection and repeated firmware reconnects. ESP-007 declares that event capability in hello. A separate GPIO control file descriptor exists only in the host simulation harness; it supplies real consumer debounce inputs during a delayed serial response. It is absent from physical firmware and the device protocol. After 20 edges, the accepted loss report clears the queue-loss count and the same gateway session executes the next command.

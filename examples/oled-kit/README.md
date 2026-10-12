@@ -1,4 +1,4 @@
-# Ordered OLED kit
+# ESP32-S3 OLED kit
 
 Firmware for the ESP32-S3-N16R8 DevKitC-style board (YD-ESP32-23 v1.3) with a 1.3-inch 128×64 I²C OLED.
 It passed physical acceptance on the owner's kit on 12 October 2026
@@ -53,7 +53,8 @@ The model emits JSON with `simulated: true`. It uses no GPIO, USB or credentials
 ## Wi-Fi build
 
 The `esp32s3-oled-kit-wifi` environment runs the same commands over your home Wi-Fi, so
-the board needs only a USB charger. The design is hub
+the board needs only a USB charger. Keep the Mac gateway running. This is not a computer-free system.
+The design is hub
 [ADR 005](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/decisions/005-wifi-device-route.md).
 The gateway setup is in its [Wi-Fi devices guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/wifi-devices.md).
 It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
@@ -67,6 +68,18 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
   `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
   text and keeps the status row.
+- If the board cannot join Wi-Fi, the top row says why and the second row says what to
+  check. The console prints the same reason and answers `status` with `wifi_failure` and
+  `wifi_hint`. Neither ever shows the network name or password.
+
+  | Top row | Second row | Cause | Fix |
+  | --- | --- | --- | --- |
+  | `No network` | `2.4GHz? Name?` | The board cannot see the network name. | Use a 2.4 GHz network; the ESP32-S3 has no 5 GHz radio. Check the name's upper and lower case. Provision again. |
+  | `Wrong password` | `Check password` | The network refused the password. | Provision again with the correct password. |
+  | `Join timeout` | `Check router` | A join attempt got no answer for 15 seconds. | Check that the router is on and the board is in range. |
+
+  The wrong-password case passed on the owner's kit
+  ([record](../../docs/verification/wifi-join-failure-2026-10-12.md)). The other two are host-tested only.
 - After Wi-Fi or gateway loss, the board reconnects with a fresh hello. The wait starts at
   0.5 s and doubles up to 5 s. After `unauthorized` or `revoked` it waits 60 s. A command is
   never replayed into a new session.

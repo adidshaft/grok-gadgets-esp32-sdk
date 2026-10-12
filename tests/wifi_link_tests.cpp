@@ -61,10 +61,52 @@ int main() {
   advance(3000);
   assert(tls.connects == 0 && fake::screen[0].rfind("WiFi...", 0) == 0);
 
+  // Join failures (#73). Reason codes map to a cause; anything else stays unclassified.
+  using grok::JoinFailure;
+  assert(grok::classifyDisconnect(201) == JoinFailure::NoNetwork);
+  for (uint8_t reason : {15, 202, 204})
+    assert(grok::classifyDisconnect(reason) == JoinFailure::WrongPassword);
+  for (uint8_t reason : {0, 2, 8, 200})
+    assert(grok::classifyDisconnect(reason) == JoinFailure::None);
+  auto blank = [](const std::string &row) {
+    return row.find_first_not_of(' ') == std::string::npos;
+  };
+  assert(blank(fake::screen[1]));
+  // A whole join attempt with no recognised reason: "Join timeout".
+  for (uint32_t start = fake::now; fake::now - start < grok::WifiRejoinMs + 6000;)
+    advance(1);
+  assert(fake::screen[0].rfind("Join timeout", 0) == 0);
+  assert(fake::screen[1].rfind("Check router", 0) == 0);
+  // Name not found, which includes a 5 GHz-only network: status, hint row and console line.
+  Serial.output.clear();
+  WiFi.fail(201);
+  advance(6000);
+  assert(fake::screen[0].rfind("No network", 0) == 0);
+  assert(fake::screen[1].rfind("2.4GHz? Name?", 0) == 0);
+  assert(Serial.output.find("status: No network. Network not found. Use a 2.4 GHz network") !=
+         std::string::npos);
+  // Wrong password.
+  WiFi.fail(15);
+  advance(6000);
+  assert(fake::screen[0].rfind("Wrong password", 0) == 0);
+  assert(fake::screen[1].rfind("Check password", 0) == 0);
+  assert(Serial.output.find("status: Wrong password. ") != std::string::npos);
+  // The console status reply names the cause, never the network or password.
+  Serial.output.clear();
+  Serial.input += "{\"type\":\"status\"}\n";
+  loop();
+  std::string console = Serial.output.substr(Serial.output.find('{'));
+  assert(!deserializeJson(frame, console) && frame["wifi"] == "disconnected");
+  assert(frame["wifi_failure"] == "wrong_password");
+  assert(std::string(frame["wifi_hint"].as<const char *>()).find("Provision") != std::string::npos);
+  assert(console.find("home-net") == std::string::npos);
+  assert(console.find("pass-word-1") == std::string::npos);
+
   // Wi-Fi up: TLS to the provisioned address; hello carries the token.
   WiFi.state = WL_CONNECTED;
   online();
   assert(tls.host == "192.168.1.20" && tls.port == 8767);
+  assert(blank(fake::screen[1])); // Joining clears the failure hint.
   assert(frame["device"]["device_id"] == "oledkit-bc9a78563412");
   assert(frame["device"]["firmware_version"] == "0.2.0-wifi");
   advance(10);

@@ -1,19 +1,19 @@
 # Grok Gadgets ESP32 SDK
 
-Build USB gadgets for your Grok Bot in an Arduino sketch: declare commands and events, and
-`grok::Gadget` talks to the local [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway).
-Two examples compile; nobody has flashed either of them yet. Experimental alpha: see the
+Build USB and Wi-Fi gadgets for your Grok Bot with an Arduino sketch. Declare commands and events with `grok::Gadget`.
+The [gateway](https://github.com/adidshaft/grok-gadgets-gateway) connects your gadget to Grok Bot.
+The owner tested one ESP32-S3 OLED kit over USB and Wi-Fi. Experimental alpha: see the
 [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
-Independent project, not affiliated with SpaceXAI.
+Independent project, not affiliated with SpaceXSI.
 
 ## First physical experiment
 
-The ordered board is an **AYWHP ESP32-S3 DevKitC-style board** with **ESP32-S3-WROOM-1-N16R8 and USB-C**.
-The order includes an **ApTechDeals 840-point breadboard and jumper-wire set**.
-The display is a **Robocraze 0.96-inch 128×64 OLED**, advertised as **SPI/I²C, 4-pin**. Start with simulation. Inspect the board and OLED after
-delivery before selecting pins, a display driver or a flash profile.
-See the [first experiment](docs/first-experiment.md) for parts, wiring gates and acceptance.
-AtomS3 Lite is an optional example, not the first experiment.
+The delivered kit uses a **YD-ESP32-23 v1.3, ESP32-S3 N16R8** board and a **1.3-inch SH1106 OLED**.
+It includes the ApTechDeals breadboard and jumper wires. The delivered display differs from the ordered 0.96-inch module.
+Start with simulation, then follow the [first experiment](docs/first-experiment.md).
+The SDK supports custom gadgets. This kit is the tested example; AtomS3 Lite is an optional example with build evidence only.
+
+> Writing style: ASD-STE100-inspired English. Use short sentences, active verbs and one instruction per step. This is not certified compliance.
 
 ## Quickstart
 
@@ -30,7 +30,7 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-Expected: six host test suites pass, both sketch transcripts pass the contract check, and the
+Expected: eight host test suites pass, four sketch transcripts pass the contract check, and the
 optional C124 firmware compiles: **build verified, hardware pending**. Next,
 [create your own gadget](docs/sdk.md).
 
@@ -67,19 +67,17 @@ names, events and limits are in the [library guide](docs/sdk.md).
 ## Flash a board
 
 The gadget talks over USB to a bridge on your computer, and the bridge talks to the
-[gateway](https://github.com/adidshaft/grok-gadgets-gateway). The [first experiment](docs/first-experiment.md) defines the ordered kit.
+[gateway](https://github.com/adidshaft/grok-gadgets-gateway). The [first experiment](docs/first-experiment.md) describes the tested kit.
 [Optional C124 build, flash and recovery](docs/build-flash.md)
 covers flash offsets, the device ID, `grok-gadgets-gateway enroll`, `usb-bridge` and unplug
-recovery. Nobody has flashed a board for this project yet, so we welcome hardware results.
+recovery for C124. Use the [OLED example](examples/oled-kit/README.md) for the tested ESP32-S3 kit. We welcome independent test results.
 
 ## Grok Bot today
 
-Run `grok-gadgets-gateway rehearse` to check the local simulated path for Grok Bot. A cloud
-Grok Bot cannot reach your computer yet, and a button press does not wake the Bot. The OLED
-kit also runs over Wi-Fi ([examples/oled-kit](examples/oled-kit/README.md#wi-fi-build)); it
-passed physical acceptance on the owner's kit on 12 October 2026
-([record](docs/verification/oled-kit-wifi-2026-10-12.md)). See the
-[hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
+The owner used Grok Bot to run `grok-gadgets-gateway rehearse` on the Mac.
+The gateway log and the owner's display observation confirmed the Wi-Fi command ([record](docs/verification/oled-kit-wifi-2026-10-12.md#grok-bot)).
+This is a local shell-command route. Native Grok Bot MCP calls remain unverified.
+The Mac must run the gateway. A USB charger powers the wireless board. A button press does not wake Grok Bot.
 
 ## Learn more
 
@@ -106,6 +104,6 @@ Contribute on the `dev` branch; `main` holds tagged stable releases ([branches](
 ## License and affiliation
 
 Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Grok Gadgets is an independent
-open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXAI or
+open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXSI or
 xAI**, which make Grok and Grok Bot, nor with M5Stack. We reconstructed the pre-publication commit dates; see the
 [history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).

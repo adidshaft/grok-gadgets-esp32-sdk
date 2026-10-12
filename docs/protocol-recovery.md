@@ -1,6 +1,6 @@
 # USB framing and lifecycle
 
-The gateway owns canonical protocol **0.1.0**. This repository copies it into `protocol/0.1.0`. The source manifest records SHA-256 hashes.
+The gateway owns canonical protocol **0.1.0**. This repository copies it into `protocol/0.1.0`. The source manifest records SHA-256 hashes. The copied protocol README records its original transport scope. Use this guide for current USB and Wi-Fi support.
 
 ## Frame format
 
@@ -24,7 +24,7 @@ The USB hello contains no credentials. The local bridge adds the host's per-devi
 Run the bridge and gateway on the same host. The device protocol is not an HTTPS MCP endpoint.
 Do not expose it through a tunnel. A tunnel does not add gateway authentication.
 The gateway's separate `serve` command provides authenticated HTTP MCP on loopback.
-Public HTTPS and Grok Bot compatibility are not verified; see `HARD-GROK-REMOTE-001` and the
+Public HTTPS and native Grok Bot MCP calls remain unverified; see `HARD-GROK-REMOTE-001` and the
 [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md).
 
 ## Startup and identity
@@ -43,13 +43,13 @@ An RGB acknowledgement follows the return of the pixel driver's `show()` functio
 
 ## Recover a session
 
-A request times out after 13 seconds. That is longer than the USB bridge's 2-second connect wait plus its 10-second reply wait, so a late reply is not applied to the next request. Hello retries start at 500 ms and increase up to five seconds. The delay returns to 500 ms after a successful request other than hello.
+A request times out after 13 seconds. The USB bridge waits 2 seconds to connect and 10 seconds for a reply. The firmware does not apply late replies to another request. Hello retries start at 500 ms and increase up to five seconds. The delay returns to 500 ms after a successful request other than hello.
 
 A reply must be one JSON object whose fields match the outstanding request. Trailing bytes, a second object, an embedded NUL, or the wrong shape starts a new session. Firmware drops the old pending acknowledgement. The gateway records dispatched commands as uncertain when their results are unknown.
 
 A permanently rejected queued event (`duplicate_conflict`, `invalid_event`, `invalid_request`, `unsupported_capability`, `invalid_state`) is dropped, counted in `history_lost`, and polling continues. Other event failures reconnect. After five failures the event is dropped.
 
-If the gateway answers an acknowledgement with `late_ack` (the command already closed as timed out or unconfirmed) or `unknown_command`, the firmware drops that acknowledgement and keeps polling on the same session. It does not resend it or reconnect. `gadget.droppedAcks()` counts these. See the [canonical protocol](../protocol/0.1.0/README.md#late-acknowledgements-late_ack).
+The gateway can answer an acknowledgement with `late_ack` or `unknown_command`. The firmware drops that acknowledgement and keeps polling on the same session. It does not resend it or reconnect. `gadget.droppedAcks()` counts these. See the [canonical protocol](../protocol/0.1.0/README.md#late-acknowledgements-late_ack).
 
 Firmware never treats an acknowledgement as a command. It does not automatically retry an action. Correct credentials or protocol settings after authorization, revocation or version errors. Then reconnect. Firmware does not print secrets.
 
@@ -69,20 +69,14 @@ Same-boot reconnect keeps this cache. A new boot clears it. Retries do not exten
 
 Device reboot removes the RAM event queue and acknowledgement cache. USB firmware has no synchronized clock, so events do not claim an `observed_at` time. Use gateway `received_at` instead.
 
-## Future Wi-Fi support
+## Wi-Fi transport
 
-Wi-Fi transport is not implemented in this alpha. The gateway's device listener is loopback-only and unencrypted. Wi-Fi needs an authenticated, reachable transport and secure credential setup. This is tracked as ESP-005.
+The OLED kit supports Wi-Fi with TLS and a pinned gateway CA. USB provisioning stores the device token and network settings.
+See the [Wi-Fi example](../examples/oled-kit/README.md#wi-fi-build) and [physical acceptance record](verification/oled-kit-wifi-2026-10-12.md).
+Keep the Mac gateway running while the board uses a USB charger.
 
-Wi-Fi device transport and cloud Bot MCP access are separate work.
-Neither creates the other. Future customer-hosted and maker-hosted services are product
-options, not shipped features. The hosting FAQ keeps their operation and security requirements together.
+Wi-Fi transport does not prove native Grok Bot MCP access. The tested Grok Bot route runs an approved local command.
+A button event does not wake Grok Bot. C124 Wi-Fi operation remains untested.
 
-Before adding that transport:
-
-1. Keep per-device credentials out of Git.
-2. Support credential revocation.
-3. Add TLS certificate validation.
-4. Define credential setup and reset behavior.
-5. Reuse the SDK's bounded command and event handling.
-
-Do not expose plaintext credentials on a LAN or public network. C124 supports Wi-Fi, but this project has not verified its radio operation.
+Keep credentials out of Git. The board stores secrets without flash encryption. Revoke its token and change Wi-Fi credentials if you lose it.
+Do not expose the unencrypted loopback device port to a network. Use the gateway's separate LAN TLS listener for Wi-Fi.
