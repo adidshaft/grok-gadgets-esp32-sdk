@@ -1,6 +1,6 @@
 # Ordered OLED kit
 
-Firmware for the ESP32-S3-N16R8 DevKitC-style board with a 0.96-inch 128×64 I²C OLED.
+Firmware for the ESP32-S3-N16R8 DevKitC-style board (YD-ESP32-23 v1.3) with a 1.3-inch 128×64 I²C OLED.
 It passed physical acceptance on the owner's kit on 12 October 2026
 ([record](../../docs/verification/oled-kit-2026-10-12.md)).
 
