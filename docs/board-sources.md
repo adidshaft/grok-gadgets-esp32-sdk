@@ -1,7 +1,7 @@
 # Optional C124 source verification
 
 These sources apply only to the optional C124 example. See the
-[first experiment](first-experiment.md) for the ordered AYWHP board and OLED.
+[first experiment](first-experiment.md) for the delivered YD-ESP32-23 board and SH1106 OLED.
 
 Verified on 4 October 2026 from manufacturer sources:
 
