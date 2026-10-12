@@ -64,6 +64,13 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
   only the gateway CA that provisioning stored. It never uses a public CA bundle or skips
   verification.
 - The hello carries the device token. The frames are the same protocol 0.1.0 frames as USB.
+- The gateway address can be its mDNS name, for example `my-mac.local`, as in
+  `wifi-provision ... --lan my-mac.local`. Before each connection the board looks the name up and
+  checks the certificate against the name. If the computer's address changes, the board follows it.
+  If the name does not answer, the top row shows `Gateway name?`. The board also announces its own
+  name, its device ID plus `.local`, on the home network.
+  On the owner's kit this passed two address changes and a Mac restart
+  ([record](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/verification/always-on-2026-10-13.md)).
 - The ESP32-S3 joins 2.4 GHz networks only.
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
   `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the

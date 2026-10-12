@@ -4,7 +4,7 @@
 #include <string>
 // A scripted TLS client: `accept` decides whether connect() succeeds, `error` is lastError().
 struct WiFiClientSecure : Stream {
-  std::string input, output, ca, host;
+  std::string input, output, ca, host, address; // address: set when connecting by IPAddress
   uint16_t port = 0;
   bool accept = true, open = false;
   int error = 0, connects = 0, stops = 0;
@@ -14,6 +14,16 @@ struct WiFiClientSecure : Stream {
   int connect(const char *name, uint16_t number) {
     ++connects;
     host = name;
+    port = number;
+    open = accept;
+    return accept;
+  }
+  int connect(IPAddress ip, uint16_t number, const char *name, const char *rootCa, const char *,
+              const char *) {
+    ++connects;
+    address = ip.toString();
+    host = name; // The name the certificate must match.
+    ca = rootCa;
     port = number;
     open = accept;
     return accept;

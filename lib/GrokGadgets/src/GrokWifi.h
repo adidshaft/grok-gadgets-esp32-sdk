@@ -4,6 +4,7 @@
 // The console never prints a stored value. The Wi-Fi password and token stay in NVS.
 #pragma once
 #include "GrokSession.h"
+#include <ESPmDNS.h>
 #include <Preferences.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -11,6 +12,8 @@
 namespace grok {
 constexpr size_t MaxCaPem = 3072, MaxConsoleLine = 4096;
 constexpr uint32_t TlsConnectSeconds = 5, TlsHandshakeSeconds = 8;
+// One mDNS lookup of the gateway's name; it blocks the loop, so keep it short.
+constexpr uint32_t MdnsQueryMs = 1000;
 // While offline, start a fresh join this often. The core's auto-reconnect can stop retrying
 // after a long access-point outage (seen in the Phase 4 router-off test).
 constexpr uint32_t WifiRejoinMs = 15000;
@@ -56,7 +59,7 @@ struct WifiSettings {
   char ssid[33] = {};
   char password[65] = {};
   char token[257] = {};
-  char host[16] = {};
+  char host[64] = {}; // IPv4 address or mDNS name such as my-mac.local (hub ADR 006).
   uint16_t port = 0;
   char ca[MaxCaPem + 1] = {};
   bool complete() const { return ssid[0] && token[0] && host[0] && port && ca[0]; }
@@ -100,6 +103,27 @@ inline bool validIpv4(const char *text) {
   }
   return parts == 4;
 }
+// An mDNS name: lower-case DNS labels ending in .local, as `lan-cert` writes it.
+inline bool validLocalName(const char *text) {
+  static constexpr const char *Suffix = ".local";
+  size_t length = strlen(text), suffix = strlen(Suffix);
+  if (length <= suffix || strcmp(text + length - suffix, Suffix))
+    return false;
+  size_t label = 0;
+  for (size_t i = 0; i < length - suffix + 1; ++i) {
+    char c = i < length - suffix ? text[i] : '.';
+    if (c == '.') {
+      if (!label || text[i - 1] == '-' || label > 63)
+        return false;
+      label = 0;
+    } else if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c == '-' && label)) {
+      ++label;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
 inline bool printableToken(const char *token) {
   for (const char *c = token; *c; ++c)
     if (*c <= 0x20 || *c > 0x7e)
@@ -122,8 +146,9 @@ inline Error readSettingsInto(JsonObjectConst in, WifiSettings &next) {
       return {"invalid_settings", "Wi-Fi password must be empty or 8-64 bytes"};
     if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
       return {"invalid_settings", "Token must be 16-256 printable characters"};
-    if (!copyString(in["host"], next.host, sizeof(next.host), 7) || !validIpv4(next.host))
-      return {"invalid_settings", "Host must be an IPv4 address"};
+    if (!copyString(in["host"], next.host, sizeof(next.host), 7) ||
+        !(validIpv4(next.host) || validLocalName(next.host)))
+      return {"invalid_settings", "Host must be an IPv4 address or NAME.local"};
     if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
       return {"invalid_settings", "Port must be 1-65535"};
     next.port = in["port"].as<uint16_t>();
@@ -185,9 +210,17 @@ private:
 // TLS to the gateway LAN listener. Trusts only the provisioned CA; never insecure mode.
 class WifiLink : public Link {
 public:
-  enum class State { NotProvisioned, WifiConnecting, GatewayConnecting, TlsRejected };
+  enum class State {
+    NotProvisioned,
+    WifiConnecting,
+    GatewayConnecting,
+    TlsRejected,
+    NameUnresolved
+  };
   explicit WifiLink(const WifiSettings &settings) : s_(settings) {}
-  void begin() {
+  // `mdnsName` is this board's own mDNS host name, used when the gateway is a .local name.
+  void begin(const char *mdnsName = "grok-gadget") {
+    mdnsName_ = mdnsName;
     if (!s_.complete())
       return;
     WiFi.mode(WIFI_STA);
@@ -229,7 +262,23 @@ public:
     }
     failure_ = JoinFailure::None;
     lastReason_ = 0;
-    if (client_.connect(s_.host, s_.port)) {
+    bool connected;
+    if (validLocalName(s_.host)) {
+      // Find the gateway's current address by name, then check its certificate by name.
+      if (!mdnsStarted_)
+        mdnsStarted_ = MDNS.begin(mdnsName_);
+      char label[sizeof(s_.host)] = {};
+      memcpy(label, s_.host, strlen(s_.host) - strlen(".local"));
+      IPAddress address = MDNS.queryHost(label, MdnsQueryMs);
+      if (!uint32_t(address)) {
+        state_ = State::NameUnresolved;
+        return false;
+      }
+      connected = client_.connect(address, s_.port, s_.host, s_.ca, nullptr, nullptr);
+    } else {
+      connected = client_.connect(s_.host, s_.port);
+    }
+    if (connected) {
       state_ = State::GatewayConnecting;
       return true;
     }
@@ -261,6 +310,8 @@ private:
   WiFiClientSecure client_;
   State state_ = State::NotProvisioned;
   JoinFailure failure_ = JoinFailure::None;
+  const char *mdnsName_ = "grok-gadget";
+  bool mdnsStarted_ = false;
   volatile uint8_t lastReason_ = 0;
   uint32_t joinedAt_ = 0;
 };
