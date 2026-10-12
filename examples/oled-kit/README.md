@@ -97,7 +97,9 @@ Lines that start with `status:` report link changes as text.
 
 ### Factory reset
 
-Hold BOOT for 10 seconds, or run `wifi-provision PORT --device ID --factory-reset`. The
+Hold BOOT for 10 seconds, or run `wifi-provision PORT --device ID --factory-reset`.
+After 3 seconds of holding, the top row counts down from `Reset in 7s`. Let go before it
+reaches zero to keep the settings. The
 board erases its Wi-Fi settings and restarts as `Not provisioned`. Also run
 `grok-gadgets-gateway revoke ID`. `esptool erase_flash` erases everything.
 
