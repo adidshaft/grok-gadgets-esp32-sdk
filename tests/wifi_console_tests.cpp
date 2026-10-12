@@ -68,7 +68,10 @@ int main() {
        {provision("home-net", "short", token), provision("", "pass-word-1", token),
         provision("home-net", "pass-word-1", "short"),
         provision("home-net", "pass-word-1", "has space in token xx"),
-        provision("home-net", "pass-word-1", token, "gateway.local"),
+        provision("home-net", "pass-word-1", token, "gateway.lan"),
+        provision("home-net", "pass-word-1", token, "my_mac.local"),
+        provision("home-net", "pass-word-1", token, "-mac.local"),
+        provision("home-net", "pass-word-1", token, ".local"),
         provision("home-net", "pass-word-1", token, "192.168.1.256"),
         provision("home-net", "pass-word-1", token, "192.168.1.20", 0),
         provision("home-net", "pass-word-1", token, "192.168.1.20", 8767, "not a pem")}) {
@@ -112,6 +115,12 @@ int main() {
   assert(fake::nvs["grok-wifi/port"] == "8767" && fake::nvs["grok-wifi/ca"] == Ca);
   assert(ESP.restarts == 1);
 
+  // A gateway mDNS name is stored as given (hub ADR 006).
+  command(provision("home-net", "pass-word-1", token, "my-mac.local"));
+  assert(reply["ok"] && fake::nvs["grok-wifi/host"] == "my-mac.local");
+  assert(grok::validLocalName("a-1.b.local") && !grok::validLocalName("My-Mac.local"));
+  assert(!grok::validLocalName("mac-.local") && !grok::validLocalName("mac.local.evil"));
+
   // An open network has an empty password.
   command(provision("open-net", "", token));
   assert(reply["ok"] && fake::nvs["grok-wifi/pass"].empty());
@@ -119,7 +128,7 @@ int main() {
   // Factory reset erases the namespace and restarts.
   command(R"({"type":"factory_reset"})");
   assert(reply["ok"] && reply["restarting"]);
-  assert(fake::nvs.empty() && ESP.restarts == 3);
+  assert(fake::nvs.empty() && ESP.restarts == 4);
 
   // A failing NVS write is reported.
   fake::nvsFails = true;

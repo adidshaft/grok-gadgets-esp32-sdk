@@ -67,6 +67,8 @@ const char *linkStatus() {
     return grok::describe(wifiLink.failure()).status; // "WiFi..." or why the join failed.
   case grok::WifiLink::State::TlsRejected:
     return "TLS rejected";
+  case grok::WifiLink::State::NameUnresolved:
+    return "Gateway name?"; // The gateway's .local name did not answer.
   default:
     return "Gateway...";
   }
@@ -228,7 +230,7 @@ void setup() {
   Serial.setRxBufferSize(grok::MaxConsoleLine + 1024); // One provisioning line fits.
   Serial.begin(115200);
   store.load(settings);
-  wifiLink.begin();
+  wifiLink.begin(gadget.deviceId());
   console.status(consoleStatus, nullptr);
   gadget.begin(wifiLink);
 #else

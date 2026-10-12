@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Wi-Fi build: the gateway can be provisioned as an mDNS name such as `my-mac.local`. Before each connection the board resolves it with `ESPmDNS` and verifies the TLS certificate against the name, so a new computer address needs no new settings. An unanswered name shows `Gateway name?`. IPv4 settings keep working ([#99](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/99), hub ADR 006).
+
 ## 0.2.0-alpha.11 — 12 October 2026
 
 - OLED Wi-Fi build: while `Online`, show a 48×48 Grok Bot face on the right of the screen and `Grok Bot` on the second row. The face moves one pixel and blinks every 3.6 s. Message text uses the bottom two rows. Connection errors and reset messages replace the face and label ([#91](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/91), [#93](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/93)). The owner checked the 48×48 face and label on the kit on 12 October 2026; text on rows 6–7 is host-tested only.
