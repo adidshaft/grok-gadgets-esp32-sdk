@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.10 — 12 October 2026
+
+- Wi-Fi build: when the board cannot join, the OLED top row says why (`No network`, `Wrong password`, `Join timeout`) and the second row says what to check (`2.4GHz? Name?`, `Check password`, `Check router`). The console prints the same cause, and the `status` reply adds `wifi_failure` and `wifi_hint`. Neither shows the network name or password ([#73](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/73)).
+- Fix: every `provision` console line crashed the Wi-Fi build after the change above (`Stack canary watchpoint triggered (loopTask)`). Two 3.4 KB settings copies sat on the 8 KB loop stack; the console now uses one buffer outside the stack. `v0.2.0-alpha.9` was within about 500 bytes of this limit, and no board has been provisioned with it.
+- The wrong-password message and the provisioning fix passed on the owner's kit on 12 October 2026 ([record](docs/verification/wifi-join-failure-2026-10-12.md)). `No network` and `Join timeout` are host-tested only.
+
 ## 0.2.0-alpha.9 — 12 October 2026
 
 - Wi-Fi build: after BOOT is held for 3 s, the status row counts down to the 10 s factory reset (`Reset in 7s` … `Reset in 1s`). Letting go keeps the settings. In the Wi-Fi acceptance the owner reset the board by accident while waiting for feedback (#80). The countdown passed a physical check on the owner's kit (`docs/verification/oled-kit-wifi-2026-10-12.md`).

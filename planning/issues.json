@@ -541,6 +541,21 @@
       ],
       "stage": "done",
       "evidence": "Documentation-only review. Dated receipts and checksum-pinned protocol copies remain historical evidence. See the accompanying PR for check results."
+    },
+    {
+      "id": "ESP-WIFI-DIAG-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "A provisioned board that could not join Wi-Fi showed only WiFi... with no reason",
+      "acceptance": [
+        "OLED top row and console status report the last station failure without any stored value",
+        "Host tests with the WiFi stub; docs list each message and its fix",
+        "Never print the network name or password"
+      ],
+      "labels": [
+        "enhancement"
+      ],
+      "stage": "done",
+      "evidence": "GitHub #73, PR #86; tests/wifi_link_tests.cpp and tests/wifi_console_tests.cpp. Owner's kit on 12 Oct 2026: wrong password showed Wrong password / Check password; the check found and fixed a provisioning stack overflow (docs/verification/wifi-join-failure-2026-10-12.md). No network and Join timeout are host-tested only."
     }
   ]
 }

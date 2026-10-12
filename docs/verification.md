@@ -1,6 +1,6 @@
 # Verification
 
-**Current first experiment:** [AYWHP ESP32-S3 and OLED kit](first-experiment.md).
+**Current first experiment:** [ESP32-S3 (YD-ESP32-23 v1.3) and 1.3-inch SH1106 OLED kit](first-experiment.md).
 **Physical acceptance passed on the owner's kit on 12 October 2026:** [record](verification/oled-kit-2026-10-12.md).
 **Over Wi-Fi it passed on the same day:** [record](verification/oled-kit-wifi-2026-10-12.md).
 
