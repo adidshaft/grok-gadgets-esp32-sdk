@@ -69,6 +69,8 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
   checks the certificate against the name. If the computer's address changes, the board follows it.
   If the name does not answer, the top row shows `Gateway name?`. The board also announces its own
   name, its device ID plus `.local`, on the home network.
+  On the owner's kit this passed two address changes and a Mac restart
+  ([record](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/verification/always-on-2026-10-13.md)).
 - The ESP32-S3 joins 2.4 GHz networks only.
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
   `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
