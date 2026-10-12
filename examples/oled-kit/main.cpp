@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Ordered kit: ESP32-S3-N16R8 DevKitC-style board, 0.96-inch 128x64 I2C OLED on GPIO8 (SDA)
+// Ordered kit: ESP32-S3-N16R8 DevKitC-style board, 1.3-inch 128x64 I2C OLED on GPIO8 (SDA)
 // and GPIO9 (SCL); the firmware also accepts the two data wires swapped, the onboard RGB pixel
 // (`rgb.set`) and the BOOT button (GPIO0, read after boot). Commands: `display.text` shows up to 32
 // printable ASCII characters; `display.clear` blanks the screen. The display state reports what the
@@ -14,7 +14,7 @@
 constexpr int DataPinA = 8, DataPinB = 9, ButtonPin = 0, RgbPin = OLED_KIT_RGB_PIN;
 constexpr size_t MaxText = 32, Columns = 16;
 
-// The delivered 0.96-inch module is an SH1106 (an SSD1306 driver left a lit column at the
+// The delivered 1.3-inch module is an SH1106 (an SSD1306 driver left a lit column at the
 // right edge). Build with -DOLED_KIT_SSD1306 for SSD1306 modules.
 #ifdef OLED_KIT_SSD1306
 using Oled = U8X8_SSD1306_128X64_NONAME_HW_I2C;
