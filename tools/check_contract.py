@@ -36,6 +36,16 @@ sketches = {
         command("t-on", "led.set", {"on": True}),
         command("t-bad", "led.set", {"on": 1}),
     ],
+    "transcript_oled_kit": [
+        command("t-text", "display.text", {"text": "Grok Bot ready"}),
+        command("t-bad", "display.text", {"text": "tab\there"}),
+        command("t-clear", "display.clear", {}),
+    ],
+}
+expected_acks = {
+    "transcript_c124": {"t-green": "executed", "t-bad": "failed"},
+    "transcript_led_button": {"t-on": "executed", "t-bad": "failed"},
+    "transcript_oled_kit": {"t-text": "executed", "t-bad": "failed", "t-clear": "executed"},
 }
 for binary, commands in sketches.items():
     output = subprocess.run(
@@ -63,6 +73,11 @@ for binary, commands in sketches.items():
     losses = [frame["data"] for frame in sent if frame["name"] == "history_lost"]
     assert losses == [{"dropped": 4}], (binary, losses)
     acks = {frame["command_id"]: frame["status"] for frame in frames if frame["type"] == "ack"}
-    assert acks == {"t-green" if "c124" in binary else "t-on": "executed", "t-bad": "failed"}
+    assert acks == expected_acks[binary], (binary, acks)
+    if binary == "transcript_oled_kit":
+        shown = {f["command_id"]: f["state"]["display"] for f in frames if f["type"] == "ack"}
+        assert shown["t-text"] == {"ready": True, "text": "Grok Bot ready", "address": "0x3c"}
+        assert shown["t-bad"]["text"] == "Grok Bot ready", "rejected text changed the display"
+        assert shown["t-clear"]["text"] == "", shown
     print(f"contract: {binary} produced {len(frames)} valid frames ({', '.join(sorted(kinds))})")
 print("contract: pinned protocol hashes and canonical fixture valid")
