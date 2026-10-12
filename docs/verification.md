@@ -2,6 +2,7 @@
 
 **Current first experiment:** [AYWHP ESP32-S3 and OLED kit](first-experiment.md).
 **Physical acceptance passed on the owner's kit on 12 October 2026:** [record](verification/oled-kit-2026-10-12.md).
+**Over Wi-Fi it passed on the same day:** [record](verification/oled-kit-wifi-2026-10-12.md).
 The C124 results below are historical software/build evidence for an optional
 example. They do not verify the ordered board, OLED controller, pins or wiring.
 
