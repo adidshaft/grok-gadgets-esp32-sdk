@@ -77,6 +77,9 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
   | `No network` | `2.4GHz? Name?` | The board cannot see the network name. | Use a 2.4 GHz network; the ESP32-S3 has no 5 GHz radio. Check the name's upper and lower case. Provision again. |
   | `Wrong password` | `Check password` | The network refused the password. | Provision again with the correct password. |
   | `Join timeout` | `Check router` | A join attempt got no answer for 15 seconds. | Check that the router is on and the board is in range. |
+
+  The wrong-password case passed on the owner's kit
+  ([record](../../docs/verification/wifi-join-failure-2026-10-12.md)). The other two are host-tested only.
 - After Wi-Fi or gateway loss, the board reconnects with a fresh hello. The wait starts at
   0.5 s and doubles up to 5 s. After `unauthorized` or `revoked` it waits 60 s. A command is
   never replayed into a new session.
