@@ -76,7 +76,13 @@ for binary, commands in sketches.items():
     assert acks == expected_acks[binary], (binary, acks)
     if binary == "transcript_oled_kit":
         shown = {f["command_id"]: f["state"]["display"] for f in frames if f["type"] == "ack"}
-        assert shown["t-text"] == {"ready": True, "text": "Grok Bot ready", "address": "0x3c"}
+        assert shown["t-text"] == {
+            "ready": True,
+            "text": "Grok Bot ready",
+            "sda": 8,
+            "scl": 9,
+            "address": "0x3c",
+        }
         assert shown["t-bad"]["text"] == "Grok Bot ready", "rejected text changed the display"
         assert shown["t-clear"]["text"] == "", shown
     print(f"contract: {binary} produced {len(frames)} valid frames ({', '.join(sorted(kinds))})")

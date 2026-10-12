@@ -6,7 +6,9 @@ namespace fake {
 extern std::map<int, std::string> screen; // Row to drawn text.
 } // namespace fake
 extern const uint8_t u8x8_font_chroma48medium8_r[];
+constexpr int U8X8_PIN_NONE = 255;
 struct FakeU8x8 {
+  FakeU8x8(int = U8X8_PIN_NONE, int = U8X8_PIN_NONE, int = U8X8_PIN_NONE) {}
   void setI2CAddress(uint8_t) {}
   bool begin() { return true; }
   void setFont(const uint8_t *) {}
