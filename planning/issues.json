@@ -78,7 +78,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128×64 advertised SPI/I²C 4-pin OLED",
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
         "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
         "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
         "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
@@ -636,6 +636,23 @@
         "GitHub #99, PR #100; tests/wifi_mdns_tests.cpp and tests/wifi_console_tests.cpp",
         "Owner's kit 12-13 Oct 2026, dev 3ae0a13 (firmware sha256 6a79e214...275f): Online by name; two Mac address changes and a Mac restart without new settings (gateway docs/verification/always-on-2026-10-13.md)"
       ]
+    },
+    {
+      "id": "DOC-STE-002",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Current install and kit guidance after the 13 October releases",
+      "acceptance": [
+        "Published package installation precedes source setup where available",
+        "Current owner evidence and remaining verification gates stay distinct"
+      ],
+      "dependencies": [],
+      "labels": [
+        "documentation"
+      ],
+      "milestone": "Documentation upkeep",
+      "stage": "done",
+      "commits": [],
+      "evidence": "Ruff and formatting pass; all eight host suites and four OLED checks pass. No firmware or hardware state changed."
     }
   ]
 }

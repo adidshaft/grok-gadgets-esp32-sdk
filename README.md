@@ -10,7 +10,8 @@ Independent project, not affiliated with SpaceXSI.
 
 The delivered kit uses a **YD-ESP32-23 v1.3, ESP32-S3 N16R8** board and a **1.3-inch SH1106 OLED**.
 It includes the ApTechDeals breadboard and jumper wires. The delivered display differs from the ordered 0.96-inch module.
-Start with simulation, then follow the [first experiment](docs/first-experiment.md).
+Build the tested kit with the [first experiment](docs/first-experiment.md).
+Without hardware, start with the host checks below.
 The SDK supports custom gadgets. This kit is the tested example; AtomS3 Lite is an optional example with build evidence only.
 
 > Writing style: ASD-STE100-inspired English. Use short sentences, active verbs and one instruction per step. This is not certified compliance.
@@ -78,6 +79,9 @@ The owner used Grok Bot to run `grok-gadgets-gateway rehearse` on the Mac.
 The gateway log and the owner's display observation confirmed the Wi-Fi command ([record](docs/verification/oled-kit-wifi-2026-10-12.md#grok-bot)).
 This is a local shell-command route. Native Grok Bot MCP calls remain unverified.
 The Mac must run the gateway. A USB charger powers the wireless board. A button press does not wake Grok Bot.
+The kit passed local-name, address-change and Mac login recovery checks. See
+[always-on setup](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/always-on.md).
+A second builder has not yet reproduced the kit: [report your result](https://github.com/adidshaft/grok-gadgets/issues/185).
 
 ## Learn more
 
