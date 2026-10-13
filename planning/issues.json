@@ -636,6 +636,23 @@
         "GitHub #99, PR #100; tests/wifi_mdns_tests.cpp and tests/wifi_console_tests.cpp",
         "Owner's kit 12-13 Oct 2026, dev 3ae0a13 (firmware sha256 6a79e214...275f): Online by name; two Mac address changes and a Mac restart without new settings (gateway docs/verification/always-on-2026-10-13.md)"
       ]
+    },
+    {
+      "id": "DOC-STE-002",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Current install and kit guidance after the 13 October releases",
+      "acceptance": [
+        "Published package installation precedes source setup where available",
+        "Current owner evidence and remaining verification gates stay distinct"
+      ],
+      "dependencies": [],
+      "labels": [
+        "documentation"
+      ],
+      "milestone": "Documentation upkeep",
+      "stage": "done",
+      "commits": [],
+      "evidence": "Ruff and formatting pass; all eight host suites and four OLED checks pass. No firmware or hardware state changed."
     }
   ]
 }
