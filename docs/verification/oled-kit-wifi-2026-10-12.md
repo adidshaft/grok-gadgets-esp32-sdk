@@ -105,3 +105,5 @@ point. Disconnect during a command was not tested. The listener's per-address ra
 was not reached (the board retried about 12 times a minute). Flash encryption is off, as ADR
 005 states. End-user setup without a USB cable is
 [#72](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/72).
+
+Update, 13 October 2026: Grok Bot later called the MCP tools natively and showed text on this kit through the gateway's remote route ([record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/grok-remote-https-2026-10-13.md)). This record is unchanged.

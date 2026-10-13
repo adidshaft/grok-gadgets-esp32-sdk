@@ -62,7 +62,7 @@ Use the [USB acceptance record](verification/oled-kit-2026-10-12.md) to compare 
 7. Compare results with the [Wi-Fi acceptance record](verification/oled-kit-wifi-2026-10-12.md).
 
 The board is wireless. The gateway still needs a running computer. A button press does not wake Grok Bot.
-The owner tested Grok Bot by running a local `rehearse` command. Native MCP access remains unverified.
+The owner tested Grok Bot with a local `rehearse` command, then with native tool calls through the gateway's remote route ([record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/grok-remote-https-2026-10-13.md)).
 
 The board stores credentials without flash encryption. Revoke its token and change the Wi-Fi password if you lose it.
 
