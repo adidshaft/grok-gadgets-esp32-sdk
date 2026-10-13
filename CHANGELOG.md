@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.13 — 13 October 2026
+
+- Documentation only; the library, firmware and examples are unchanged from 0.2.0-alpha.12. README, the first experiment, protocol recovery and SECURITY record that Grok Bot called the gateway's tools natively from the Mac and the iPhone and showed text on the OLED kit on 13 October 2026, through an owner-run tunnel to the MCP port only (#106). The install steps use the published packages (#105).
+
 ## 0.2.0-alpha.12 — 13 October 2026
 
 - Wi-Fi build: the gateway can be provisioned as an mDNS name such as `my-mac.local`. Before each connection the board resolves it with `ESPmDNS` and verifies the TLS certificate against the name, so a new computer address needs no new settings. An unanswered name shows `Gateway name?`. IPv4 settings keep working. On 12–13 October 2026 the owner's kit connected by name and followed two Mac address changes and a Mac restart without new settings ([gateway record](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/verification/always-on-2026-10-13.md)) ([#99](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/99), hub ADR 006).
