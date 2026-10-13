@@ -68,7 +68,9 @@ int main() {
        {provision("home-net", "short", token), provision("", "pass-word-1", token),
         provision("home-net", "pass-word-1", "short"),
         provision("home-net", "pass-word-1", "has space in token xx"),
-        provision("home-net", "pass-word-1", token, "gateway.lan"),
+        provision("home-net", "pass-word-1", token, "gateway"),
+        provision("home-net", "pass-word-1", token, "Devices.example.net"),
+        provision("home-net", "pass-word-1", token, "relay.example.123"),
         provision("home-net", "pass-word-1", token, "my_mac.local"),
         provision("home-net", "pass-word-1", token, "-mac.local"),
         provision("home-net", "pass-word-1", token, ".local"),
@@ -121,6 +123,11 @@ int main() {
   assert(grok::validLocalName("a-1.b.local") && !grok::validLocalName("My-Mac.local"));
   assert(!grok::validLocalName("mac-.local") && !grok::validLocalName("mac.local.evil"));
 
+  // A relay's DNS name is stored as given (hub ADR 009).
+  command(provision("home-net", "pass-word-1", token, "devices.example.net", 8443));
+  assert(reply["ok"] && fake::nvs["grok-wifi/host"] == "devices.example.net");
+  assert(fake::nvs["grok-wifi/port"] == "8443");
+
   // An open network has an empty password.
   command(provision("open-net", "", token));
   assert(reply["ok"] && fake::nvs["grok-wifi/pass"].empty());
@@ -128,7 +135,7 @@ int main() {
   // Factory reset erases the namespace and restarts.
   command(R"({"type":"factory_reset"})");
   assert(reply["ok"] && reply["restarting"]);
-  assert(fake::nvs.empty() && ESP.restarts == 4);
+  assert(fake::nvs.empty() && ESP.restarts == 5);
 
   // A failing NVS write is reported.
   fake::nvsFails = true;

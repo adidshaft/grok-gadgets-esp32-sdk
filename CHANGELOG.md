@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A relay's DNS name for the Wi-Fi gateway ([#111](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/111), hub ADR 009). `provision` accepts a public DNS name such as `devices.example.net` (lower case, two or more labels, up to 63 characters) beside an IPv4 address and a `.local` name. `WifiLink` looks the name up before each connection and checks the certificate against it. The OLED kit's top row shows `Relay...` while it connects and `Relay name?` if the name does not resolve. Host-tested and compiled; no kit has run it yet.
+- Reconnect waits get jitter: each is cut by up to a quarter at random, never below 0.5 s, so boards that lost the same relay spread out.
+- After a Wi-Fi drop, the join timer starts again, so the status shows `WiFi...` and not `Join timeout` at the first retry.
+
 ## 0.2.0-alpha.13 — 13 October 2026
 
 - Documentation only; the library, firmware and examples are unchanged from 0.2.0-alpha.12. README, the first experiment, protocol recovery and SECURITY record that Grok Bot called the gateway's tools natively from the Mac and the iPhone and showed text on the OLED kit on 13 October 2026, through an owner-run tunnel to the MCP port only (#106). The install steps use the published packages (#105).

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// Wi-Fi transport (hub ADR 005): TLS to the gateway's LAN listener with a pinned local CA,
-// settings in NVS, and a USB serial console for provisioning and factory reset.
+// Wi-Fi transport (hub ADR 005, 009): TLS to the gateway's LAN or relay listener with a pinned
+// CA, settings in NVS, and a USB serial console for provisioning and factory reset.
 // The console never prints a stored value. The Wi-Fi password and token stay in NVS.
 #pragma once
 #include "GrokSession.h"
@@ -59,7 +59,9 @@ struct WifiSettings {
   char ssid[33] = {};
   char password[65] = {};
   char token[257] = {};
-  char host[64] = {}; // IPv4 address or mDNS name such as my-mac.local (hub ADR 006).
+  // IPv4 address, mDNS name such as my-mac.local (hub ADR 006) or a relay's DNS name such as
+  // devices.example.net (hub ADR 009), up to 63 characters.
+  char host[64] = {};
   uint16_t port = 0;
   char ca[MaxCaPem + 1] = {};
   bool complete() const { return ssid[0] && token[0] && host[0] && port && ca[0]; }
@@ -124,6 +126,30 @@ inline bool validLocalName(const char *text) {
   }
   return true;
 }
+// A relay's public DNS name: lower-case labels, at least two, the last starting with a letter.
+// mDNS .local names have their own rule and are not DNS names here.
+inline bool validDnsName(const char *text) {
+  size_t length = strlen(text), label = 0, labels = 0;
+  if (!length || validLocalName(text))
+    return false;
+  const char *last = text;
+  for (size_t i = 0; i <= length; ++i) {
+    char c = i < length ? text[i] : '.';
+    if (c == '.') {
+      if (!label || text[i - 1] == '-' || label > 63)
+        return false;
+      ++labels;
+      label = 0;
+      if (i < length)
+        last = text + i + 1;
+    } else if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c == '-' && label)) {
+      ++label;
+    } else {
+      return false;
+    }
+  }
+  return labels >= 2 && *last >= 'a' && *last <= 'z';
+}
 inline bool printableToken(const char *token) {
   for (const char *c = token; *c; ++c)
     if (*c <= 0x20 || *c > 0x7e)
@@ -146,9 +172,9 @@ inline Error readSettingsInto(JsonObjectConst in, WifiSettings &next) {
       return {"invalid_settings", "Wi-Fi password must be empty or 8-64 bytes"};
     if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
       return {"invalid_settings", "Token must be 16-256 printable characters"};
-    if (!copyString(in["host"], next.host, sizeof(next.host), 7) ||
-        !(validIpv4(next.host) || validLocalName(next.host)))
-      return {"invalid_settings", "Host must be an IPv4 address or NAME.local"};
+    if (!copyString(in["host"], next.host, sizeof(next.host), 4) ||
+        !(validIpv4(next.host) || validLocalName(next.host) || validDnsName(next.host)))
+      return {"invalid_settings", "Host must be an IPv4 address, NAME.local or a DNS name"};
     if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
       return {"invalid_settings", "Port must be 1-65535"};
     next.port = in["port"].as<uint16_t>();
@@ -207,7 +233,7 @@ private:
   Preferences prefs_;
 };
 
-// TLS to the gateway LAN listener. Trusts only the provisioned CA; never insecure mode.
+// TLS to the gateway's LAN or relay listener. Trusts only the provisioned CA; never insecure mode.
 class WifiLink : public Link {
 public:
   enum class State {
@@ -247,6 +273,11 @@ public:
     if (WiFi.status() != WL_CONNECTED) {
       state_ = State::WifiConnecting;
       uint32_t now = millis();
+      if (joined_) {
+        // Wi-Fi just dropped: the core is rejoining, so time the attempt from now.
+        joined_ = false;
+        joinedAt_ = now;
+      }
       JoinFailure seen = classifyDisconnect(lastReason_);
       if (seen != JoinFailure::None)
         failure_ = seen;
@@ -262,6 +293,7 @@ public:
     }
     failure_ = JoinFailure::None;
     lastReason_ = 0;
+    joined_ = true;
     bool connected;
     if (validLocalName(s_.host)) {
       // Find the gateway's current address by name, then check its certificate by name.
@@ -271,6 +303,14 @@ public:
       memcpy(label, s_.host, strlen(s_.host) - strlen(".local"));
       IPAddress address = MDNS.queryHost(label, MdnsQueryMs);
       if (!uint32_t(address)) {
+        state_ = State::NameUnresolved;
+        return false;
+      }
+      connected = client_.connect(address, s_.port, s_.host, s_.ca, nullptr, nullptr);
+    } else if (validDnsName(s_.host)) {
+      // A relay (hub ADR 009): look the name up, then check its certificate by the same name.
+      IPAddress address;
+      if (!WiFi.hostByName(s_.host, address) || !uint32_t(address)) {
         state_ = State::NameUnresolved;
         return false;
       }
@@ -292,6 +332,8 @@ public:
   void close() override { client_.stop(); }
   Stream &stream() override { return client_; }
   const char *token() const override { return s_.token; }
+  // True when the gateway is a relay reached by DNS name, not a computer on this network.
+  bool relay() const { return validDnsName(s_.host); }
   // Why the last open() failed or what it is waiting for.
   State state() const {
     if (!s_.complete())
@@ -312,6 +354,7 @@ private:
   JoinFailure failure_ = JoinFailure::None;
   const char *mdnsName_ = "grok-gadget";
   bool mdnsStarted_ = false;
+  bool joined_ = false; // Wi-Fi was up at the last open().
   volatile uint8_t lastReason_ = 0;
   uint32_t joinedAt_ = 0;
 };
