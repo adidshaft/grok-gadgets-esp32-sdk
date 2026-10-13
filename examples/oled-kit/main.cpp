@@ -68,9 +68,10 @@ const char *linkStatus() {
   case grok::WifiLink::State::TlsRejected:
     return "TLS rejected";
   case grok::WifiLink::State::NameUnresolved:
-    return "Gateway name?"; // The gateway's .local name did not answer.
+    // The gateway's .local name did not answer, or the relay's DNS name did not resolve.
+    return wifiLink.relay() ? "Relay name?" : "Gateway name?";
   default:
-    return "Gateway...";
+    return wifiLink.relay() ? "Relay..." : "Gateway...";
   }
 }
 void drawStatus() {
