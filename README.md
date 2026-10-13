@@ -77,7 +77,7 @@ recovery for C124. Use the [OLED example](examples/oled-kit/README.md) for the t
 
 The owner used Grok Bot to run `grok-gadgets-gateway rehearse` on the Mac.
 The gateway log and the owner's display observation confirmed the Wi-Fi command ([record](docs/verification/oled-kit-wifi-2026-10-12.md#grok-bot)).
-That was a local shell-command route. On 13 October 2026 Grok Bot also called the gateway's tools natively, from the Mac and the iPhone, and showed text on this kit ([record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/grok-remote-https-2026-10-13.md), [how to connect](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md)).
+That was a local shell-command route. On 13 October 2026 Grok Bot also called the tools natively from the Mac and the iPhone. It showed text on this kit ([record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/grok-remote-https-2026-10-13.md), [how to connect](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md)).
 The Mac must run the gateway. A USB charger powers the wireless board. A button press does not wake Grok Bot.
 The kit passed local-name, address-change and Mac login recovery checks. See
 [always-on setup](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/always-on.md).
