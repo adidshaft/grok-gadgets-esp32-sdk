@@ -78,7 +78,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128×64 advertised SPI/I²C 4-pin OLED",
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
         "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
         "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
         "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
@@ -653,6 +653,21 @@
       "stage": "done",
       "commits": [],
       "evidence": "Ruff and formatting pass; all eight host suites and four OLED checks pass. No firmware or hardware state changed."
+    },
+    {
+      "id": "DOC-PHASE8-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Current documentation needs the verified Phase 8 route and clear start paths",
+      "acceptance": [
+        "Keep owner-only evidence and remaining gates explicit",
+        "Separate the current route from proposed relay work",
+        "Link three start paths from the README"
+      ],
+      "labels": [
+        "documentation"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #117; README and current documentation reviewed against the 13 October owner handoff. No new hardware or Grok Bot test. 9 host suites and 4 OLED model tests; Ruff and C++ format checks passed. Firmware unchanged."
     }
   ]
 }
