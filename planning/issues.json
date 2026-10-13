@@ -653,6 +653,21 @@
       "stage": "done",
       "commits": [],
       "evidence": "Ruff and formatting pass; all eight host suites and four OLED checks pass. No firmware or hardware state changed."
+    },
+    {
+      "id": "DOC-PHASE8-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Current documentation needs the verified Phase 8 route and clear start paths",
+      "acceptance": [
+        "Keep owner-only evidence and remaining gates explicit",
+        "Separate the current route from proposed relay work",
+        "Link three start paths from the README"
+      ],
+      "labels": [
+        "documentation"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #117; README and current documentation reviewed against the 13 October owner handoff. No new hardware or Grok Bot test. 9 host suites and 4 OLED model tests; Ruff and C++ format checks passed. Firmware unchanged."
     }
   ]
 }

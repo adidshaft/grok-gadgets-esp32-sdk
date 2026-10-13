@@ -3,8 +3,16 @@
 Build USB and Wi-Fi gadgets for your Grok Bot with an Arduino sketch. Declare commands and events with `grok::Gadget`.
 The [gateway](https://github.com/adidshaft/grok-gadgets-gateway) connects your gadget to Grok Bot.
 The owner tested one ESP32-S3 OLED kit over USB and Wi-Fi. Experimental alpha: see the
-[project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
+[project status](https://grokgadgets.org/doc-docs-public-support-matrix).
 Independent project, not affiliated with SpaceXSI.
+
+## Start here
+
+| Path | Next step |
+| --- | --- |
+| [Use the tested kit](docs/first-experiment.md) | Wire and check the OLED kit |
+| [Build a gadget](docs/sdk.md) | Declare commands, state and events |
+| [Connect Grok Bot](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md) | Use the current Mac gateway route |
 
 ## First physical experiment
 
@@ -31,7 +39,7 @@ sh tools/check.sh
 .venv/bin/pio run -e atoms3-lite-usb
 ```
 
-Expected: eight host test suites pass, four sketch transcripts pass the contract check, and the
+Expected: nine host test suites pass, four sketch transcripts pass the contract check, and the
 optional C124 firmware compiles: **build verified, hardware pending**. Next,
 [create your own gadget](docs/sdk.md).
 
@@ -78,7 +86,10 @@ recovery for C124. Use the [OLED example](examples/oled-kit/README.md) for the t
 The owner used Grok Bot to run `grok-gadgets-gateway rehearse` on the Mac.
 The gateway log and the owner's display observation confirmed the Wi-Fi command ([record](docs/verification/oled-kit-wifi-2026-10-12.md#grok-bot)).
 That was a local shell-command route. On 13 October 2026 Grok Bot also called the tools natively from the Mac and the iPhone. It showed text on this kit ([record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/grok-remote-https-2026-10-13.md), [how to connect](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md)).
-The Mac must run the gateway. A USB charger powers the wireless board. A button press does not wake Grok Bot.
+The Mac must stay awake and run the gateway and tunnel. A USB charger powers the wireless board.
+The owner tested the daily route for one day, including a phone call over cellular.
+Mac sleep interrupted calls; nothing was queued. A button press does not wake Grok Bot.
+A Mac-free relay and phone-only setup are planned. See the [roadmap](https://github.com/adidshaft/grok-gadgets/blob/main/ROADMAP.md).
 The kit passed local-name, address-change and Mac login recovery checks. See
 [always-on setup](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/always-on.md).
 A second builder has not yet reproduced the kit: [report your result](https://github.com/adidshaft/grok-gadgets/issues/185).
