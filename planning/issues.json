@@ -78,7 +78,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128×64 advertised SPI/I²C 4-pin OLED",
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
         "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
         "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
         "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
@@ -668,6 +668,31 @@
       ],
       "stage": "review",
       "evidence": "GitHub #117; README and current documentation reviewed against the 13 October owner handoff. No new hardware or Grok Bot test. 9 host suites and 4 OLED model tests; Ruff and C++ format checks passed. Firmware unchanged."
+    },
+    {
+      "id": "ESP-RELAY-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "The Wi-Fi build reached only a gateway on the same home network",
+      "acceptance": [
+        "Provisioning accepts a public DNS name",
+        "Resolve before each connection; verify TLS by name",
+        "Relay... and Relay name? status rows",
+        "Reconnect backoff 0.5-5 s with jitter"
+      ],
+      "dependencies": [],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1"
+      ],
+      "stage": "done",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "GitHub #111, PR #120; tests/wifi_relay_tests.cpp and tests/wifi_console_tests.cpp",
+        "Owner's kit 13 Oct 2026, dev 2483f43: Online via relay; text from Grok Bot on the iPhone on cellular while the Mac slept; wrong CA TLSV1_ALERT_UNKNOWN_CA (hub docs/verification/mac-free-route-2026-10-13.md)"
+      ]
     }
   ]
 }

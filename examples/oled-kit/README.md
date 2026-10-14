@@ -77,7 +77,8 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
   hub [ADR 009](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/decisions/009-relay-route.md)).
   The board looks the name up before each connection and checks the certificate against it.
   The top row shows `Relay...` while it connects and `Relay name?` if the name does not resolve.
-  The name may have up to 63 characters. This path is host-tested only; no kit has run it yet.
+  The name may have up to 63 characters. The owner's kit passed this route on 13 October 2026
+  ([record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/mac-free-route-2026-10-13.md)).
 - The ESP32-S3 joins 2.4 GHz networks only.
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...` (or `Relay...`),
   `Online`, `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
