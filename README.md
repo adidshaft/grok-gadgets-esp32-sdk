@@ -12,7 +12,7 @@ Independent project, not affiliated with SpaceXSI.
 | --- | --- |
 | [Use the tested kit](docs/first-experiment.md) | Wire and check the OLED kit |
 | [Build a gadget](docs/sdk.md) | Declare commands, state and events |
-| [Connect Grok Bot](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md) | Use the current Mac gateway route |
+| [Connect Grok Bot](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md) | Use the current Grok Bot connection |
 
 ## First physical experiment
 
@@ -86,10 +86,11 @@ recovery for C124. Use the [OLED example](examples/oled-kit/README.md) for the t
 The owner used Grok Bot to run `grok-gadgets-gateway rehearse` on the Mac.
 The gateway log and the owner's display observation confirmed the Wi-Fi command ([record](docs/verification/oled-kit-wifi-2026-10-12.md#grok-bot)).
 That was a local shell-command route. On 13 October 2026 Grok Bot also called the tools natively from the Mac and the iPhone. It showed text on this kit ([record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/grok-remote-https-2026-10-13.md), [how to connect](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md)).
-The Mac must stay awake and run the gateway and tunnel. A USB charger powers the wireless board.
-The owner tested the daily route for one day, including a phone call over cellular.
-Mac sleep interrupted calls; nothing was queued. A button press does not wake Grok Bot.
-A Mac-free relay and phone-only setup are planned. See the [roadmap](https://github.com/adidshaft/grok-gadgets/blob/main/ROADMAP.md).
+A USB charger powers the wireless board. An always-on relay can keep it available without the Mac.
+The kit passed [relay checks](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/mac-free-route-2026-10-13.md).
+Phone setup passed on iPhone and Android on 14 October. Grok Bot calls from Android remain untested.
+See the [phone setup record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/phone-setup-2026-10-14.md).
+A button press does not wake Grok Bot. See the [roadmap](https://github.com/adidshaft/grok-gadgets/blob/main/ROADMAP.md).
 The kit passed local-name, address-change and Mac login recovery checks. See
 [always-on setup](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/always-on.md).
 A second builder has not yet reproduced the kit: [report your result](https://github.com/adidshaft/grok-gadgets/issues/185).
@@ -122,3 +123,8 @@ Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Grok Gadgets is an inde
 open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXSI or
 xAI**, which make Grok and Grok Bot, nor with M5Stack. We reconstructed the pre-publication commit dates; see the
 [history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
+
+## Project discussion
+
+Ask questions and share gadget ideas in [hub Discussions](https://github.com/adidshaft/grok-gadgets/discussions).
+Use this repository's issue forms for defects.
