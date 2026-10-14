@@ -131,19 +131,33 @@ The serial console in this build takes one-line JSON commands:
 
 | Command | Reply |
 | --- | --- |
-| `{"type":"status"}` | Device ID, firmware, `provisioned`, Wi-Fi and gateway state |
+| `{"type":"status"}` | Device ID, firmware, `provisioned`, `factory`, Wi-Fi and gateway state |
 | `{"type":"provision", ...}` | `ok` and `restarting`, or `invalid_settings` without any value |
-| `{"type":"factory_reset"}` | Erases the settings and restarts |
+| `{"type":"factory_provision", ...}` | Writes the factory identity (see below); `already_provisioned` unless `replace` is true |
+| `{"type":"factory_reset"}` | Erases the user's settings (Wi-Fi) and restarts; the factory identity stays |
 
 Lines that start with `status:` report link changes as text.
+
+### Factory identity and user settings
+
+The board keeps two NVS namespaces (hub ADR 010):
+
+- `grok-factory`: the device token, the relay name and port, the CA, and the setup hotspot's
+  passphrase and setup code. The builder writes it once with `factory_provision`
+  (`grok-gadgets-gateway factory-provision`).
+- `grok-wifi`: the user's settings, the home Wi-Fi name and password.
+
+A factory reset erases `grok-wifi` only, so the board keeps its identity. A full `provision`
+line also writes `grok-wifi`; its token, address and CA then take precedence over the
+factory identity. A board provisioned before ADR 010 has no `grok-factory` and keeps working.
 
 ### Factory reset
 
 Hold BOOT for 10 seconds, or run `wifi-provision PORT --device ID --factory-reset`.
 After 3 seconds of holding, the top row counts down from `Reset in 7s`. Let go before it
 reaches zero to keep the settings. The
-board erases its Wi-Fi settings and restarts as `Not provisioned`. Also run
-`grok-gadgets-gateway revoke ID`. `esptool erase_flash` erases everything.
+board erases its Wi-Fi settings and restarts as `Not provisioned`. A board with a factory
+identity keeps it. For a board without one, also run `grok-gadgets-gateway revoke ID`. `esptool erase_flash` erases everything.
 
 ### Limits
 

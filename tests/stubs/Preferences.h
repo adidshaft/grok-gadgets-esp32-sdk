@@ -39,6 +39,7 @@ struct Preferences {
     memcpy(out, it->second.c_str(), it->second.size() + 1);
     return it->second.size();
   }
+  bool isKey(const char *key) { return fake::nvs.count(space + "/" + key) > 0; }
   uint16_t getUShort(const char *key, uint16_t fallback) {
     auto it = fake::nvs.find(space + "/" + key);
     return it == fake::nvs.end() ? fallback : uint16_t(std::stoi(it->second));

@@ -693,6 +693,31 @@
         "GitHub #111, PR #120; tests/wifi_relay_tests.cpp and tests/wifi_console_tests.cpp",
         "Owner's kit 13 Oct 2026, dev 2483f43: Online via relay; text from Grok Bot on the iPhone on cellular while the Mac slept; wrong CA TLSV1_ALERT_UNKNOWN_CA (hub docs/verification/mac-free-route-2026-10-13.md)"
       ]
+    },
+    {
+      "id": "ESP-SETUP-002",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Identity and user Wi-Fi shared one NVS namespace, so a reset erased the identity",
+      "acceptance": [
+        "grok-factory holds token, relay, port, CA, passphrase and setup code",
+        "factory_provision console command, once unless replace",
+        "BOOT reset and factory_reset erase grok-wifi only",
+        "Old layout and full provision keep working",
+        "Host tests"
+      ],
+      "dependencies": [],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1"
+      ],
+      "stage": "review",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "GitHub #115; tests/wifi_factory_tests.cpp; Wi-Fi build compiles (RAM 106508 B, flash 889817 B; +6.9 KB RAM, +2.6 KB flash). No kit test yet."
+      ]
     }
   ]
 }

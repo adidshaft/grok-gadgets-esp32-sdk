@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Factory identity separate from user settings ([#115](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/115), hub ADR 010). NVS namespace `grok-factory` holds the device token, relay name and port, CA, setup-hotspot passphrase and setup code. The console command `factory_provision` writes it once (`replace` to change it) and never echoes a value. `grok-wifi` holds the home Wi-Fi. A BOOT reset or `factory_reset` erases `grok-wifi` only. A full `provision` line and boards provisioned before this change keep working. `status` reports `factory`. Static RAM +6.9 KB and flash +2.6 KB on the Wi-Fi build. Host-tested and compiled; no kit has run it yet.
+
 ## 0.2.0-alpha.14 — 14 October 2026
 
 - On 13 October 2026 the owner's kit, on this firmware, reached a gateway relay on an always-on Linux server by DNS name. Grok Bot on the iPhone, on cellular, showed text on it while the Mac slept. A wrong CA showed `TLS rejected`; revoke showed `Token rejected` ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/mac-free-route-2026-10-13.md)).

@@ -45,7 +45,8 @@ grok::Gadget gadget("ESP32-S3 OLED kit", FirmwareVersion, "oledkit");
 // Holding BOOT this long erases the Wi-Fi settings. From FactoryResetWarnMs the status row
 // counts down, so a person waiting for feedback can let go in time.
 constexpr uint32_t FactoryResetHoldMs = 10000, FactoryResetWarnMs = 3000;
-grok::WifiSettings settings;
+grok::WifiSettings settings;   // What the link uses: factory identity plus home Wi-Fi.
+grok::FactorySettings factory; // The builder's identity and label values (hub ADR 010).
 grok::NvsStore store;
 grok::WifiLink wifiLink(settings);
 grok::Console console(Serial, store, gadget.deviceId());
@@ -89,6 +90,7 @@ void drawStatus() {
 void consoleStatus(JsonObject reply, void *) {
   reply["firmware"] = FirmwareVersion;
   reply["provisioned"] = settings.complete();
+  reply["factory"] = factory.complete(); // Never a value: only whether an identity is stored.
   reply["wifi"] = WiFi.status() == WL_CONNECTED ? "connected" : "disconnected";
   reply["gateway"] = linkStatus();
   grok::JoinFailureText failure = grok::describe(wifiLink.failure());
@@ -230,6 +232,7 @@ void setup() {
 #ifdef OLED_KIT_WIFI
   Serial.setRxBufferSize(grok::MaxConsoleLine + 1024); // One provisioning line fits.
   Serial.begin(115200);
+  store.loadFactory(factory);
   store.load(settings);
   wifiLink.begin(gadget.deviceId());
   console.status(consoleStatus, nullptr);
