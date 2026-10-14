@@ -718,6 +718,35 @@
       "evidence": [
         "GitHub #115; tests/wifi_factory_tests.cpp; Wi-Fi build compiles (RAM 106508 B, flash 889817 B; +6.9 KB RAM, +2.6 KB flash). No kit test yet."
       ]
+    },
+    {
+      "id": "ESP-SETUP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Joining a gadget to home Wi-Fi needed a computer and a USB cable",
+      "acceptance": [
+        "Per-device WPA2 hotspot from the factory identity, one station",
+        "Captive page: setup code first, network scan, password, live status with the join failure reason",
+        "10-minute window only while unprovisioned or after reset",
+        "Rate-limited setup codes; the page never shows stored values",
+        "OLED shows hotspot name and setup state",
+        "Host tests; Wi-Fi build compiles; RAM and flash recorded"
+      ],
+      "dependencies": [
+        "ESP-SETUP-002"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "needs hardware",
+        "P1"
+      ],
+      "stage": "review",
+      "commits": [],
+      "blocker": "Owner kit test (hub Phase 10 record)",
+      "evidence": [
+        "GitHub #114; tests/wifi_setup_tests.cpp; Wi-Fi build RAM 108076 B, flash 932549 B. No kit or phone test yet."
+      ]
     }
   ]
 }

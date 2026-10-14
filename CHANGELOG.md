@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Setup hotspot with a captive page ([#114](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/114), hub ADR 010). `GrokSetup.h`: a board with a factory identity and no home Wi-Fi opens `GrokGadget-XXXX` with the label's WPA2 passphrase, for one phone, for 10 minutes. The page at `192.168.4.1` (captive DNS; every other path redirects there) asks for the label's setup code, lists 2.4 GHz networks, joins the chosen one and shows live status: joining, the join failure reason, joined, Online. Wrong codes: 5 free, then a doubling 1-minute lock; 20 close the hotspot. The page never shows a stored value. After a join the board saves only the home Wi-Fi, connects to the relay with the factory identity, and closes the hotspot 30 s after Online. The OLED kit shows `Setup N min` and the hotspot name, then `Joining WiFi` or the reason. `WifiLink::begin` can keep the hotspot up. Wi-Fi build: static RAM 108,076 B and flash 932,549 B (+8.5 KB RAM and +45.4 KB flash against 0.2.0-alpha.14). Host-tested and compiled; no kit has run it yet.
+
 - Factory identity separate from user settings ([#115](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/115), hub ADR 010). NVS namespace `grok-factory` holds the device token, relay name and port, CA, setup-hotspot passphrase and setup code. The console command `factory_provision` writes it once (`replace` to change it) and never echoes a value. `grok-wifi` holds the home Wi-Fi. A BOOT reset or `factory_reset` erases `grok-wifi` only. A full `provision` line and boards provisioned before this change keep working. `status` reports `factory`. Static RAM +6.9 KB and flash +2.6 KB on the Wi-Fi build. Host-tested and compiled; no kit has run it yet.
 
 ## 0.2.0-alpha.14 — 14 October 2026
