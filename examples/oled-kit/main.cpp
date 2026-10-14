@@ -8,9 +8,11 @@
 // Build with -DOLED_KIT_WIFI (environment esp32s3-oled-kit-wifi) for Wi-Fi: TLS to the gateway's
 // LAN listener with the provisioned CA, settings in NVS, the USB serial port as a provisioning
 // console, a status line on the top row, and BOOT held for 10 seconds as a factory reset.
+// A factory-provisioned board without home Wi-Fi opens the setup hotspot (hub ADR 010).
 #include <GrokSession.h>
 #ifdef OLED_KIT_WIFI
 #include "OnlineLogo.h"
+#include <GrokSetup.h>
 #include <GrokWifi.h>
 #endif
 #include <U8x8lib.h>
@@ -45,16 +47,38 @@ grok::Gadget gadget("ESP32-S3 OLED kit", FirmwareVersion, "oledkit");
 // Holding BOOT this long erases the Wi-Fi settings. From FactoryResetWarnMs the status row
 // counts down, so a person waiting for feedback can let go in time.
 constexpr uint32_t FactoryResetHoldMs = 10000, FactoryResetWarnMs = 3000;
-grok::WifiSettings settings;
+grok::WifiSettings settings;   // What the link uses: factory identity plus home Wi-Fi.
+grok::FactorySettings factory; // The builder's identity and label values (hub ADR 010).
 grok::NvsStore store;
 grok::WifiLink wifiLink(settings);
 grok::Console console(Serial, store, gadget.deviceId());
+grok::SetupHotspot hotspot(store, settings, factory);
+bool setupShown = false;            // The display shows the setup rows.
 char shownStatus[Columns + 1] = {}; // What the status row shows now.
 char shownHint[Columns + 1] = {};   // Row 1: what to check after a failed Wi-Fi join.
 oledkit::OnlineLogo onlineLogo;
 uint32_t bootHeldSince = 0;
 bool bootHeld = false;
 
+// The setup hotspot's status row; nullptr when setup is not running.
+const char *setupStatus(char (&row)[Columns + 1]) {
+  using State = grok::SetupHotspot::State;
+  switch (hotspot.state()) {
+  case State::Open:
+    snprintf(row, sizeof(row), "Setup %u min", unsigned(hotspot.minutesLeft(millis())));
+    return row;
+  case State::Joining:
+    return "Joining WiFi";
+  case State::Failed:
+    return grok::describe(hotspot.failure()).status;
+  case State::Expired:
+    return "Setup closed";
+  case State::Locked:
+    return "Setup locked";
+  default:
+    return nullptr;
+  }
+}
 const char *linkStatus() {
   if (!settings.complete())
     return "Not provisioned";
@@ -85,10 +109,17 @@ void drawStatus() {
   oled->drawString(0, 1, row);
   if (online)
     onlineLogo.draw(*oled); // Columns 10-15 of rows 0-5, over the padding above.
+  if (setupShown && hotspot.active()) {
+    oled->drawString(0, 3, "Scan the label  ");
+    oled->drawString(0, 4, "with your phone ");
+  }
 }
 void consoleStatus(JsonObject reply, void *) {
   reply["firmware"] = FirmwareVersion;
   reply["provisioned"] = settings.complete();
+  reply["factory"] = factory.complete(); // Never a value: only whether an identity is stored.
+  reply["setup"] = grok::SetupHotspot::stateName(hotspot.state());
+  reply["free_heap"] = ESP.getFreeHeap(); // Runtime cost of the setup hotspot (hub ADR 010).
   reply["wifi"] = WiFi.status() == WL_CONNECTED ? "connected" : "disconnected";
   reply["gateway"] = linkStatus();
   grok::JoinFailureText failure = grok::describe(wifiLink.failure());
@@ -230,10 +261,12 @@ void setup() {
 #ifdef OLED_KIT_WIFI
   Serial.setRxBufferSize(grok::MaxConsoleLine + 1024); // One provisioning line fits.
   Serial.begin(115200);
+  store.loadFactory(factory);
   store.load(settings);
   wifiLink.begin(gadget.deviceId());
   console.status(consoleStatus, nullptr);
   gadget.begin(wifiLink);
+  hotspot.begin(gadget.deviceId(), millis()); // After begin: the device ID is set there.
 #else
   gadget.begin();
 #endif
@@ -243,12 +276,15 @@ void loop() {
   gadget.loop();
   console.loop();
   uint32_t now = millis();
+  hotspot.loop(now, gadget.connected());
+  if (hotspot.takeJoined())
+    wifiLink.begin(gadget.deviceId(), true); // Keep the hotspot so the page can show Online.
   bool pressed = digitalRead(ButtonPin) == LOW;
   if (pressed && !bootHeld)
     bootHeldSince = now;
   bootHeld = pressed;
   uint32_t held = bootHeld ? uint32_t(now - bootHeldSince) : 0;
-  char status[Columns + 1], hint[Columns + 1] = {};
+  char status[Columns + 1], hint[Columns + 1] = {}, setupRow[Columns + 1];
   if (console.restartRequested())
     snprintf(status, sizeof(status), "%s", shownStatus); // Keep the last message.
   else if (held >= FactoryResetHoldMs && console.factoryReset())
@@ -256,18 +292,24 @@ void loop() {
   else if (held >= FactoryResetWarnMs)
     snprintf(status, sizeof(status), "Reset in %cs", // 7 down to 1
              char('0' + (FactoryResetHoldMs - held + 999) / 1000));
-  else {
+  else if (const char *setup = setupStatus(setupRow)) {
+    snprintf(status, sizeof(status), "%s", setup);
+    using State = grok::SetupHotspot::State;
+    bool closed = hotspot.state() == State::Expired || hotspot.state() == State::Locked;
+    snprintf(hint, sizeof(hint), "%s", closed ? "Power cycle" : hotspot.name());
+  } else {
     snprintf(status, sizeof(status), "%s", linkStatus());
     if (wifiLink.state() == grok::WifiLink::State::WifiConnecting)
       snprintf(hint, sizeof(hint), "%s", grok::describe(wifiLink.failure()).hint);
   }
-  if (strcmp(status, shownStatus) || strcmp(hint, shownHint)) {
-    const bool wasOnline = !strcmp(shownStatus, "Online");
+  if (strcmp(status, shownStatus) || strcmp(hint, shownHint) || setupShown != hotspot.active()) {
+    const bool wasOnline = !strcmp(shownStatus, "Online"), wasSetup = setupShown;
     strcpy(shownStatus, status);
     strcpy(shownHint, hint);
+    setupShown = hotspot.active();
     onlineLogo.reset(now);
-    if (oled && wasOnline != !strcmp(shownStatus, "Online"))
-      draw(); // The face appears or goes and the text moves: redraw once.
+    if (oled && (wasOnline != !strcmp(shownStatus, "Online") || wasSetup != setupShown))
+      draw(); // The face or the setup rows appear or go: redraw once.
     else
       drawStatus();
     // The console line explains a failed join; it never names the network.

@@ -2,6 +2,12 @@
 // Wi-Fi transport (hub ADR 005, 009): TLS to the gateway's LAN or relay listener with a pinned
 // CA, settings in NVS, and a USB serial console for provisioning and factory reset.
 // The console never prints a stored value. The Wi-Fi password and token stay in NVS.
+//
+// Two NVS namespaces (hub ADR 010). `grok-factory` holds the gadget's identity, written once
+// by the builder: device token, relay name and port, CA, setup-hotspot passphrase and setup
+// code. `grok-wifi` holds the user's settings: the home Wi-Fi name and password. A BOOT reset
+// or `factory_reset` erases `grok-wifi` only. A full `provision` line from USB also writes
+// `grok-wifi`, and its token, host and CA then take precedence (the pre-ADR 010 layout).
 #pragma once
 #include "GrokSession.h"
 #include <ESPmDNS.h>
@@ -19,7 +25,11 @@ constexpr uint32_t MdnsQueryMs = 1000;
 constexpr uint32_t WifiRejoinMs = 15000;
 // mbedTLS: the server certificate did not verify against the pinned CA.
 constexpr int TlsVerifyFailed = -0x2700;
-constexpr const char *WifiNamespace = "grok-wifi";
+constexpr const char *WifiNamespace = "grok-wifi", *FactoryNamespace = "grok-factory";
+// Setup code and hotspot passphrase characters: no 0/O or 1/I look-alikes (the gateway's
+// sign-in code alphabet). A setup code is 8 of them (40 bits); a passphrase 16 or more.
+constexpr const char *SetupAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+constexpr size_t SetupCodeLength = 8, MinPassphrase = 16, MaxPassphrase = 63;
 
 // Why the station could not join, from the core's disconnect reason codes (ESP-IDF
 // wifi_err_reason_t). None of these carries the network name or password.
@@ -75,6 +85,46 @@ struct WifiSettings {
     port = 0;
   }
 };
+
+// The gadget's identity from the builder (namespace `grok-factory`). About 3.4 KB: keep it global.
+struct FactorySettings {
+  char token[257] = {};
+  char host[64] = {};
+  uint16_t port = 0;
+  char ca[MaxCaPem + 1] = {};
+  char passphrase[MaxPassphrase + 1] = {}; // The setup hotspot's WPA2 passphrase.
+  char setupCode[SetupCodeLength + 1] = {};
+  bool complete() const { return token[0] && host[0] && port && ca[0]; }
+  // The setup hotspot can open: identity plus both label values.
+  bool setupReady() const { return complete() && passphrase[0] && setupCode[0]; }
+  void wipe() {
+    memset(token, 0, sizeof(token));
+    memset(host, 0, sizeof(host));
+    memset(ca, 0, sizeof(ca));
+    memset(passphrase, 0, sizeof(passphrase));
+    memset(setupCode, 0, sizeof(setupCode));
+    port = 0;
+  }
+};
+
+inline bool inSetupAlphabet(char c) { return c && strchr(SetupAlphabet, c); }
+inline bool validSetupCode(const char *code) {
+  if (strlen(code) != SetupCodeLength)
+    return false;
+  for (const char *c = code; *c; ++c)
+    if (!inSetupAlphabet(*c))
+      return false;
+  return true;
+}
+inline bool validPassphrase(const char *text) {
+  size_t length = strlen(text);
+  if (length < MinPassphrase || length > MaxPassphrase)
+    return false;
+  for (const char *c = text; *c; ++c)
+    if (!inSetupAlphabet(*c))
+      return false;
+  return true;
+}
 
 inline bool copyString(JsonVariantConst value, char *out, size_t capacity, size_t minimum) {
   if (!value.is<const char *>())
@@ -188,18 +238,62 @@ inline Error readSettingsInto(JsonObjectConst in, WifiSettings &next) {
   return error;
 }
 
+// Validate a `factory_provision` console command into `next`, which is wiped on any error.
+// `replace` must be true to overwrite an identity that is already stored.
+inline Error readFactoryInto(JsonObjectConst in, FactorySettings &next, bool &replace) {
+  static constexpr const char *Begin = "-----BEGIN CERTIFICATE-----";
+  next.wipe();
+  replace = in["replace"] | false;
+  Error error = [&]() -> Error {
+    if (in.size() != (in.containsKey("replace") ? 8u : 7u))
+      return {"invalid_settings",
+              "Expected type, token, host, port, ca, passphrase, setup_code and optional replace"};
+    if (!copyString(in["token"], next.token, sizeof(next.token), 16) || !printableToken(next.token))
+      return {"invalid_settings", "Token must be 16-256 printable characters"};
+    if (!copyString(in["host"], next.host, sizeof(next.host), 4) ||
+        !(validIpv4(next.host) || validLocalName(next.host) || validDnsName(next.host)))
+      return {"invalid_settings", "Host must be an IPv4 address, NAME.local or a DNS name"};
+    if (!in["port"].is<int>() || in["port"].as<int>() < 1 || in["port"].as<int>() > 65535)
+      return {"invalid_settings", "Port must be 1-65535"};
+    next.port = in["port"].as<uint16_t>();
+    if (!copyString(in["ca"], next.ca, sizeof(next.ca), 64) ||
+        strncmp(next.ca, Begin, strlen(Begin)) || !strstr(next.ca, "-----END CERTIFICATE-----"))
+      return {"invalid_settings", "CA must be one PEM certificate up to 3072 bytes"};
+    if (!copyString(in["passphrase"], next.passphrase, sizeof(next.passphrase), MinPassphrase) ||
+        !validPassphrase(next.passphrase))
+      return {"invalid_settings", "Passphrase must be 16-63 setup-alphabet characters"};
+    if (!copyString(in["setup_code"], next.setupCode, sizeof(next.setupCode), SetupCodeLength) ||
+        !validSetupCode(next.setupCode))
+      return {"invalid_settings", "Setup code must be 8 setup-alphabet characters"};
+    return {};
+  }();
+  if (error.code)
+    next.wipe();
+  return error;
+}
+
 class SettingsStore {
 public:
   virtual ~SettingsStore() = default;
+  // The settings the link uses: factory identity plus the user's Wi-Fi.
   virtual bool load(WifiSettings &settings) = 0;
+  // A full USB `provision` line, into the user's settings.
   virtual bool save(const WifiSettings &settings) = 0;
+  // The user's settings only; the factory identity stays.
   virtual bool erase() = 0;
+  virtual bool loadFactory(FactorySettings &factory) = 0;
+  virtual bool hasFactory() = 0;
+  virtual bool saveFactory(const FactorySettings &factory) = 0;
+  // The home Wi-Fi from the setup page; replaces the user's settings.
+  virtual bool saveWifi(const char *ssid, const char *password) = 0;
 };
 
-// NVS namespace `grok-wifi`. Flash encryption is off: whoever holds the board can read it.
+// NVS namespaces `grok-factory` and `grok-wifi`. Flash encryption is off: whoever holds the
+// board can read them.
 class NvsStore : public SettingsStore {
 public:
   bool load(WifiSettings &s) override {
+    s.wipe();
     if (!prefs_.begin(WifiNamespace, true))
       return false;
     prefs_.getString("ssid", s.ssid, sizeof(s.ssid));
@@ -209,7 +303,52 @@ public:
     s.port = prefs_.getUShort("port", 0);
     prefs_.getString("ca", s.ca, sizeof(s.ca));
     prefs_.end();
+    if (s.token[0] || !prefs_.begin(FactoryNamespace, true))
+      return s.complete(); // A full USB provision (or no factory identity): use it as stored.
+    prefs_.getString("token", s.token, sizeof(s.token));
+    prefs_.getString("host", s.host, sizeof(s.host));
+    s.port = prefs_.getUShort("port", 0);
+    prefs_.getString("ca", s.ca, sizeof(s.ca));
+    prefs_.end();
     return s.complete();
+  }
+  bool loadFactory(FactorySettings &f) override {
+    f.wipe();
+    if (!prefs_.begin(FactoryNamespace, true))
+      return false;
+    prefs_.getString("token", f.token, sizeof(f.token));
+    prefs_.getString("host", f.host, sizeof(f.host));
+    f.port = prefs_.getUShort("port", 0);
+    prefs_.getString("ca", f.ca, sizeof(f.ca));
+    prefs_.getString("passphrase", f.passphrase, sizeof(f.passphrase));
+    prefs_.getString("setup_code", f.setupCode, sizeof(f.setupCode));
+    prefs_.end();
+    return f.complete();
+  }
+  bool hasFactory() override {
+    if (!prefs_.begin(FactoryNamespace, true))
+      return false;
+    bool found = prefs_.isKey("token"); // Whether one exists; never its value.
+    prefs_.end();
+    return found;
+  }
+  bool saveFactory(const FactorySettings &f) override {
+    if (!prefs_.begin(FactoryNamespace, false))
+      return false;
+    bool ok = prefs_.clear() && prefs_.putString("token", f.token) &&
+              prefs_.putString("host", f.host) && prefs_.putUShort("port", f.port) &&
+              prefs_.putString("ca", f.ca) && prefs_.putString("passphrase", f.passphrase) &&
+              prefs_.putString("setup_code", f.setupCode);
+    prefs_.end();
+    return ok;
+  }
+  bool saveWifi(const char *ssid, const char *password) override {
+    if (!prefs_.begin(WifiNamespace, false))
+      return false;
+    bool ok = prefs_.clear() && prefs_.putString("ssid", ssid) &&
+              prefs_.putString("pass", password) == strlen(password);
+    prefs_.end();
+    return ok;
   }
   bool save(const WifiSettings &s) override {
     if (!prefs_.begin(WifiNamespace, false))
@@ -245,11 +384,12 @@ public:
   };
   explicit WifiLink(const WifiSettings &settings) : s_(settings) {}
   // `mdnsName` is this board's own mDNS host name, used when the gateway is a .local name.
-  void begin(const char *mdnsName = "grok-gadget") {
+  // `keepAccessPoint` leaves the setup hotspot up (hub ADR 010) after its page joined Wi-Fi.
+  void begin(const char *mdnsName = "grok-gadget", bool keepAccessPoint = false) {
     mdnsName_ = mdnsName;
     if (!s_.complete())
       return;
-    WiFi.mode(WIFI_STA);
+    WiFi.mode(keepAccessPoint ? WIFI_AP_STA : WIFI_STA);
     WiFi.setSleep(false); // Lower latency for 100 ms polling.
     WiFi.setAutoReconnect(true);
     // Runs on the Wi-Fi event task: store only the reason code.
@@ -258,7 +398,8 @@ public:
           lastReason_ = info.wifi_sta_disconnected.reason;
         },
         ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
-    WiFi.begin(s_.ssid, s_.password);
+    if (WiFi.status() != WL_CONNECTED) // The setup page may have joined already.
+      WiFi.begin(s_.ssid, s_.password);
     joinedAt_ = millis();
     client_.setCACert(s_.ca);
     client_.setTimeout(TlsConnectSeconds);
@@ -420,13 +561,27 @@ private:
         reply(false);
       }
       settings.wipe();
+    } else if (!strcmp(type, "factory_provision")) {
+      bool replace = false;
+      Error error = readFactoryInto(doc.as<JsonObjectConst>(), factory_, replace);
+      if (error.code)
+        fail(error.code, error.message);
+      else if (store_.hasFactory() && !replace)
+        fail("already_provisioned", "This board has a factory identity; send replace to change it");
+      else if (!store_.saveFactory(factory_))
+        fail("storage_failed", "Could not write NVS");
+      else {
+        restart_ = true;
+        reply(false);
+      }
+      factory_.wipe();
     } else if (!strcmp(type, "factory_reset")) {
       if (factoryReset())
         reply(false);
       else
         fail("storage_failed", "Could not erase NVS");
     } else {
-      fail("unknown_command", "Use status, provision or factory_reset");
+      fail("unknown_command", "Use status, provision, factory_provision or factory_reset");
     }
     wipe();
   }
@@ -462,7 +617,8 @@ private:
   const char *deviceId_;
   Status status_ = nullptr;
   void *context_ = nullptr;
-  WifiSettings pending_; // Validated provisioning input; wiped after each command.
+  WifiSettings pending_;    // Validated provisioning input; wiped after each command.
+  FactorySettings factory_; // Validated factory input; wiped after each command.
   char line_[MaxConsoleLine + 1] = {};
   size_t used_ = 0;
   bool dropping_ = false, restart_ = false;

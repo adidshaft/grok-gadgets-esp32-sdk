@@ -67,5 +67,6 @@ struct FakeEsp {
   int restarts = 0;
   uint64_t getEfuseMac() const { return 0x123456789abcULL; }
   void restart() { ++restarts; }
+  uint32_t getFreeHeap() const { return 200000; }
 };
 extern FakeEsp ESP;

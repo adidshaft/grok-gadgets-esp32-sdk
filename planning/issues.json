@@ -693,6 +693,62 @@
         "GitHub #111, PR #120; tests/wifi_relay_tests.cpp and tests/wifi_console_tests.cpp",
         "Owner's kit 13 Oct 2026, dev 2483f43: Online via relay; text from Grok Bot on the iPhone on cellular while the Mac slept; wrong CA TLSV1_ALERT_UNKNOWN_CA (hub docs/verification/mac-free-route-2026-10-13.md)"
       ]
+    },
+    {
+      "id": "ESP-SETUP-002",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Identity and user Wi-Fi shared one NVS namespace, so a reset erased the identity",
+      "acceptance": [
+        "grok-factory holds token, relay, port, CA, passphrase and setup code",
+        "factory_provision console command, once unless replace",
+        "BOOT reset and factory_reset erase grok-wifi only",
+        "Old layout and full provision keep working",
+        "Host tests"
+      ],
+      "dependencies": [],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1"
+      ],
+      "stage": "done",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "GitHub #115; tests/wifi_factory_tests.cpp; Wi-Fi build compiles (RAM 106508 B, flash 889817 B; +6.9 KB RAM, +2.6 KB flash). No kit test yet.",
+        "Owner's kit 14 Oct 2026, dev 7aa72de: phone setup Pass on iPhone and Android; hub docs/verification/phone-setup-2026-10-14.md"
+      ]
+    },
+    {
+      "id": "ESP-SETUP-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Joining a gadget to home Wi-Fi needed a computer and a USB cable",
+      "acceptance": [
+        "Per-device WPA2 hotspot from the factory identity, one station",
+        "Captive page: setup code first, network scan, password, live status with the join failure reason",
+        "10-minute window only while unprovisioned or after reset",
+        "Rate-limited setup codes; the page never shows stored values",
+        "OLED shows hotspot name and setup state",
+        "Host tests; Wi-Fi build compiles; RAM and flash recorded"
+      ],
+      "dependencies": [
+        "ESP-SETUP-002"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "needs hardware",
+        "P1"
+      ],
+      "stage": "done",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "GitHub #114; tests/wifi_setup_tests.cpp; Wi-Fi build RAM 108076 B, flash 932549 B. No kit or phone test yet.",
+        "Owner's kit 14 Oct 2026, dev 7aa72de: phone setup Pass on iPhone and Android; hub docs/verification/phone-setup-2026-10-14.md"
+      ]
     }
   ]
 }

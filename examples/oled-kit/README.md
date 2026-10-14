@@ -131,19 +131,64 @@ The serial console in this build takes one-line JSON commands:
 
 | Command | Reply |
 | --- | --- |
-| `{"type":"status"}` | Device ID, firmware, `provisioned`, Wi-Fi and gateway state |
+| `{"type":"status"}` | Device ID, firmware, `provisioned`, `factory`, Wi-Fi and gateway state |
 | `{"type":"provision", ...}` | `ok` and `restarting`, or `invalid_settings` without any value |
-| `{"type":"factory_reset"}` | Erases the settings and restarts |
+| `{"type":"factory_provision", ...}` | Writes the factory identity (see below); `already_provisioned` unless `replace` is true |
+| `{"type":"factory_reset"}` | Erases the user's settings (Wi-Fi) and restarts; the factory identity stays |
 
 Lines that start with `status:` report link changes as text.
+
+### Factory identity and user settings
+
+The board keeps two NVS namespaces (hub ADR 010):
+
+- `grok-factory`: the device token, the relay name and port, the CA, and the setup hotspot's
+  passphrase and setup code. The builder writes it once with `factory_provision`
+  (`grok-gadgets-gateway factory-provision`).
+- `grok-wifi`: the user's settings, the home Wi-Fi name and password.
+
+A factory reset erases `grok-wifi` only, so the board keeps its identity. A full `provision`
+line also writes `grok-wifi`; its token, address and CA then take precedence over the
+factory identity. A board provisioned before ADR 010 has no `grok-factory` and keeps working.
+
+### Set up from a phone (setup hotspot)
+
+The owner's kit passed this with an iPhone and an Android phone on 14 October 2026
+([record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/phone-setup-2026-10-14.md)).
+
+A board with a factory identity and no home Wi-Fi opens a setup hotspot at power-on (hub
+ADR 010). The person needs only the printed label and a phone: no computer and no app.
+
+1. Scan the label's Wi-Fi QR code with the phone camera. The phone joins `GrokGadget-XXXX`
+   with the label's passphrase. The display shows `Setup 10 min` and the hotspot name.
+2. The phone opens the setup page. If it does not, open `http://192.168.4.1` in the browser.
+3. Type the setup code from the label, pick the home network (2.4 GHz), type its password and
+   tap **Join**.
+4. The page and the display show `Joining WiFi`, then the result: `Wrong password`,
+   `No network`, `Join timeout`, or the relay status and **Online**.
+
+Rules the firmware enforces:
+
+- The hotspot opens only while the board has no home Wi-Fi: on first power-on, or after a
+  factory reset. It closes after 10 minutes (`Setup closed`; power-cycle to reopen it) or 30
+  seconds after **Online**.
+- The page needs the setup code before it lists networks or accepts Wi-Fi details. After 5
+  wrong codes it waits 1 minute, then twice as long after each wrong code; after 20 the
+  hotspot closes (`Setup locked`) until a power cycle.
+- One phone at a time. The page never shows a stored value.
+- The hotspot and the home Wi-Fi share one radio. While the board joins, the phone can lose
+  the page for a few seconds; the display shows the result.
+
+The console `status` reply adds `setup` (`off`, `open`, `joining`, `failed`, `joined`,
+`online` or `closed`) and `free_heap`.
 
 ### Factory reset
 
 Hold BOOT for 10 seconds, or run `wifi-provision PORT --device ID --factory-reset`.
 After 3 seconds of holding, the top row counts down from `Reset in 7s`. Let go before it
 reaches zero to keep the settings. The
-board erases its Wi-Fi settings and restarts as `Not provisioned`. Also run
-`grok-gadgets-gateway revoke ID`. `esptool erase_flash` erases everything.
+board erases its Wi-Fi settings and restarts as `Not provisioned`. A board with a factory
+identity keeps it and opens the setup hotspot again. For a board without one, also run `grok-gadgets-gateway revoke ID`. `esptool erase_flash` erases everything.
 
 ### Limits
 
