@@ -153,6 +153,9 @@ factory identity. A board provisioned before ADR 010 has no `grok-factory` and k
 
 ### Set up from a phone (setup hotspot)
 
+The owner's kit passed this with an iPhone and an Android phone on 14 October 2026
+([record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/phone-setup-2026-10-14.md)).
+
 A board with a factory identity and no home Wi-Fi opens a setup hotspot at power-on (hub
 ADR 010). The person needs only the printed label and a phone: no computer and no app.
 

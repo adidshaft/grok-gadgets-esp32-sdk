@@ -712,11 +712,12 @@
         "esp32",
         "P1"
       ],
-      "stage": "review",
+      "stage": "done",
       "commits": [],
       "blocker": null,
       "evidence": [
-        "GitHub #115; tests/wifi_factory_tests.cpp; Wi-Fi build compiles (RAM 106508 B, flash 889817 B; +6.9 KB RAM, +2.6 KB flash). No kit test yet."
+        "GitHub #115; tests/wifi_factory_tests.cpp; Wi-Fi build compiles (RAM 106508 B, flash 889817 B; +6.9 KB RAM, +2.6 KB flash). No kit test yet.",
+        "Owner's kit 14 Oct 2026, dev 7aa72de: phone setup Pass on iPhone and Android; hub docs/verification/phone-setup-2026-10-14.md"
       ]
     },
     {
@@ -741,11 +742,12 @@
         "needs hardware",
         "P1"
       ],
-      "stage": "review",
+      "stage": "done",
       "commits": [],
-      "blocker": "Owner kit test (hub Phase 10 record)",
+      "blocker": null,
       "evidence": [
-        "GitHub #114; tests/wifi_setup_tests.cpp; Wi-Fi build RAM 108076 B, flash 932549 B. No kit or phone test yet."
+        "GitHub #114; tests/wifi_setup_tests.cpp; Wi-Fi build RAM 108076 B, flash 932549 B. No kit or phone test yet.",
+        "Owner's kit 14 Oct 2026, dev 7aa72de: phone setup Pass on iPhone and Android; hub docs/verification/phone-setup-2026-10-14.md"
       ]
     }
   ]
