@@ -71,9 +71,17 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
   name, its device ID plus `.local`, on the home network.
   On the owner's kit this passed two address changes and a Mac restart
   ([record](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/verification/always-on-2026-10-13.md)).
+- The gateway can also be a relay on an always-on host, reached by its DNS name. Provision
+  with `wifi-provision ... --gateway devices.example.net` and the relay's CA
+  ([relay host guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/dev/docs/relay-host.md),
+  hub [ADR 009](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/decisions/009-relay-route.md)).
+  The board looks the name up before each connection and checks the certificate against it.
+  The top row shows `Relay...` while it connects and `Relay name?` if the name does not resolve.
+  The name may have up to 63 characters. The owner's kit passed this route on 13 October 2026
+  ([record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/mac-free-route-2026-10-13.md)).
 - The ESP32-S3 joins 2.4 GHz networks only.
-- The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...`, `Online`,
-  `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
+- The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...` (or `Relay...`),
+  `Online`, `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
   text and keeps the status row.
 - While the status says `Online`, the second row says `Grok Bot`. A 48×48 Grok Bot face
   fills the right side of the first six rows. It moves one pixel up and down and blinks once
@@ -93,7 +101,9 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
   The wrong-password case passed on the owner's kit
   ([record](../../docs/verification/wifi-join-failure-2026-10-12.md)). The other two are host-tested only.
 - After Wi-Fi or gateway loss, the board reconnects with a fresh hello. The wait starts at
-  0.5 s and doubles up to 5 s. After `unauthorized` or `revoked` it waits 60 s. A command is
+  0.5 s and doubles up to 5 s. Each wait is cut by up to a quarter at random, never below 0.5 s.
+  Boards that lost the same relay then do not all reconnect at once. After a Wi-Fi drop, a join
+  counts as timed out only after 15 s. After `unauthorized` or `revoked` it waits 60 s. A command is
   never replayed into a new session.
 
 The pixel face follows the project's

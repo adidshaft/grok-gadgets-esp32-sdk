@@ -21,11 +21,20 @@ constexpr size_t IncomingCapacity = JSON_ARRAY_SIZE(MaxFrame / 2 + 8) + MaxFrame
 // Longer than the USB bridge's worst case (2 s connect + 10 s reply), so a reply is never
 // attributed to the next request. Protocol 0.1.0 has no request ID.
 constexpr uint32_t RequestTimeoutMs = 13000;
-constexpr uint32_t PollIntervalMs = 100, StateIntervalMs = 3000, MaxBackoffMs = 5000;
+constexpr uint32_t PollIntervalMs = 100, StateIntervalMs = 3000;
+constexpr uint32_t MinBackoffMs = 500, MaxBackoffMs = 5000;
 // After `unauthorized` or `revoked` on a link, wait this long before the next hello.
 constexpr uint32_t RejectedBackoffMs = 60000;
 constexpr uint8_t MaxEventAttempts = 5;
 constexpr size_t SerialRxBuffer = 2 * (MaxFrame + 1);
+
+// The wait before a reconnect: three quarters to all of `backoff`, never under MinBackoffMs.
+// Gadgets that lost the same relay at once then spread their reconnects (hub ADR 009).
+inline uint32_t jitteredBackoff(uint32_t backoff, uint32_t random) {
+  uint32_t span = backoff / 4;
+  uint32_t wait = backoff - (span ? random % (span + 1) : 0);
+  return wait < MinBackoffMs ? MinBackoffMs : wait;
+}
 
 // A connection the gadget opens itself, such as TLS over Wi-Fi (hub ADR 005). Over USB the
 // bridge owns the connection and the token, so a plain Stream needs no Link.
@@ -414,7 +423,7 @@ private:
     if (!r["ok"].as<bool>())
       return failed(r["error"]["code"] | "", now);
     if (pending_ != Kind::Hello)
-      backoff_ = 500; // The session has carried real traffic.
+      backoff_ = MinBackoffMs; // The session has carried real traffic.
     switch (pending_) {
     case Kind::Hello:
       connected_ = true;
@@ -499,7 +508,7 @@ private:
     if (!failedAck(id, true))
       failedAck(id, false); // Empty state means unknown state.
     haveAck_ = true;
-    backoff_ = 500;
+    backoff_ = MinBackoffMs;
     return true;
   }
   bool failedAck(const char *id, bool withState) {
@@ -522,7 +531,8 @@ private:
     lines_.reset();
     if (link_)
       link_->close();
-    retryAt_ = now + (link_ && rejected_ ? RejectedBackoffMs : backoff_);
+    retryAt_ =
+        now + (link_ && rejected_ ? RejectedBackoffMs : jitteredBackoff(backoff_, esp_random()));
     backoff_ = backoff_ * 2 < MaxBackoffMs ? backoff_ * 2 : MaxBackoffMs;
   }
 
@@ -548,7 +558,7 @@ private:
   uint8_t attempts_ = 0;
   uint32_t droppedAcks_ = 0;
   uint32_t sequence_ = 0, lost_ = 0, reportedLost_ = 0, lossSequence_ = 0;
-  uint32_t lastRequest_ = 0, lastState_ = 0, retryAt_ = 0, backoff_ = 500;
+  uint32_t lastRequest_ = 0, lastState_ = 0, retryAt_ = 0, backoff_ = MinBackoffMs;
   char deviceId_[80] = {}, bootId_[32] = {};
 };
 } // namespace grok

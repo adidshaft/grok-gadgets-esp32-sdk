@@ -653,6 +653,46 @@
       "stage": "done",
       "commits": [],
       "evidence": "Ruff and formatting pass; all eight host suites and four OLED checks pass. No firmware or hardware state changed."
+    },
+    {
+      "id": "DOC-PHASE8-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Current documentation needs the verified Phase 8 route and clear start paths",
+      "acceptance": [
+        "Keep owner-only evidence and remaining gates explicit",
+        "Separate the current route from proposed relay work",
+        "Link three start paths from the README"
+      ],
+      "labels": [
+        "documentation"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #117; README and current documentation reviewed against the 13 October owner handoff. No new hardware or Grok Bot test. 9 host suites and 4 OLED model tests; Ruff and C++ format checks passed. Firmware unchanged."
+    },
+    {
+      "id": "ESP-RELAY-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "The Wi-Fi build reached only a gateway on the same home network",
+      "acceptance": [
+        "Provisioning accepts a public DNS name",
+        "Resolve before each connection; verify TLS by name",
+        "Relay... and Relay name? status rows",
+        "Reconnect backoff 0.5-5 s with jitter"
+      ],
+      "dependencies": [],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1"
+      ],
+      "stage": "done",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "GitHub #111, PR #120; tests/wifi_relay_tests.cpp and tests/wifi_console_tests.cpp",
+        "Owner's kit 13 Oct 2026, dev 2483f43: Online via relay; text from Grok Bot on the iPhone on cellular while the Mac slept; wrong CA TLSV1_ALERT_UNKNOWN_CA (hub docs/verification/mac-free-route-2026-10-13.md)"
+      ]
     }
   ]
 }

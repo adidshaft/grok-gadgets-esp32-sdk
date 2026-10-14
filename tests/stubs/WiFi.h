@@ -1,6 +1,7 @@
 #pragma once
 #include "Arduino.h"
 #include <functional>
+#include <map>
 #include <string>
 constexpr int WL_CONNECTED = 3, WL_DISCONNECTED = 6, WIFI_STA = 1;
 enum arduino_event_id_t { ARDUINO_EVENT_WIFI_STA_DISCONNECTED = 5 };
@@ -28,6 +29,17 @@ struct FakeWiFi {
     ++begins;
   }
   int status() const { return state; }
+  // DNS: `dns` maps a name to its address; an unknown name fails, as the core's lookup does.
+  std::map<std::string, IPAddress> dns;
+  int lookups = 0;
+  int hostByName(const char *name, IPAddress &result) {
+    ++lookups;
+    auto found = dns.find(name);
+    if (found == dns.end())
+      return 0;
+    result = found->second;
+    return 1;
+  }
   // Deliver a station disconnect event, as the core's event task would.
   void fail(uint8_t reason) {
     arduino_event_info_t info;
