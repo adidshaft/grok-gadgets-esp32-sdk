@@ -384,11 +384,12 @@ public:
   };
   explicit WifiLink(const WifiSettings &settings) : s_(settings) {}
   // `mdnsName` is this board's own mDNS host name, used when the gateway is a .local name.
-  void begin(const char *mdnsName = "grok-gadget") {
+  // `keepAccessPoint` leaves the setup hotspot up (hub ADR 010) after its page joined Wi-Fi.
+  void begin(const char *mdnsName = "grok-gadget", bool keepAccessPoint = false) {
     mdnsName_ = mdnsName;
     if (!s_.complete())
       return;
-    WiFi.mode(WIFI_STA);
+    WiFi.mode(keepAccessPoint ? WIFI_AP_STA : WIFI_STA);
     WiFi.setSleep(false); // Lower latency for 100 ms polling.
     WiFi.setAutoReconnect(true);
     // Runs on the Wi-Fi event task: store only the reason code.
@@ -397,7 +398,8 @@ public:
           lastReason_ = info.wifi_sta_disconnected.reason;
         },
         ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
-    WiFi.begin(s_.ssid, s_.password);
+    if (WiFi.status() != WL_CONNECTED) // The setup page may have joined already.
+      WiFi.begin(s_.ssid, s_.password);
     joinedAt_ = millis();
     client_.setCACert(s_.ca);
     client_.setTimeout(TlsConnectSeconds);
