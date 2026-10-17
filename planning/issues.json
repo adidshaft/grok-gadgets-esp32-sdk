@@ -78,7 +78,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128×64 advertised SPI/I²C 4-pin OLED",
         "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
         "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
         "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
@@ -775,6 +775,24 @@
         "GitHub #116; tests/claim_tests.cpp; contract with an accounts-relay script; Wi-Fi build RAM 108108 B, flash 933393 B. No kit test yet.",
         "Owner's kit 17 Oct 2026, dev 76a52c9: claim code shown, claimed by a second account, transfer code after reset; hub docs/verification/claim-2026-10-17.md"
       ]
+    },
+    {
+      "id": "ESP-CORE-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Decide the Arduino-ESP32 3.x (IDF 5.5) migration",
+      "acceptance": [
+        "Build matrix 2.0.17 and 3.3.x, USB and Wi-Fi",
+        "API deltas",
+        "Size and static RAM",
+        "Go/no-go before Phase 12b code"
+      ],
+      "labels": [
+        "research",
+        "esp32",
+        "P1"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #124; docs/core-3x-decision.md: 2.0.17 vs 3.3.12 matrix, API deltas, Phase 12b needs on each core. Recommendation: no-go for Phase 12b. Owner decides at the ADR 012 review."
     }
   ]
 }
