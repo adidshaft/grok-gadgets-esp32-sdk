@@ -74,8 +74,8 @@ void loop() {
 }
 ```
 
-`MbedtlsUpdateCrypto` takes a second key, so you can move to a new key: ship an image that
-trusts both keys, then sign with the new one.
+`MbedtlsUpdateCrypto` takes a second key. To move to a new key, ship an image that trusts
+both keys, then sign with the new one.
 
 ## Cost on the kit
 
