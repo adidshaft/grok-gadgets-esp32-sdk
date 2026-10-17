@@ -107,6 +107,7 @@ border-radius:8px}button{background:#111;color:#fff;border:0;margin-top:16px}
 const $=id=>document.getElementById(id),msg=t=>$('msg').textContent=t;
 const say={open:'',joining:'Joining your Wi-Fi. This page can lose the connection for a few seconds; the gadget display shows the result too.',
 joined:'Joined your Wi-Fi. Connecting to the relay...',online:'Done. The gadget is Online. You can close this page.',
+code:'Done. The gadget is Online. To add it, tell Grok Bot: "Claim my gadget with code CODE".',
 failed:'',closed:'Setup has closed. Turn the gadget off and on to open it again.',
 wrong_password:'The network rejected the password. Check it and try again.',
 no_network:'Network not found. Use a 2.4 GHz network and check the name.',
@@ -125,7 +126,8 @@ $('s2').onsubmit=async e=>{e.preventDefault();const ssid=$('net').value||$('othe
 const j=await post('/join',{code:$('code').value,ssid:ssid,password:$('pw').value});if(!j.ok)return err(j);
 msg(say.joining);poll()};
 async function poll(){let j;try{j=await(await fetch('/status')).json()}catch(e){return setTimeout(poll,1500)}
-if(j.state=='failed'){msg(say[j.reason]||say.join_timeout);return}msg(say[j.state]||'');
+if(j.state=='failed'){msg(say[j.reason]||say.join_timeout);return}
+if(j.claim_code){msg(say.code.replace('CODE',j.claim_code));return}msg(say[j.state]||'');
 if(j.state!='online'&&j.state!='closed')setTimeout(poll,1000)}
 </script></body></html>)";
 
@@ -160,8 +162,11 @@ public:
     hotspotUp_ = true;
     return true;
   }
-  void loop(uint32_t now, bool online) {
+  // `claimCode`: the relay's claim code while Online (hub ADR 011 §10), for gadgets without a
+  // display. The page shows it, and the hotspot then stays up longer so the person can read it.
+  void loop(uint32_t now, bool online, const char *claimCode = nullptr) {
     now_ = now;
+    snprintf(claimCode_, sizeof(claimCode_), "%s", online && claimCode ? claimCode : "");
     if (!hotspotUp_)
       return;
     dns_.processNextRequest();
@@ -187,7 +192,7 @@ public:
       }
       break;
     case State::Online:
-      if (uint32_t(now - onlineAt_) >= SetupOnlineGraceMs)
+      if (uint32_t(now - onlineAt_) >= (claimCode_[0] ? SetupJoinedGraceMs : SetupOnlineGraceMs))
         close(State::Online);
       break;
     default:
@@ -370,6 +375,8 @@ private:
   void status() {
     StaticJsonDocument<128> out;
     out["state"] = stateName(state_);
+    if (state_ == State::Online && claimCode_[0])
+      out["claim_code"] = claimCode_;
     if (state_ == State::Failed)
       out["reason"] = describe(failure_).code;
     if (accepting())
@@ -401,6 +408,7 @@ private:
   size_t networks_ = 0;
   volatile uint8_t reason_ = 0;
   uint32_t openedAt_ = 0, joinStartedAt_ = 0, joinedAt_ = 0, onlineAt_ = 0, scannedAt_ = 0;
+  char claimCode_[10] = {};
   uint32_t now_ = 0;
   bool hotspotUp_ = false, joinedNow_ = false;
 };

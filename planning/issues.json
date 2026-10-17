@@ -830,6 +830,73 @@
       ],
       "stage": "done",
       "evidence": "GitHub #148, PR #149; the kit took the fix as signed update 0.2.0-alpha.17.6 and the OLED stayed lit through that download, the revert test and the power-cut test (owner observation, 17 October 2026). Cause not confirmed."
+    },
+    {
+      "id": "ESP-EXAMPLE-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Climate sensor example",
+      "acceptance": [
+        "Host model and tests",
+        "CI compile environment",
+        "Hardware Pass only with the part"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "P2"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #127; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
+    },
+    {
+      "id": "ESP-EXAMPLE-002",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Relay switch example",
+      "acceptance": [
+        "Host model and tests",
+        "CI compile environment",
+        "Hardware Pass only with the part"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "P2"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #128; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
+    },
+    {
+      "id": "ESP-EXAMPLE-003",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Servo example",
+      "acceptance": [
+        "Host model and tests",
+        "CI compile environment",
+        "Hardware Pass only with the part"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "P2"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #129; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
+    },
+    {
+      "id": "ESP-BUILD-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Ship a gadget guide and factory flashing",
+      "acceptance": [
+        "Guide from build to batch",
+        "Factory flashing steps"
+      ],
+      "labels": [
+        "docs",
+        "esp32",
+        "P2"
+      ],
+      "stage": "review",
+      "evidence": "GitHub #118; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
     }
   ]
 }

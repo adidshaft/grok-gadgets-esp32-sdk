@@ -24,7 +24,12 @@ version = option("custom_firmware_version", "GROK_FIRMWARE_VERSION")
 if version:
     if not re.fullmatch(r"[0-9A-Za-z][0-9A-Za-z.+_-]{0,31}", version):
         raise SystemExit(f"GROK_FIRMWARE_VERSION {version!r}: 1-32 letters, digits, . + _ -")
-    env.Append(CPPDEFINES=[("OLED_KIT_VERSION", env.StringifyMacro(version))])
+    env.Append(
+        CPPDEFINES=[
+            ("OLED_KIT_VERSION", env.StringifyMacro(version)),
+            ("GROK_APP_VERSION", env.StringifyMacro(version)),
+        ]
+    )
 
 key_path = option("custom_update_public_key", "GROK_UPDATE_PUBLIC_KEY")
 if key_path:
