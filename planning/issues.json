@@ -845,8 +845,8 @@
         "esp32",
         "P2"
       ],
-      "stage": "review",
-      "evidence": "GitHub #127; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
+      "stage": "done",
+      "evidence": "GitHub #127; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware. Released in 0.2.0-alpha.18. Phase 12a acceptance on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): the guide and the OLED kit passed batch provisioning, phone setup, claim and a signed update on a fresh relay. The three examples are Not tested on hardware."
     },
     {
       "id": "ESP-EXAMPLE-002",
@@ -862,8 +862,8 @@
         "esp32",
         "P2"
       ],
-      "stage": "review",
-      "evidence": "GitHub #128; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
+      "stage": "done",
+      "evidence": "GitHub #128; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware. Released in 0.2.0-alpha.18. Phase 12a acceptance on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): the guide and the OLED kit passed batch provisioning, phone setup, claim and a signed update on a fresh relay. The three examples are Not tested on hardware."
     },
     {
       "id": "ESP-EXAMPLE-003",
@@ -879,8 +879,8 @@
         "esp32",
         "P2"
       ],
-      "stage": "review",
-      "evidence": "GitHub #129; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
+      "stage": "done",
+      "evidence": "GitHub #129; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware. Released in 0.2.0-alpha.18. Phase 12a acceptance on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): the guide and the OLED kit passed batch provisioning, phone setup, claim and a signed update on a fresh relay. The three examples are Not tested on hardware."
     },
     {
       "id": "ESP-BUILD-001",
@@ -895,8 +895,8 @@
         "esp32",
         "P2"
       ],
-      "stage": "review",
-      "evidence": "GitHub #118; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware."
+      "stage": "done",
+      "evidence": "GitHub #118; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware. Released in 0.2.0-alpha.18. Phase 12a acceptance on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): the guide and the OLED kit passed batch provisioning, phone setup, claim and a signed update on a fresh relay. The three examples are Not tested on hardware."
     }
   ]
 }
