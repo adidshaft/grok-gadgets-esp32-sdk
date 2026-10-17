@@ -57,6 +57,27 @@ The gateway rejects schema references, `pattern` and `patternProperties`. Use ex
 
 `begin()` calls `Serial.setRxBufferSize` for two full frames (4096 bytes) before `Serial.begin()`. The Arduino-ESP32 2.0.17 USB CDC queue otherwise stays 256 bytes and can drop a long reply. That call is unverified on hardware.
 
+## Claim codes
+
+On a relay with accounts (hub ADR 011), a person claims a gadget with a code it shows. A
+gadget with a display opts in before `begin()`:
+
+```cpp
+gadget.showClaimCodes();
+```
+
+Each hello then sends `"claim": "ready"`. The relay answers with `claimed` and, while nobody
+owns the gadget, `claim_code` (`XXXX-XXXX`, valid 10 minutes). A fresh code or `claimed: true`
+can arrive in any poll reply. `claimCode()` returns the code to show, or null; `claimed()`
+says whether the relay reports an owner. A disconnect clears the code.
+
+Call `claimAfterSetup()` when a phone setup has joined the gadget to Wi-Fi after a reset. The
+next accepted hello then says `after_setup`, and a claimed gadget may show a transfer code for
+its next owner. A relay without accounts ignores the field. A relay from before claim codes
+answers `invalid_request`; the gadget then sends its hello again without the field and stops
+asking until the next boot. A gadget that does not opt in sends and accepts exactly the
+protocol 0.1.0 frames it did before.
+
 ## Limits
 
 A reply may be one JSON object of at most 2047 bytes plus LF. The parse document is sized for a gateway-legal frame (one value per two input bytes, plus the string bytes). A command that is still too deep gets a failed ACK (`invalid_command`) instead of a session reset. Trailing bytes, a second object, or an embedded NUL resets the session.

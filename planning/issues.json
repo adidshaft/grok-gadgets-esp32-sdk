@@ -78,7 +78,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128×64 advertised SPI/I²C 4-pin OLED",
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
         "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
         "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
         "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
@@ -748,6 +748,31 @@
       "evidence": [
         "GitHub #114; tests/wifi_setup_tests.cpp; Wi-Fi build RAM 108076 B, flash 932549 B. No kit or phone test yet.",
         "Owner's kit 14 Oct 2026, dev 7aa72de: phone setup Pass on iPhone and Android; hub docs/verification/phone-setup-2026-10-14.md"
+      ]
+    },
+    {
+      "id": "ESP-CLAIM-001",
+      "repository": "grok-gadgets-esp32-sdk",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "An unclaimed gadget cannot show the code a person needs to claim it",
+      "acceptance": [
+        "Opt-in claim field in the hello; claimed and claim_code accepted only then",
+        "Show Code XXXX-XXXX (8 characters, 40 bits) until claimed; ignore the fields when absent",
+        "Fallback for relays without claim codes",
+        "Host tests, contract fixture, Wi-Fi build, RAM and flash recorded"
+      ],
+      "dependencies": [],
+      "labels": [
+        "feature",
+        "protocol",
+        "esp32",
+        "P1"
+      ],
+      "stage": "review",
+      "commits": [],
+      "blocker": null,
+      "evidence": [
+        "GitHub #116; tests/claim_tests.cpp; contract with an accounts-relay script; Wi-Fi build RAM 108108 B, flash 933393 B. No kit test yet."
       ]
     }
   ]

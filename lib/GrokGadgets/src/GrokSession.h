@@ -91,6 +91,21 @@ public:
     writer_ = writer;
     writerContext_ = context;
   }
+  // Claim codes (hub ADR 011): call before begin() on a gadget that can show a code. Each
+  // hello then asks the relay for `claimed` and, while nobody owns the gadget, `claim_code`.
+  // A relay before this change refuses the request once; the gadget then stops asking until
+  // the next boot and works as before.
+  void showClaimCodes() {
+    if (!began_)
+      claimWanted_ = true;
+  }
+  // The next hello follows a reset and a phone setup: a claimed gadget may then show a
+  // transfer code for its next owner (hub ADR 011 §7).
+  void claimAfterSetup() { afterSetup_ = true; }
+  // The code to show (`XXXX-XXXX`), or null. Valid only while connected.
+  const char *claimCode() const { return claimCode_[0] ? claimCode_ : nullptr; }
+  // True once the relay reported an owner for this gadget.
+  bool claimed() const { return claimed_; }
 
   // Queue a declared custom event. False if undeclared, too large or the queue is full;
   // a full queue is counted and reported later as `history_lost`.
@@ -253,6 +268,9 @@ private:
     outgoing_["protocol_version"] = ProtocolVersion;
     if (link_ && link_->token())
       outgoing_["token"] = link_->token();
+    claimSent_ = claimWanted_ && !claimRefused_;
+    if (claimSent_)
+      outgoing_["claim"] = afterSetup_ ? "after_setup" : "ready";
     auto d = outgoing_.createNestedObject("device");
     d["device_id"] = deviceId_;
     d["model"] = model_;
@@ -385,7 +403,20 @@ private:
              error["message"].is<const char *>();
     }
     // Each request kind has its own reply shape; a mismatch is a stray or late reply.
+    // After a hello with `claim`, hello and poll replies may also carry the claim fields.
     size_t expected = 1;
+    if (claimSent_ && (pending_ == Kind::Hello || pending_ == Kind::Poll)) {
+      if (r.containsKey("claimed")) {
+        if (!r["claimed"].is<bool>())
+          return false;
+        ++expected;
+      }
+      if (r.containsKey("claim_code")) {
+        if (!r.containsKey("claimed") || !validClaimCode(r["claim_code"] | ""))
+          return false;
+        ++expected;
+      }
+    }
     if (pending_ == Kind::Hello) {
       if (!r["session_id"].is<const char *>() ||
           strcmp(r["protocol_version"] | "", ProtocolVersion))
@@ -424,10 +455,16 @@ private:
       return failed(r["error"]["code"] | "", now);
     if (pending_ != Kind::Hello)
       backoff_ = MinBackoffMs; // The session has carried real traffic.
+    if (claimSent_ && r.containsKey("claimed")) {
+      claimed_ = r["claimed"].as<bool>();
+      const char *code = r["claim_code"] | "";
+      snprintf(claimCode_, sizeof(claimCode_), "%s", code); // Empty: no code to show.
+    }
     switch (pending_) {
     case Kind::Hello:
       connected_ = true;
       rejected_ = nullptr;
+      afterSetup_ = false; // after_setup goes in one accepted hello only.
       break;
     case Kind::Ack:
       haveAck_ = false;
@@ -453,6 +490,14 @@ private:
     }
     return true;
   }
+  static bool validClaimCode(const char *code) {
+    if (strlen(code) != 9 || code[4] != '-')
+      return false;
+    for (int i = 0; i < 9; ++i)
+      if (i != 4 && !strchr("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", code[i]))
+        return false;
+    return true;
+  }
   static bool permanent(const char *code) {
     return !strcmp(code, "duplicate_conflict") || !strcmp(code, "invalid_event") ||
            !strcmp(code, "invalid_request") || !strcmp(code, "unsupported_capability") ||
@@ -464,6 +509,8 @@ private:
   }
   // A rejected event never blocks polling: drop it (counted as lost) and continue.
   bool failed(const char *code, uint32_t now) {
+    if (pending_ == Kind::Hello && claimSent_ && !strcmp(code, "invalid_request"))
+      claimRefused_ = true; // A relay without claim codes: ask without the field.
     if (!strcmp(code, "unauthorized"))
       rejected_ = "unauthorized";
     else if (!strcmp(code, "revoked"))
@@ -527,6 +574,7 @@ private:
   void resetSession(uint32_t now) {
     // A possibly executed command cannot be acknowledged into a new gateway session.
     connected_ = waiting_ = haveAck_ = false;
+    claimCode_[0] = '\0'; // A code lives only as long as its session.
     ack_.clear();
     lines_.reset();
     if (link_)
@@ -554,6 +602,10 @@ private:
   int buttonPin_ = -1;
   bool activeLow_ = true, began_ = false, ready_ = false;
   bool connected_ = false, waiting_ = false, haveAck_ = false;
+  // Claim codes (hub ADR 011).
+  bool claimWanted_ = false, claimRefused_ = false, claimSent_ = false, afterSetup_ = false;
+  bool claimed_ = false;
+  char claimCode_[10] = {};
   Kind pending_ = Kind::Hello;
   uint8_t attempts_ = 0;
   uint32_t droppedAcks_ = 0;
