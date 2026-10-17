@@ -60,7 +60,7 @@ int main() {
   command(R"({"type":"status"})");
   assert(reply["ok"] && reply["device_id"] == "oledkit-bc9a78563412");
   assert(reply["provisioned"] == false && reply["gateway"] == "Not provisioned");
-  assert(reply["firmware"] == "0.2.0-wifi");
+  assert(reply["firmware"] == FirmwareVersion);
 
   // Invalid settings are refused without echoing any value, and nothing is stored.
   const char *token = "device-token-0123456789";

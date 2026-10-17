@@ -78,7 +78,7 @@
       "owner": "grok-gadgets-esp32-sdk",
       "problem": "First physical acceptance: AYWHP ESP32-S3 and Robocraze OLED kit",
       "acceptance": [
-        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128\u00d764 advertised SPI/I\u00b2C 4-pin OLED",
+        "Use the ordered AYWHP ESP32-S3 DevKitC-style ESP32-S3-WROOM-1-N16R8 USB-C board, ApTechDeals 840-point breadboard/jumpers and Robocraze 0.96-inch 128×64 advertised SPI/I²C 4-pin OLED",
         "Record board revision, USB route, module marking, OLED controller/interface, supply requirements and confirmed pin mapping after delivery",
         "Keep simulator-first evidence separate from physical results; exercise logical display text and clear, invalid input and reconnect behavior",
         "Select and compile a board profile and display driver only after inspection; do not flash the optional C124 image",
@@ -775,6 +775,61 @@
         "GitHub #116; tests/claim_tests.cpp; contract with an accounts-relay script; Wi-Fi build RAM 108108 B, flash 933393 B. No kit test yet.",
         "Owner's kit 17 Oct 2026, dev 76a52c9: claim code shown, claimed by a second account, transfer code after reset; hub docs/verification/claim-2026-10-17.md"
       ]
+    },
+    {
+      "id": "ESP-CORE-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Decide the Arduino-ESP32 3.x (IDF 5.5) migration",
+      "acceptance": [
+        "Build matrix 2.0.17 and 3.3.x, USB and Wi-Fi",
+        "API deltas",
+        "Size and static RAM",
+        "Go/no-go before Phase 12b code"
+      ],
+      "labels": [
+        "research",
+        "esp32",
+        "P1"
+      ],
+      "stage": "done",
+      "evidence": "GitHub #124; docs/core-3x-decision.md: 2.0.17 vs 3.3.12 matrix, API deltas, Phase 12b needs on each core. Recommendation: no-go for Phase 12b. Owner decides at the ADR 012 review. Owner approved the no-go on 17 October 2026 (hub ADR 012 decision 3)."
+    },
+    {
+      "id": "ESP-OTA-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "No over-the-air update with rollback and signed images",
+      "acceptance": [
+        "Signature and manifest checked before download; SHA-256 before Update.end()",
+        "Rollback on; valid only after Online through the relay, else revert",
+        "OLED rows Update 42% and Reverted; a real version in hello",
+        "Host tests; RAM and flash recorded",
+        "Kit takes a signed update over the relay and reverts a bad image (hub Phase 12b record)"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1"
+      ],
+      "stage": "done",
+      "evidence": "GitHub #125; tests/update_tests.cpp (real ECDSA/SHA-256 against the pinned gateway fixture); tools/check.sh 14/14; esp32s3-oled-kit-wifi and -updates compile (RAM 108,124/109,252 B, flash 933,973/943,481 B). No kit test yet. Kit acceptance passed on 17 October 2026 (hub docs/verification/ota-2026-10-17.md): update applied, wrong key and changed byte refused, revert after 5 min, power cut recovered."
+    },
+    {
+      "id": "ESP-OTA-003",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "OLED dark after an update download while the board kept running",
+      "acceptance": [
+        "I2C bus clear before the boot probe",
+        "OLED set up again after each download",
+        "Console status reports display",
+        "Kit shows Online after a pushed update and after a refused download"
+      ],
+      "labels": [
+        "bug",
+        "esp32",
+        "P1"
+      ],
+      "stage": "done",
+      "evidence": "GitHub #148, PR #149; the kit took the fix as signed update 0.2.0-alpha.17.6 and the OLED stayed lit through that download, the revert test and the power-cut test (owner observation, 17 October 2026). Cause not confirmed."
     }
   ]
 }

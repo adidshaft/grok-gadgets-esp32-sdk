@@ -9,11 +9,18 @@
 // LAN listener with the provisioned CA, settings in NVS, the USB serial port as a provisioning
 // console, a status line on the top row, and BOOT held for 10 seconds as a factory reset.
 // A factory-provisioned board without home Wi-Fi opens the setup hotspot (hub ADR 010).
+// A Wi-Fi build with a builder's public key (tools/update_build.py) takes signed updates over
+// the relay and keeps a new image only once it is Online (hub ADR 012).
 #include <GrokSession.h>
 #ifdef OLED_KIT_WIFI
 #include "OnlineLogo.h"
 #include <GrokSetup.h>
 #include <GrokWifi.h>
+#if defined(GROK_UPDATE_KEY_HEADER) && !defined(GROK_HOST_SIMULATION)
+#define OLED_KIT_UPDATES
+#include <GrokUpdateEsp.h>
+#include <grok_update_key.h>
+#endif
 #endif
 #include <U8x8lib.h>
 #include <Wire.h>
@@ -23,11 +30,12 @@
 #endif
 constexpr int DataPinA = 8, DataPinB = 9, ButtonPin = 0, RgbPin = OLED_KIT_RGB_PIN;
 constexpr size_t MaxText = 32, Columns = 16;
-#ifdef OLED_KIT_WIFI
-constexpr const char *FirmwareVersion = "0.2.0-wifi";
-#else
-constexpr const char *FirmwareVersion = "0.1.0";
+// The version this image reports in its hello; a signed update names the same string.
+// tools/update_build.py replaces it from GROK_FIRMWARE_VERSION.
+#ifndef OLED_KIT_VERSION
+#define OLED_KIT_VERSION "0.2.0-alpha.17"
 #endif
+constexpr const char *FirmwareVersion = OLED_KIT_VERSION;
 
 // The delivered 1.3-inch module is an SH1106 (an SSD1306 driver left a lit column at the
 // right edge). Build with -DOLED_KIT_SSD1306 for SSD1306 modules.
@@ -59,6 +67,24 @@ char shownHint[Columns + 1] = {};   // Row 1: what to check after a failed Wi-Fi
 oledkit::OnlineLogo onlineLogo;
 uint32_t bootHeldSince = 0;
 bool bootHeld = false;
+#ifdef OLED_KIT_UPDATES
+grok::EspUpdatePlatform updatePlatform;
+grok::MbedtlsUpdateCrypto updateCrypto(GrokUpdateKey);
+grok::Updater updater(updatePlatform, updateCrypto, GrokUpdateBoard, FirmwareVersion);
+// Arduino marks a new image valid at boot unless this returns true; the updater decides.
+extern "C" bool verifyRollbackLater() { return true; }
+#ifdef OLED_KIT_TEST_NEVER_ONLINE
+// Acceptance test only (hub ADR 012): a signed image that never reaches the relay, to show
+// that a bad image reverts by itself. Build it with PLATFORMIO_BUILD_FLAGS; never ship it.
+struct NeverOnline : grok::Link {
+  bool open() override { return false; }
+  bool alive() override { return false; }
+  void close() override {}
+  Stream &stream() override { return wifiLink.stream(); }
+  const char *token() const override { return nullptr; }
+} neverOnline;
+#endif
+#endif
 
 // The setup hotspot's status row; nullptr when setup is not running.
 const char *setupStatus(char (&row)[Columns + 1]) {
@@ -128,6 +154,11 @@ void consoleStatus(JsonObject reply, void *) {
   reply["free_heap"] = ESP.getFreeHeap(); // Runtime cost of the setup hotspot (hub ADR 010).
   reply["wifi"] = WiFi.status() == WL_CONNECTED ? "connected" : "disconnected";
   reply["claimed"] = gadget.claimed(); // Never the code: it shows on the display only.
+#ifdef OLED_KIT_UPDATES
+  reply["updates"] = updateCrypto.keys() ? "ready" : "no_key";
+  reply["update_trial"] = updater.onTrial(); // A new image not yet kept.
+#endif
+  reply["display"] = address != 0; // An OLED answered on I2C at boot.
   reply["gateway"] = linkStatus();
   grok::JoinFailureText failure = grok::describe(wifiLink.failure());
   if (failure.code) {
@@ -137,6 +168,24 @@ void consoleStatus(JsonObject reply, void *) {
 }
 #endif
 
+// A reset in the middle of a display write can leave the OLED holding SDA low; the probe then
+// finds nothing until a power cycle. Clock the bus free and send a STOP first (I2C bus clear).
+void clearBus(int sdaPin, int sclPin) {
+  pinMode(sdaPin, INPUT_PULLUP);
+  pinMode(sclPin, INPUT_PULLUP);
+  for (int pulse = 0; pulse < 9 && digitalRead(sdaPin) == LOW; ++pulse) {
+    pinMode(sclPin, OUTPUT);
+    digitalWrite(sclPin, LOW);
+    delayMicroseconds(5);
+    pinMode(sclPin, INPUT_PULLUP);
+    delayMicroseconds(5);
+  }
+  pinMode(sdaPin, OUTPUT);
+  digitalWrite(sdaPin, LOW);
+  delayMicroseconds(5);
+  pinMode(sdaPin, INPUT_PULLUP); // SDA rises while SCL is high: STOP.
+  delayMicroseconds(5);
+}
 bool probe(uint8_t candidate) {
   Wire.beginTransmission(candidate);
   return Wire.endTransmission() == 0;
@@ -235,6 +284,7 @@ void setup() {
   neopixelWrite(RgbPin, 0, 0, 0);
   // Try the documented wiring first, then the two data wires swapped.
   for (auto pins : {std::make_pair(DataPinA, DataPinB), std::make_pair(DataPinB, DataPinA)}) {
+    clearBus(pins.first, pins.second);
     Wire.begin(pins.first, pins.second);
     for (uint8_t candidate : {0x3c, 0x3d})
       if (probe(candidate)) {
@@ -273,7 +323,16 @@ void setup() {
   wifiLink.begin(gadget.deviceId());
   console.status(consoleStatus, nullptr);
   gadget.showClaimCodes(); // Ignored by relays without accounts.
+#ifdef OLED_KIT_UPDATES
+  updater.begin(millis());
+  if (updateCrypto.keys())
+    gadget.updates(updater); // Older relays refuse the request once; nothing else changes.
+#endif
+#if defined(OLED_KIT_UPDATES) && defined(OLED_KIT_TEST_NEVER_ONLINE)
+  gadget.begin(neverOnline);
+#else
   gadget.begin(wifiLink);
+#endif
   hotspot.begin(gadget.deviceId(), millis()); // After begin: the device ID is set there.
 #else
   gadget.begin();
@@ -284,6 +343,19 @@ void loop() {
   gadget.loop();
   console.loop();
   uint32_t now = millis();
+#ifdef OLED_KIT_UPDATES
+  updater.loop(now); // The 5-minute trial and the restart after a verified download.
+  // A download writes flash for a minute at full Wi-Fi rate. On 17 October 2026 the kit's OLED
+  // was dark after one while the board kept running, so set the display up again afterwards.
+  static bool wasDownloading = false;
+  const bool downloading = updater.state() == grok::Updater::State::Downloading;
+  if (wasDownloading && !downloading && oled) {
+    oled->begin();
+    oled->setFont(u8x8_font_chroma48medium8_r);
+    draw();
+  }
+  wasDownloading = downloading;
+#endif
   hotspot.loop(now, gadget.connected());
   if (hotspot.takeJoined()) {
     wifiLink.begin(gadget.deviceId(), true); // Keep the hotspot so the page can show Online.
@@ -302,6 +374,12 @@ void loop() {
   else if (held >= FactoryResetWarnMs)
     snprintf(status, sizeof(status), "Reset in %cs", // 7 down to 1
              char('0' + (FactoryResetHoldMs - held + 999) / 1000));
+#ifdef OLED_KIT_UPDATES
+  else if (updater.state() != grok::Updater::State::Idle)
+    snprintf(status, sizeof(status), "Update %u%%", unsigned(updater.percent()));
+  else if (updater.showReverted())
+    snprintf(status, sizeof(status), "Reverted"); // For a minute after a bad image.
+#endif
   else if (const char *setup = setupStatus(setupRow)) {
     snprintf(status, sizeof(status), "%s", setup);
     using State = grok::SetupHotspot::State;
