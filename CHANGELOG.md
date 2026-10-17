@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Tooling: `clang-format` 23.1.3 and `ruff` 0.17.0, with the same pins in `requirements.lock` ([#139](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/139)). Sources need no reformatting; firmware and library are unchanged.
+
 ## 0.2.0-alpha.15 — 14 October 2026
 
 - On 14 October 2026 the owner's kit, on this firmware and factory-provisioned once, joined home Wi-Fi from an iPhone and from an Android phone through its setup hotspot, with no computer and no app, and went Online through the relay. A wrong setup code was refused, a wrong Wi-Fi password showed on the page and the OLED, the 10-minute window closed, and two BOOT resets re-joined. A board provisioned before this change came back Online after the update ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/phone-setup-2026-10-14.md)).
