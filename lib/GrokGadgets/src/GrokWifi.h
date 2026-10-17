@@ -587,7 +587,8 @@ private:
   }
   void wipe() { memset(line_, 0, sizeof(line_)); }
   void reply(bool withStatus) {
-    StaticJsonDocument<384> out;
+    // Room for the sketch's status fields, also with 16-byte slots on a 64-bit host.
+    StaticJsonDocument<640> out;
     out["ok"] = true;
     out["device_id"] = deviceId_;
     if (restart_)
@@ -605,7 +606,7 @@ private:
     send(out);
   }
   void send(JsonDocument &out) {
-    char text[512];
+    char text[768]; // A status reply with a Wi-Fi hint and the update fields.
     size_t size = serializeJson(out, text, sizeof(text) - 1);
     text[size++] = '\n';
     port_.write(reinterpret_cast<const uint8_t *>(text), size);

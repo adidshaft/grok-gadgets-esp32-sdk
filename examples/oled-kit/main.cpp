@@ -158,6 +158,7 @@ void consoleStatus(JsonObject reply, void *) {
   reply["updates"] = updateCrypto.keys() ? "ready" : "no_key";
   reply["update_trial"] = updater.onTrial(); // A new image not yet kept.
 #endif
+  reply["display"] = address != 0; // An OLED answered on I2C at boot.
   reply["gateway"] = linkStatus();
   grok::JoinFailureText failure = grok::describe(wifiLink.failure());
   if (failure.code) {
@@ -167,6 +168,24 @@ void consoleStatus(JsonObject reply, void *) {
 }
 #endif
 
+// A reset in the middle of a display write can leave the OLED holding SDA low; the probe then
+// finds nothing until a power cycle. Clock the bus free and send a STOP first (I2C bus clear).
+void clearBus(int sdaPin, int sclPin) {
+  pinMode(sdaPin, INPUT_PULLUP);
+  pinMode(sclPin, INPUT_PULLUP);
+  for (int pulse = 0; pulse < 9 && digitalRead(sdaPin) == LOW; ++pulse) {
+    pinMode(sclPin, OUTPUT);
+    digitalWrite(sclPin, LOW);
+    delayMicroseconds(5);
+    pinMode(sclPin, INPUT_PULLUP);
+    delayMicroseconds(5);
+  }
+  pinMode(sdaPin, OUTPUT);
+  digitalWrite(sdaPin, LOW);
+  delayMicroseconds(5);
+  pinMode(sdaPin, INPUT_PULLUP); // SDA rises while SCL is high: STOP.
+  delayMicroseconds(5);
+}
 bool probe(uint8_t candidate) {
   Wire.beginTransmission(candidate);
   return Wire.endTransmission() == 0;
@@ -265,6 +284,7 @@ void setup() {
   neopixelWrite(RgbPin, 0, 0, 0);
   // Try the documented wiring first, then the two data wires swapped.
   for (auto pins : {std::make_pair(DataPinA, DataPinB), std::make_pair(DataPinB, DataPinA)}) {
+    clearBus(pins.first, pins.second);
     Wire.begin(pins.first, pins.second);
     for (uint8_t candidate : {0x3c, 0x3d})
       if (probe(candidate)) {
@@ -325,6 +345,16 @@ void loop() {
   uint32_t now = millis();
 #ifdef OLED_KIT_UPDATES
   updater.loop(now); // The 5-minute trial and the restart after a verified download.
+  // A download writes flash for a minute at full Wi-Fi rate. On 17 October 2026 the kit's OLED
+  // was dark after one while the board kept running, so set the display up again afterwards.
+  static bool wasDownloading = false;
+  const bool downloading = updater.state() == grok::Updater::State::Downloading;
+  if (wasDownloading && !downloading && oled) {
+    oled->begin();
+    oled->setFont(u8x8_font_chroma48medium8_r);
+    draw();
+  }
+  wasDownloading = downloading;
 #endif
   hotspot.loop(now, gadget.connected());
   if (hotspot.takeJoined()) {
