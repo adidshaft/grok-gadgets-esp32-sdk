@@ -61,6 +61,16 @@ inline int digitalRead(int) { return fake::pin; }
 inline void digitalWrite(int, int level) { fake::led = level; }
 inline void pinMode(int, int) {}
 inline void delayMicroseconds(uint32_t) {}
+// LEDC (servo PWM) as in Arduino-ESP32 2.0.17; the host keeps the last duty.
+namespace fake {
+inline uint32_t &ledcDuty() {
+  static uint32_t duty = 0;
+  return duty;
+}
+} // namespace fake
+inline double ledcSetup(uint8_t, double freq, uint8_t) { return freq; }
+inline void ledcAttachPin(uint8_t, uint8_t) {}
+inline void ledcWrite(uint8_t, uint32_t duty) { fake::ledcDuty() = duty; }
 inline void neopixelWrite(int, uint8_t r, uint8_t g, uint8_t b) {
   fake::neopixel = (uint32_t(r) << 16) | (uint32_t(g) << 8) | b;
 }

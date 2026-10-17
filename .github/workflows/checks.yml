@@ -37,7 +37,7 @@ jobs:
           version: '0.12.3'
       - run: python tools/check_readme.py
       - name: Plain language (ASD-STE100 sentence limit)
-        run: python tools/check_ste.py README.md CONTRIBUTING.md SUPPORT.md docs/updates.md docs/core-3x-decision.md
+        run: python tools/check_ste.py README.md CONTRIBUTING.md SUPPORT.md docs/updates.md docs/core-3x-decision.md docs/ship-a-gadget.md
       - name: Library manifests agree and pack (nothing is published)
         run: .venv/bin/python tools/check_package.py
       - name: Simulated firmware over a PTY USB link to gateway main
@@ -55,4 +55,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m venv .venv && .venv/bin/pip install -r requirements.lock
-      - run: .venv/bin/pio run -e atoms3-lite-usb -e esp32s3-led-button -e esp32s3-oled-kit -e esp32s3-oled-kit-wifi -e esp32s3-oled-kit-wifi-updates
+      - run: .venv/bin/pio run -e atoms3-lite-usb -e esp32s3-led-button -e esp32s3-oled-kit -e esp32s3-oled-kit-wifi -e esp32s3-oled-kit-wifi-updates -e esp32s3-climate-sensor -e esp32s3-switch -e esp32s3-servo
