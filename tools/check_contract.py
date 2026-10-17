@@ -21,6 +21,11 @@ validator = Draft202012Validator(
 )
 for frame in json.loads((root / "protocol/0.1.0/fixtures/device-transcript.json").read_text()):
     validator.validate(frame)
+# Signed updates (hub ADR 012): the requests a gadget sends while it takes an update.
+for frame in json.loads((root / "protocol/0.1.0/fixtures/update-transcript.json").read_text())[
+    "requests"
+]:
+    validator.validate(frame)
 
 
 def command(command_id, capability, arguments):

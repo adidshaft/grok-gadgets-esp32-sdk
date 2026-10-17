@@ -22,6 +22,8 @@ constexpr size_t IncomingCapacity = JSON_ARRAY_SIZE(MaxFrame / 2 + 8) + MaxFrame
 // attributed to the next request. Protocol 0.1.0 has no request ID.
 constexpr uint32_t RequestTimeoutMs = 13000;
 constexpr uint32_t PollIntervalMs = 100, StateIntervalMs = 3000;
+// While an update downloads, update frames go between polls; one poll a second at least.
+constexpr uint32_t UpdatePollMs = 1000;
 constexpr uint32_t MinBackoffMs = 500, MaxBackoffMs = 5000;
 // After `unauthorized` or `revoked` on a link, wait this long before the next hello.
 constexpr uint32_t RejectedBackoffMs = 60000;
@@ -46,6 +48,21 @@ public:
   virtual void close() = 0;
   virtual Stream &stream() = 0;
   virtual const char *token() const = 0; // Device token sent in the hello.
+};
+
+// Signed updates (hub ADR 012). The session asks for them in its hello, passes offers on, and
+// sends the update frames the hooks ask for between its own requests. GrokUpdate.h's Updater
+// implements this.
+class UpdateHooks {
+public:
+  virtual ~UpdateHooks() = default;
+  virtual void offer(JsonVariantConst offer, uint32_t now) = 0; // Null: withdrawn.
+  virtual bool request(JsonDocument &frame, uint32_t now) = 0;  // The next update frame.
+  virtual void reply(JsonObjectConst reply, uint32_t now) = 0;  // `ok` reply to that frame.
+  virtual void refused(const char *code, uint32_t now) = 0;     // Error reply to that frame.
+  virtual void online(uint32_t now) = 0; // A hello accepted and a poll answered.
+  virtual void lost(uint32_t now) = 0;   // The session ended.
+  virtual bool downloading() const = 0;  // Poll at least once a second meanwhile.
 };
 
 // One gadget per firmware. Declare it as a global or static object: it holds about 40 KB
@@ -102,6 +119,13 @@ public:
   // The next hello follows a reset and a phone setup: a claimed gadget may then show a
   // transfer code for its next owner (hub ADR 011 §7).
   void claimAfterSetup() { afterSetup_ = true; }
+  // Signed updates (hub ADR 012): call before begin(). Each hello then asks the relay for
+  // update offers. A relay before this change refuses the request once; the gadget then
+  // stops asking until the next boot and works as before.
+  void updates(UpdateHooks &hooks) {
+    if (!began_)
+      update_ = &hooks;
+  }
   // The code to show (`XXXX-XXXX`), or null. Valid only while connected.
   const char *claimCode() const { return claimCode_[0] ? claimCode_ : nullptr; }
   // True once the relay reported an owner for this gadget.
@@ -190,7 +214,7 @@ public:
   const char *bootId() const { return bootId_; }
 
 private:
-  enum class Kind { Hello, Poll, Ack, Event, State, Loss };
+  enum class Kind { Hello, Poll, Ack, Event, State, Loss, Update };
   struct Pending {
     uint32_t sequence = 0;
     const char *name = nullptr;
@@ -271,6 +295,9 @@ private:
     claimSent_ = claimWanted_ && !claimRefused_;
     if (claimSent_)
       outgoing_["claim"] = afterSetup_ ? "after_setup" : "ready";
+    updateSent_ = update_ && !updateRefused_;
+    if (updateSent_)
+      outgoing_["update"] = "ready";
     auto d = outgoing_.createNestedObject("device");
     d["device_id"] = deviceId_;
     d["model"] = model_;
@@ -350,8 +377,15 @@ private:
       device_.state(outgoing_.createNestedObject("state"));
       lastState_ = now;
       transmit(Kind::State, now);
-    } else if (uint32_t(now - lastRequest_) >= PollIntervalMs) {
+    } else if (update_ && updateSent_ &&
+               !(update_->downloading() && uint32_t(now - lastPoll_) >= UpdatePollMs) &&
+               update_->request(outgoing_, now)) {
+      transmit(Kind::Update, now); // Between polls, so commands still arrive.
+    } else if (uint32_t(now - lastRequest_) >= PollIntervalMs ||
+               (update_ && update_->downloading() && uint32_t(now - lastPoll_) >= UpdatePollMs)) {
+      outgoing_.clear();
       outgoing_["type"] = "poll";
+      lastPoll_ = now;
       transmit(Kind::Poll, now);
     }
   }
@@ -405,6 +439,13 @@ private:
     // Each request kind has its own reply shape; a mismatch is a stray or late reply.
     // After a hello with `claim`, hello and poll replies may also carry the claim fields.
     size_t expected = 1;
+    // After a hello with `update`, hello and poll replies may carry an offer or null.
+    if (updateSent_ && (pending_ == Kind::Hello || pending_ == Kind::Poll) &&
+        r.containsKey("update")) {
+      if (!r["update"].isNull() && !r["update"].is<JsonObjectConst>())
+        return false;
+      ++expected;
+    }
     if (claimSent_ && (pending_ == Kind::Hello || pending_ == Kind::Poll)) {
       if (r.containsKey("claimed")) {
         if (!r["claimed"].is<bool>())
@@ -426,6 +467,10 @@ private:
       JsonArrayConst commands = r["commands"];
       if (commands.isNull() || commands.size() > 1 ||
           (commands.size() && !commands[0].is<JsonObjectConst>()))
+        return false;
+      expected += 1;
+    } else if (pending_ == Kind::Update && r.containsKey("data")) {
+      if (!r["data"].is<const char *>())
         return false;
       expected += 1;
     } else if (r.containsKey("duplicate")) {
@@ -460,6 +505,9 @@ private:
       const char *code = r["claim_code"] | "";
       snprintf(claimCode_, sizeof(claimCode_), "%s", code); // Empty: no code to show.
     }
+    if (updateSent_ && update_ && (pending_ == Kind::Hello || pending_ == Kind::Poll) &&
+        r.containsKey("update"))
+      update_->offer(r["update"], now);
     switch (pending_) {
     case Kind::Hello:
       connected_ = true;
@@ -484,6 +532,13 @@ private:
         device_.execute(command, ack_);
         haveAck_ = true;
       }
+      if (update_ && !answeredPoll_) {
+        answeredPoll_ = true;
+        update_->online(now); // Online: a hello accepted and a poll answered.
+      }
+      break;
+    case Kind::Update:
+      update_->reply(r, now);
       break;
     case Kind::State:
       break;
@@ -509,8 +564,18 @@ private:
   }
   // A rejected event never blocks polling: drop it (counted as lost) and continue.
   bool failed(const char *code, uint32_t now) {
-    if (pending_ == Kind::Hello && claimSent_ && !strcmp(code, "invalid_request"))
-      claimRefused_ = true; // A relay without claim codes: ask without the field.
+    if (pending_ == Kind::Hello && !strcmp(code, "invalid_request")) {
+      // An older relay: ask without the newest field first, then without the claim.
+      if (updateSent_)
+        updateRefused_ = true;
+      else if (claimSent_)
+        claimRefused_ = true;
+    }
+    if (pending_ == Kind::Update && strcmp(code, "unauthorized") && strcmp(code, "revoked") &&
+        strcmp(code, "stale_session")) {
+      update_->refused(code, now); // The gateway keeps the session for these.
+      return true;
+    }
     if (!strcmp(code, "unauthorized"))
       rejected_ = "unauthorized";
     else if (!strcmp(code, "revoked"))
@@ -574,6 +639,9 @@ private:
   void resetSession(uint32_t now) {
     // A possibly executed command cannot be acknowledged into a new gateway session.
     connected_ = waiting_ = haveAck_ = false;
+    if (update_)
+      update_->lost(now);
+    answeredPoll_ = false;
     claimCode_[0] = '\0'; // A code lives only as long as its session.
     ack_.clear();
     lines_.reset();
@@ -606,6 +674,10 @@ private:
   bool claimWanted_ = false, claimRefused_ = false, claimSent_ = false, afterSetup_ = false;
   bool claimed_ = false;
   char claimCode_[10] = {};
+  // Signed updates (hub ADR 012).
+  UpdateHooks *update_ = nullptr;
+  bool updateSent_ = false, updateRefused_ = false, answeredPoll_ = false;
+  uint32_t lastPoll_ = 0;
   Kind pending_ = Kind::Hello;
   uint8_t attempts_ = 0;
   uint32_t droppedAcks_ = 0;

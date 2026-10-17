@@ -791,8 +791,27 @@
         "esp32",
         "P1"
       ],
+      "stage": "done",
+      "evidence": "GitHub #124; docs/core-3x-decision.md: 2.0.17 vs 3.3.12 matrix, API deltas, Phase 12b needs on each core. Recommendation: no-go for Phase 12b. Owner decides at the ADR 012 review. Owner approved the no-go on 17 October 2026 (hub ADR 012 decision 3)."
+    },
+    {
+      "id": "ESP-OTA-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "No over-the-air update with rollback and signed images",
+      "acceptance": [
+        "Signature and manifest checked before download; SHA-256 before Update.end()",
+        "Rollback on; valid only after Online through the relay, else revert",
+        "OLED rows Update 42% and Reverted; a real version in hello",
+        "Host tests; RAM and flash recorded",
+        "Kit takes a signed update over the relay and reverts a bad image (hub Phase 12b record)"
+      ],
+      "labels": [
+        "feature",
+        "esp32",
+        "P1"
+      ],
       "stage": "review",
-      "evidence": "GitHub #124; docs/core-3x-decision.md: 2.0.17 vs 3.3.12 matrix, API deltas, Phase 12b needs on each core. Recommendation: no-go for Phase 12b. Owner decides at the ADR 012 review."
+      "evidence": "GitHub #125; tests/update_tests.cpp (real ECDSA/SHA-256 against the pinned gateway fixture); tools/check.sh 14/14; esp32s3-oled-kit-wifi and -updates compile (RAM 108,124/109,252 B, flash 933,973/943,481 B). No kit test yet."
     }
   ]
 }

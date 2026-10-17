@@ -123,7 +123,7 @@ int main() {
   // Joining replaces the failure hint with the Grok Bot label.
   assert(fake::screen[1].rfind("Grok Bot", 0) == 0);
   assert(frame["device"]["device_id"] == "oledkit-bc9a78563412");
-  assert(frame["device"]["firmware_version"] == "0.2.0-wifi");
+  assert(frame["device"]["firmware_version"] == FirmwareVersion);
   advance(10);
   assert(fake::screen[0].rfind("Online", 0) == 0);
   logoPixels();

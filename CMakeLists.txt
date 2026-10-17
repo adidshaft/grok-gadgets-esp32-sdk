@@ -59,3 +59,10 @@ add_test(NAME wifi_factory COMMAND wifi_factory_tests)
 host_sketch(wifi_setup_tests tests/wifi_setup_tests.cpp)
 target_compile_definitions(wifi_setup_tests PRIVATE GROK_SETUP_TESTS)
 add_test(NAME wifi_setup COMMAND wifi_setup_tests)
+
+# Signed updates (hub ADR 012): real ECDSA and SHA-256 from OpenSSL, as mbedTLS on the board.
+find_package(OpenSSL REQUIRED)
+host_sketch(update_tests tests/update_tests.cpp)
+target_link_libraries(update_tests PRIVATE OpenSSL::Crypto)
+target_compile_definitions(update_tests PRIVATE GROK_UPDATE_FIXTURE="${CMAKE_SOURCE_DIR}/protocol/0.1.0/fixtures/update-transcript.json")
+add_test(NAME update COMMAND update_tests)
