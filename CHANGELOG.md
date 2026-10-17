@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.17 — 17 October 2026
+
+- On 17 October 2026 the owner's kit took signed updates from the owner's relay with no cable. The OLED showed `Update %`, the kit restarted and reported the new version in its hello. It refused an image signed with another key before any download, and an image with one changed byte at the SHA-256 check. An image that never came Online reverted by itself after 5 minutes and showed `Reverted`. A power cut during a download recovered ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/ota-2026-10-17.md)). The first USB flash of this firmware came Online against a relay that refuses the new hello field.
+
+- The OLED stays usable across update downloads and restarts ([#148](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/148)). In the acceptance the kit's display went dark after a download while the board kept running. The firmware now clears the I2C bus before the boot probe and sets the OLED up again after each download. The console `status` reports `display`, and its reply buffers grew so that every field fits.
+
+- `OLED_KIT_TEST_NEVER_ONLINE` builds a signed test image that never connects, to show a revert (acceptance only; never ship it).
+
 - Signed updates over the relay ([#125](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/125), hub ADR 012). `GrokUpdate.h` adds `grok::Updater`: with a builder's public key compiled in, the gadget sends `"update": "ready"` in its hello, checks the ECDSA P-256 signature and every manifest field before downloading, writes 1,024-byte chunks into the other app slot while still polling once a second, and checks the size and SHA-256 before `Update.end()`. A new image starts on trial and marks itself valid only after a hello and a poll through the relay; after 5 minutes without that, or after a crash, the previous image starts, reports `reverted` and refuses that version. `GrokUpdateEsp.h` holds the ESP32 parts (`Update`, app rollback, NVS namespace `grok-update`, mbedTLS, up to two keys). `Gadget::updates()` attaches it; an older relay refuses the hello field once and the gadget asks no more until the next boot. The OLED kit shows `Update 42%` and `Reverted`, reports a real version (`0.2.0-alpha.17`, or `GROK_FIRMWARE_VERSION`) instead of `0.2.0-wifi`, and compiles a key in from `GROK_UPDATE_PUBLIC_KEY` (`tools/update_build.py`); without a key it never asks. New compile check `esp32s3-oled-kit-wifi-updates`. Host tests use real ECDSA and SHA-256 against the gateway's pinned update fixture (protocol pinned at gateway `7dd5b3a`). Guide: [signed updates](docs/updates.md).
 - ESP-CORE-001: keep Arduino-ESP32 2.0.17 for Phase 12b; the [core record](docs/core-3x-decision.md) compares 3.3.12 (owner decision, 17 October 2026).
 

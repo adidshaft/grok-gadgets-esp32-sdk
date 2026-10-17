@@ -810,8 +810,26 @@
         "esp32",
         "P1"
       ],
-      "stage": "review",
-      "evidence": "GitHub #125; tests/update_tests.cpp (real ECDSA/SHA-256 against the pinned gateway fixture); tools/check.sh 14/14; esp32s3-oled-kit-wifi and -updates compile (RAM 108,124/109,252 B, flash 933,973/943,481 B). No kit test yet."
+      "stage": "done",
+      "evidence": "GitHub #125; tests/update_tests.cpp (real ECDSA/SHA-256 against the pinned gateway fixture); tools/check.sh 14/14; esp32s3-oled-kit-wifi and -updates compile (RAM 108,124/109,252 B, flash 933,973/943,481 B). No kit test yet. Kit acceptance passed on 17 October 2026 (hub docs/verification/ota-2026-10-17.md): update applied, wrong key and changed byte refused, revert after 5 min, power cut recovered."
+    },
+    {
+      "id": "ESP-OTA-003",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "OLED dark after an update download while the board kept running",
+      "acceptance": [
+        "I2C bus clear before the boot probe",
+        "OLED set up again after each download",
+        "Console status reports display",
+        "Kit shows Online after a pushed update and after a refused download"
+      ],
+      "labels": [
+        "bug",
+        "esp32",
+        "P1"
+      ],
+      "stage": "done",
+      "evidence": "GitHub #148, PR #149; the kit took the fix as signed update 0.2.0-alpha.17.6 and the OLED stayed lit through that download, the revert test and the power-cut test (owner observation, 17 October 2026). Cause not confirmed."
     }
   ]
 }
