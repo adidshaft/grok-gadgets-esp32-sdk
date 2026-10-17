@@ -7,16 +7,13 @@ covers the key, signing and the relay. This page covers the firmware.
 
 ## What the gadget does
 
-1. It sends `"update": "ready"` in its hello, only when a public key is compiled in.
+1. It sends `"update": "ready"` in its hello, only when the build compiled in a public key.
 2. When the relay offers an update, it checks the ECDSA P-256 signature with the compiled
-   key. Then it checks the format, the board, the protocol, the version and the size. A
-   failure is reported as `rejected`, and the gadget downloads nothing.
+   key. Then it checks the format, the board, the protocol, the version and the size. On a failure it reports `rejected` and downloads nothing.
 3. It downloads 1,024-byte chunks into the other app slot with `Update.write`. It still polls
    at least once a second, so commands keep working. The OLED kit shows `Update 42%`.
-4. It checks the byte count and the SHA-256 before `Update.end()`. A mismatch is reported as
-   `failed` and the running image stays.
-5. It restarts. The new image starts *pending verify*. It marks itself valid only after a
-   hello is accepted and a poll is answered, then reports `applied`.
+4. It checks the byte count and the SHA-256 before `Update.end()`. On a mismatch it reports `failed`, and the running image stays.
+5. It restarts. The new image starts *pending verify*. It marks itself valid only after the relay accepts a hello and answers a poll. Then it reports `applied`.
 6. If the new image is not Online within 5 minutes, it marks itself invalid and the previous
    image starts. A crash or a power cut on trial has the same result. The previous image
    reports `reverted` and refuses that version from then on. The OLED kit shows `Reverted`
@@ -27,7 +24,7 @@ download starts again from the beginning at the next offer.
 
 ## Build an image that takes updates
 
-The public key is compiled in from a file outside the repository:
+The build compiles in the public key from a file outside the repository:
 
 ```sh
 GROK_UPDATE_PUBLIC_KEY=~/grok-keys/builder.pub.pem .venv/bin/pio run -e esp32s3-oled-kit-wifi
@@ -95,8 +92,7 @@ manifest parser.
 
 ## Limits
 
-- Anti-rollback is off: any signed version other than the running one, and other than a
-  reverted one, is accepted.
+- Anti-rollback is off. The gadget accepts any signed version other than the running one and other than a reverted one.
 - Secure boot and flash encryption are off. Anyone with the board and a cable can flash it.
   The signature check protects the over-the-air path only.
 - The bootloader written by the USB flash stays. An update replaces the application only.

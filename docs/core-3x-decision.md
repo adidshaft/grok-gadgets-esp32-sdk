@@ -62,7 +62,7 @@ signature check has to be in the application, over the streamed image, before
 
 - A core move changes the bootloader that USB flashing writes. An over-the-air update
   replaces the app only, so a kit flashed with the 2.0.17 bootloader would run a 3.x app on
-  an IDF 4.4 bootloader. That pairing is untested here.
+  an IDF 4.4 bootloader. We did not test that pairing.
 - The Wi-Fi, TLS, setup hotspot and claim acceptance (Phases 4–11) all ran on 2.0.17. A move
   repeats them.
 - +163 KB per image means about 160 more chunks per update over the relay.
@@ -72,8 +72,6 @@ signature check has to be in the application, over the streamed image, before
 **No-go for Phase 12b.** Keep 2.0.17. Build Phase 12b's signature check on the mbedTLS
 public-key API, which exists in both cores, so the code moves with the core later.
 
-**Go later, as its own step:** migrate in a later phase, once over-the-air updates work. The
-first 3.x image should reach a spare board over the air, from a 2.0.17 bootloader, before
-any kit is flashed with a 3.x bootloader. Rename `neopixelWrite` to `rgbLedWrite` then.
+**Go later, as its own step:** migrate in a later phase, once over-the-air updates work. First send a 3.x image over the air to a spare board with a 2.0.17 bootloader. Only then flash a kit with a 3.x bootloader. Rename `neopixelWrite` to `rgbLedWrite` then.
 
 The owner decides at the ADR 012 review.
