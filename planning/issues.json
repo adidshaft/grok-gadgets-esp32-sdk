@@ -768,11 +768,12 @@
         "esp32",
         "P1"
       ],
-      "stage": "review",
+      "stage": "done",
       "commits": [],
       "blocker": null,
       "evidence": [
-        "GitHub #116; tests/claim_tests.cpp; contract with an accounts-relay script; Wi-Fi build RAM 108108 B, flash 933393 B. No kit test yet."
+        "GitHub #116; tests/claim_tests.cpp; contract with an accounts-relay script; Wi-Fi build RAM 108108 B, flash 933393 B. No kit test yet.",
+        "Owner's kit 17 Oct 2026, dev 76a52c9: claim code shown, claimed by a second account, transfer code after reset; hub docs/verification/claim-2026-10-17.md"
       ]
     }
   ]
