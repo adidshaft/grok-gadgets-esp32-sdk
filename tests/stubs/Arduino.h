@@ -60,6 +60,7 @@ inline void delay(uint32_t ms) { fake::now += ms; }
 inline int digitalRead(int) { return fake::pin; }
 inline void digitalWrite(int, int level) { fake::led = level; }
 inline void pinMode(int, int) {}
+inline void delayMicroseconds(uint32_t) {}
 inline void neopixelWrite(int, uint8_t r, uint8_t g, uint8_t b) {
   fake::neopixel = (uint32_t(r) << 16) | (uint32_t(g) << 8) | b;
 }
