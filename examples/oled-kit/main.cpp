@@ -73,6 +73,17 @@ grok::MbedtlsUpdateCrypto updateCrypto(GrokUpdateKey);
 grok::Updater updater(updatePlatform, updateCrypto, GrokUpdateBoard, FirmwareVersion);
 // Arduino marks a new image valid at boot unless this returns true; the updater decides.
 extern "C" bool verifyRollbackLater() { return true; }
+#ifdef OLED_KIT_TEST_NEVER_ONLINE
+// Acceptance test only (hub ADR 012): a signed image that never reaches the relay, to show
+// that a bad image reverts by itself. Build it with PLATFORMIO_BUILD_FLAGS; never ship it.
+struct NeverOnline : grok::Link {
+  bool open() override { return false; }
+  bool alive() override { return false; }
+  void close() override {}
+  Stream &stream() override { return wifiLink.stream(); }
+  const char *token() const override { return nullptr; }
+} neverOnline;
+#endif
 #endif
 
 // The setup hotspot's status row; nullptr when setup is not running.
@@ -297,7 +308,11 @@ void setup() {
   if (updateCrypto.keys())
     gadget.updates(updater); // Older relays refuse the request once; nothing else changes.
 #endif
+#if defined(OLED_KIT_UPDATES) && defined(OLED_KIT_TEST_NEVER_ONLINE)
+  gadget.begin(neverOnline);
+#else
   gadget.begin(wifiLink);
+#endif
   hotspot.begin(gadget.deviceId(), millis()); // After begin: the device ID is set there.
 #else
   gadget.begin();

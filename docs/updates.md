@@ -47,6 +47,10 @@ only on the source and the toolchain. An image with a key differs per builder.
 Flash the first update-capable image over USB once. After that, sign each new image with the
 gateway's `firmware sign`, using `--board esp32s3-oled-kit-wifi` and the same version.
 
+To prove the revert, build a signed test image that never connects. Add
+`PLATFORMIO_BUILD_FLAGS=-DOLED_KIT_TEST_NEVER_ONLINE` to the build command, with its own
+`GROK_FIRMWARE_VERSION`. It reverts 5 minutes after it starts. Never ship it.
+
 The `esp32s3-oled-kit-wifi-updates` environment compiles the update path with the gateway
 fixture's test key. It is a compile check; never flash it.
 
