@@ -25,11 +25,21 @@ namespace script {
 std::vector<std::string> commands;
 bool holding = false;
 std::string held;
+bool claimPending = false; // An accounts relay (hub ADR 011) reports the claim once.
 
-std::string respond(const std::string &type) {
+std::string respond(const std::string &type, bool claim) {
+  if (type == "hello" && claim) {
+    claimPending = true;
+    return R"({"ok":true,"session_id":"transcript","protocol_version":"0.1.0",)"
+           R"("claimed":false,"claim_code":"ABCD-EFGH"})";
+  }
   if (type == "hello")
     return R"({"ok":true,"session_id":"transcript","protocol_version":"0.1.0"})";
   if (type == "poll") {
+    if (commands.empty() && claimPending) {
+      claimPending = false;
+      return R"({"ok":true,"commands":[],"claimed":true})";
+    }
     if (commands.empty())
       return R"({"ok":true,"commands":[]})";
     auto command = commands.front();
@@ -48,9 +58,10 @@ void step(uint32_t ms) {
       std::cout << line << '\n';
       StaticJsonDocument<256> filter;
       filter["type"] = true;
+      filter["claim"] = true;
       StaticJsonDocument<256> frame;
       deserializeJson(frame, line, DeserializationOption::Filter(filter));
-      std::string answer = respond(frame["type"] | "");
+      std::string answer = respond(frame["type"] | "", !frame["claim"].isNull());
       if (holding)
         held = answer;
       else
