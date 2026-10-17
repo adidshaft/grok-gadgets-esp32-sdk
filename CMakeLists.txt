@@ -55,7 +55,7 @@ add_test(NAME wifi_relay COMMAND wifi_relay_tests)
 host_sketch(transcript_oled_kit_wifi tests/transcript.cpp)
 target_compile_definitions(transcript_oled_kit_wifi PRIVATE GROK_WIFI_TRANSCRIPT GROK_EXAMPLE="${CMAKE_SOURCE_DIR}/examples/oled-kit/main.cpp")
 # Builder examples on grok::WifiApp (hub ADR 013), with host models for their parts.
-foreach(example climate-sensor switch servo)
+foreach(example climate-sensor switch servo template)
  string(REPLACE "-" "_" target ${example})
  host_sketch(transcript_${target}_wifi tests/transcript.cpp)
  target_compile_definitions(transcript_${target}_wifi PRIVATE GROK_APP_TRANSCRIPT GROK_EXAMPLE="${CMAKE_SOURCE_DIR}/examples/${example}/main.cpp")

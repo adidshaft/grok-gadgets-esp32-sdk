@@ -62,7 +62,13 @@ sketches["transcript_servo_wifi"] = [
     command("t-move", "servo.move", {"angle": 120}),
     command("t-bad", "servo.move", {"angle": 200}),
 ]
-APP_SKETCHES = ("transcript_climate_sensor_wifi", "transcript_switch_wifi", "transcript_servo_wifi")
+sketches["transcript_template_wifi"] = sketches["transcript_switch_wifi"]
+APP_SKETCHES = (
+    "transcript_climate_sensor_wifi",
+    "transcript_switch_wifi",
+    "transcript_servo_wifi",
+    "transcript_template_wifi",
+)
 expected_acks = {
     "transcript_c124": {"t-green": "executed", "t-bad": "failed"},
     "transcript_led_button": {"t-on": "executed", "t-bad": "failed"},
@@ -72,6 +78,7 @@ expected_acks["transcript_oled_kit_wifi"] = expected_acks["transcript_oled_kit"]
 expected_acks["transcript_climate_sensor_wifi"] = {"t-set": "executed", "t-bad": "failed"}
 expected_acks["transcript_switch_wifi"] = {"t-on": "executed", "t-bad": "failed"}
 expected_acks["transcript_servo_wifi"] = {"t-move": "executed", "t-bad": "failed"}
+expected_acks["transcript_template_wifi"] = expected_acks["transcript_switch_wifi"]
 for binary, commands in sketches.items():
     output = subprocess.run(
         [root / "build" / binary, *commands], check=True, capture_output=True, text=True, timeout=60
@@ -121,7 +128,7 @@ for binary, commands in sketches.items():
         if binary == "transcript_climate_sensor_wifi":
             assert states["t-set"]["climate"]["above_c"] == 26, states
             assert states["t-bad"]["climate"]["above_c"] == 26, "a refused value changed it"
-        elif binary == "transcript_switch_wifi":
+        elif binary in ("transcript_switch_wifi", "transcript_template_wifi"):
             assert states["t-on"]["switch"] == {"on": True}, states
         else:
             assert states["t-move"]["servo"] == {"angle": 120}, states
