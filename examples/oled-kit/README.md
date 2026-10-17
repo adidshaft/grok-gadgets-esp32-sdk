@@ -83,6 +83,11 @@ It passed physical acceptance over Wi-Fi on the owner's kit on 12 October 2026
 - The top OLED row shows the link: `Not provisioned`, `WiFi...`, `Gateway...` (or `Relay...`),
   `Online`, `TLS rejected` or `Token rejected`. Rows 2–5 show the text. `display.clear` blanks the
   text and keeps the status row.
+- On a relay with accounts (hub ADR 011), an unclaimed kit shows `Code XXXX-XXXX` on the top
+  row instead of `Online`, and `Add in Grok Bot` on the second row. Type that code on the
+  relay's sign-in page or give it to Grok Bot. The code changes every 10 minutes and goes away
+  once the kit is claimed. After a BOOT reset and a phone setup, a claimed kit may show a
+  transfer code for 10 minutes. The console prints `status: Code shown`, never the code.
 - While the status says `Online`, the second row says `Grok Bot`. A 48×48 Grok Bot face
   fills the right side of the first six rows. It moves one pixel up and down and blinks once
   every 3.6 seconds. Text then uses the bottom two rows, 16 columns each, by word when two

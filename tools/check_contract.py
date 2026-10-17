@@ -65,6 +65,8 @@ for binary, commands in sketches.items():
     assert frames[0]["type"] == "hello", binary
     wifi = binary.endswith("_wifi")
     assert (frames[0].get("token") == "transcript-device-token") == wifi, (binary, "hello token")
+    # The Wi-Fi OLED kit asks for claim codes (hub ADR 011); USB builds never do.
+    assert (frames[0].get("claim") == "ready") == (binary == "transcript_oled_kit_wifi"), binary
     hello = frames[0]["device"]
     names = hello["capabilities"]
     assert names[-2:] == ["state", "history_lost"] and "button" in names, (binary, names)

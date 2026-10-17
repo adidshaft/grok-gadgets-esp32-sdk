@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Claim codes ([#116](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/116), hub ADR 011). `Gadget::showClaimCodes()` before `begin()` adds `"claim": "ready"` to the hello and accepts `claimed` and `claim_code` in hello and poll replies; every other unknown reply field still resets the session. `claimCode()` and `claimed()` read them; a disconnect clears the code. `claimAfterSetup()` makes the next accepted hello say `after_setup`. A relay that refuses the field (`invalid_request`) gets a hello without it until the next boot. The OLED Wi-Fi build opts in, shows `Code XXXX-XXXX` and `Add in Grok Bot` while a code is live, marks the first hello after a phone setup, and reports `claimed` in the console `status` (never the code). Protocol files follow gateway `dev`. Wi-Fi build: static RAM 108,108 B and flash 933,393 B (+32 B RAM, +844 B flash against 0.2.0-alpha.15). Host-tested and compiled; not yet run on the kit.
+
 - Tooling: `clang-format` 23.1.3 and `ruff` 0.17.0, with the same pins in `requirements.lock` ([#139](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/139)). Sources need no reformatting; firmware and library are unchanged.
 
 ## 0.2.0-alpha.15 — 14 October 2026

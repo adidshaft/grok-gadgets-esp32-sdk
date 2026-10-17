@@ -82,6 +82,12 @@ const char *setupStatus(char (&row)[Columns + 1]) {
 const char *linkStatus() {
   if (!settings.complete())
     return "Not provisioned";
+  if (gadget.connected() && gadget.claimCode()) {
+    // A relay with accounts (hub ADR 011): the code a person types to claim this gadget.
+    static char row[Columns + 1];
+    snprintf(row, sizeof(row), "Code %s", gadget.claimCode());
+    return row;
+  }
   if (gadget.connected())
     return "Online";
   if (gadget.rejected())
@@ -121,6 +127,7 @@ void consoleStatus(JsonObject reply, void *) {
   reply["setup"] = grok::SetupHotspot::stateName(hotspot.state());
   reply["free_heap"] = ESP.getFreeHeap(); // Runtime cost of the setup hotspot (hub ADR 010).
   reply["wifi"] = WiFi.status() == WL_CONNECTED ? "connected" : "disconnected";
+  reply["claimed"] = gadget.claimed(); // Never the code: it shows on the display only.
   reply["gateway"] = linkStatus();
   grok::JoinFailureText failure = grok::describe(wifiLink.failure());
   if (failure.code) {
@@ -265,6 +272,7 @@ void setup() {
   store.load(settings);
   wifiLink.begin(gadget.deviceId());
   console.status(consoleStatus, nullptr);
+  gadget.showClaimCodes(); // Ignored by relays without accounts.
   gadget.begin(wifiLink);
   hotspot.begin(gadget.deviceId(), millis()); // After begin: the device ID is set there.
 #else
@@ -277,8 +285,10 @@ void loop() {
   console.loop();
   uint32_t now = millis();
   hotspot.loop(now, gadget.connected());
-  if (hotspot.takeJoined())
+  if (hotspot.takeJoined()) {
     wifiLink.begin(gadget.deviceId(), true); // Keep the hotspot so the page can show Online.
+    gadget.claimAfterSetup(); // A next owner may claim it after this reset (hub ADR 011).
+  }
   bool pressed = digitalRead(ButtonPin) == LOW;
   if (pressed && !bootHeld)
     bootHeldSince = now;
@@ -301,6 +311,8 @@ void loop() {
     snprintf(status, sizeof(status), "%s", linkStatus());
     if (wifiLink.state() == grok::WifiLink::State::WifiConnecting)
       snprintf(hint, sizeof(hint), "%s", grok::describe(wifiLink.failure()).hint);
+    else if (gadget.connected() && gadget.claimCode())
+      snprintf(hint, sizeof(hint), "%s", "Add in Grok Bot");
   }
   if (strcmp(status, shownStatus) || strcmp(hint, shownHint) || setupShown != hotspot.active()) {
     const bool wasOnline = !strcmp(shownStatus, "Online"), wasSetup = setupShown;
@@ -313,10 +325,13 @@ void loop() {
     else
       drawStatus();
     // The console line explains a failed join; it never names the network.
-    const char *advice = hint[0] ? grok::describe(wifiLink.failure()).advice : nullptr;
+    // The claim code stays on the display; the console says only that one is shown.
+    const bool code = !strncmp(status, "Code ", 5);
+    const char *advice = hint[0] && !code ? grok::describe(wifiLink.failure()).advice : nullptr;
+    const char *said = code ? "Code shown" : status;
     char line[160];
-    size_t size = advice ? snprintf(line, sizeof(line), "status: %s. %s\n", status, advice)
-                         : snprintf(line, sizeof(line), "status: %s\n", status);
+    size_t size = advice ? snprintf(line, sizeof(line), "status: %s. %s\n", said, advice)
+                         : snprintf(line, sizeof(line), "status: %s\n", said);
     Serial.write(reinterpret_cast<const uint8_t *>(line), size);
   } else if (oled && !strcmp(shownStatus, "Online") && onlineLogo.advance(now)) {
     onlineLogo.draw(*oled); // No delay, full-screen clear, text redraw or console output.
