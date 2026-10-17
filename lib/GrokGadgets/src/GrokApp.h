@@ -19,7 +19,7 @@
 #include "GrokWifi.h"
 
 #ifndef GROK_APP_VERSION
-#define GROK_APP_VERSION "0.2.0-alpha.17"
+#define GROK_APP_VERSION "0.2.0-alpha.18"
 #endif
 
 #if defined(GROK_UPDATE_KEY_HEADER) && !defined(GROK_HOST_SIMULATION)
