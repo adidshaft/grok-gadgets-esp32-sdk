@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.18 — 18 October 2026
+
+- On 17 October 2026 the owner's kit passed the Phase 12a dry run on a fresh relay. It was provisioned from a batch, joined Wi-Fi from a phone, was claimed with its screen code, showed text from Grok Bot and took a signed update ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/builder-kit-2026-10-17.md)). The default firmware version is now `0.2.0-alpha.18`. The climate sensor, switch and servo examples are not tested on hardware yet.
+
+- Three builder examples on a new `grok::WifiApp` ([#127](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/127), [#128](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/128), [#129](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/129), hub ADR 013). `GrokApp.h` gives a gadget without a display the relay link, phone setup, claim codes, signed updates (with a key), the USB console and the BOOT factory reset in two calls. `climate-sensor` (AHT20: `climate` state, `threshold.crossed`, `threshold.set`), `switch` (low-voltage relay module: `switch.set`, off at boot and after 30 s without the relay) and `servo` (SG90: `servo.move`, acknowledged when the move ends). Each has a host model, a contract transcript and a CI build (`esp32s3-climate-sensor`, `-switch`, `-servo`). Not tested on hardware yet.
+- The setup page shows the claim code after the gadget goes Online, for gadgets without a display (hub ADR 011 §10), and then stays up 3 minutes so the person can read it. The USB console never prints it.
+- Guide: [Ship a gadget](docs/ship-a-gadget.md): build with the update key, flash, read IDs, batch, factory-provision ([#118](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/118)).
+
 ## 0.2.0-alpha.17 — 17 October 2026
 
 - On 17 October 2026 the owner's kit took signed updates from the owner's relay with no cable. The OLED showed `Update %`, the kit restarted and reported the new version in its hello. It refused an image signed with another key before any download, and an image with one changed byte at the SHA-256 check. An image that never came Online reverted by itself after 5 minutes and showed `Reverted`. A power cut during a download recovered ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/ota-2026-10-17.md)). The first USB flash of this firmware came Online against a relay that refuses the new hello field.

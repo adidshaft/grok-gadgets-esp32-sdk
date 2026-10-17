@@ -49,12 +49,36 @@ sketches = {
 }
 # The Wi-Fi build sends the same frames over TLS, with the device token in its hello.
 sketches["transcript_oled_kit_wifi"] = sketches["transcript_oled_kit"]
+# Builder examples on grok::WifiApp (hub ADR 013), each with a host model of its part.
+sketches["transcript_climate_sensor_wifi"] = [
+    command("t-set", "threshold.set", {"above_c": 26}),
+    command("t-bad", "threshold.set", {"above_c": 500}),
+]
+sketches["transcript_switch_wifi"] = [
+    command("t-on", "switch.set", {"on": True}),
+    command("t-bad", "switch.set", {"on": 1}),
+]
+sketches["transcript_servo_wifi"] = [
+    command("t-move", "servo.move", {"angle": 120}),
+    command("t-bad", "servo.move", {"angle": 200}),
+]
+sketches["transcript_template_wifi"] = sketches["transcript_switch_wifi"]
+APP_SKETCHES = (
+    "transcript_climate_sensor_wifi",
+    "transcript_switch_wifi",
+    "transcript_servo_wifi",
+    "transcript_template_wifi",
+)
 expected_acks = {
     "transcript_c124": {"t-green": "executed", "t-bad": "failed"},
     "transcript_led_button": {"t-on": "executed", "t-bad": "failed"},
     "transcript_oled_kit": {"t-text": "executed", "t-bad": "failed", "t-clear": "executed"},
 }
 expected_acks["transcript_oled_kit_wifi"] = expected_acks["transcript_oled_kit"]
+expected_acks["transcript_climate_sensor_wifi"] = {"t-set": "executed", "t-bad": "failed"}
+expected_acks["transcript_switch_wifi"] = {"t-on": "executed", "t-bad": "failed"}
+expected_acks["transcript_servo_wifi"] = {"t-move": "executed", "t-bad": "failed"}
+expected_acks["transcript_template_wifi"] = expected_acks["transcript_switch_wifi"]
 for binary, commands in sketches.items():
     output = subprocess.run(
         [root / "build" / binary, *commands], check=True, capture_output=True, text=True, timeout=60
@@ -71,7 +95,8 @@ for binary, commands in sketches.items():
     wifi = binary.endswith("_wifi")
     assert (frames[0].get("token") == "transcript-device-token") == wifi, (binary, "hello token")
     # The Wi-Fi OLED kit asks for claim codes (hub ADR 011); USB builds never do.
-    assert (frames[0].get("claim") == "ready") == (binary == "transcript_oled_kit_wifi"), binary
+    claims = binary == "transcript_oled_kit_wifi" or binary in APP_SKETCHES
+    assert (frames[0].get("claim") == "ready") == claims, binary
     hello = frames[0]["device"]
     names = hello["capabilities"]
     assert names[-2:] == ["state", "history_lost"] and "button" in names, (binary, names)
@@ -98,5 +123,15 @@ for binary, commands in sketches.items():
         }
         assert shown["t-bad"]["text"] == "Grok Bot ready", "rejected text changed the display"
         assert shown["t-clear"]["text"] == "", shown
+    if binary in APP_SKETCHES:
+        states = {f["command_id"]: f["state"] for f in frames if f["type"] == "ack"}
+        if binary == "transcript_climate_sensor_wifi":
+            assert states["t-set"]["climate"]["above_c"] == 26, states
+            assert states["t-bad"]["climate"]["above_c"] == 26, "a refused value changed it"
+        elif binary in ("transcript_switch_wifi", "transcript_template_wifi"):
+            assert states["t-on"]["switch"] == {"on": True}, states
+        else:
+            assert states["t-move"]["servo"] == {"angle": 120}, states
+            assert states["t-bad"]["servo"] == {"angle": 120}, "a refused angle moved it"
     print(f"contract: {binary} produced {len(frames)} valid frames ({', '.join(sorted(kinds))})")
 print("contract: pinned protocol hashes and canonical fixture valid")

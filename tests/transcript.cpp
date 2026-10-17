@@ -16,6 +16,12 @@
 #ifdef GROK_WIFI_TRANSCRIPT
 std::string &wireOut() { return static_cast<WiFiClientSecure &>(wifiLink.stream()).output; }
 std::string &wireIn() { return static_cast<WiFiClientSecure &>(wifiLink.stream()).input; }
+#elif defined(GROK_APP_TRANSCRIPT)
+// A builder example on grok::WifiApp (hub ADR 013): the relay on its TLS link.
+std::string &wireOut() {
+  return static_cast<WiFiClientSecure &>(app.linkForTests().stream()).output;
+}
+std::string &wireIn() { return static_cast<WiFiClientSecure &>(app.linkForTests().stream()).input; }
 #else
 std::string &wireOut() { return Serial.output; }
 std::string &wireIn() { return Serial.input; }
@@ -74,7 +80,7 @@ int main(int argc, char **argv) {
   using script::holding;
   using script::step;
   script::commands.assign(argv + 1, argv + argc);
-#ifdef GROK_WIFI_TRANSCRIPT
+#if defined(GROK_WIFI_TRANSCRIPT) || defined(GROK_APP_TRANSCRIPT)
   fake::nvs = {
       {"grok-wifi/ssid", "transcript-net"},
       {"grok-wifi/pass", "transcript-pass"},
