@@ -44,7 +44,8 @@ void polls_wait_and_commands_still_arrive() {
   reply(hello);
   assert(gadget.connected());
   assert(awaitPoll() == "poll" && frame["wait_ms"] == 2500);
-  reply(R"({"ok":true,"commands":[{"command_id":"c1","capability":"rgb.set","arguments":{"r":1,"g":2,"b":3,"on":true}}]})");
+  reply(
+      R"({"ok":true,"commands":[{"command_id":"c1","capability":"rgb.set","arguments":{"r":1,"g":2,"b":3,"on":true}}]})");
   assert(next() == "ack" && frame["command_id"] == "c1"); // No handler here: a failed ACK.
   reply(R"({"ok":true})");
   assert(awaitPoll() == "poll" && frame["wait_ms"] == 2500);
