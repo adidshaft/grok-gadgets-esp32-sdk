@@ -19,7 +19,7 @@
 #include "GrokWifi.h"
 
 #ifndef GROK_APP_VERSION
-#define GROK_APP_VERSION "0.2.0-alpha.18"
+#define GROK_APP_VERSION "0.2.0-alpha.19"
 #endif
 
 #if defined(GROK_UPDATE_KEY_HEADER) && !defined(GROK_HOST_SIMULATION)
@@ -56,6 +56,7 @@ public:
     link_.begin(gadget_.deviceId());
     console_.status(consoleStatus, this);
     gadget_.showClaimCodes(); // Ignored by relays without accounts.
+    gadget_.longPoll(2500);   // Hub ADR 014; older relays refuse it once.
 #ifdef GROK_APP_UPDATES
     updater_.begin(millis());
     if (crypto_.keys())

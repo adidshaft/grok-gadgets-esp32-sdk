@@ -112,6 +112,17 @@ public:
   // hello then asks the relay for `claimed` and, while nobody owns the gadget, `claim_code`.
   // A relay before this change refuses the request once; the gadget then stops asking until
   // the next boot and works as before.
+  // Long-poll (hub ADR 014): each poll asks the relay to wait up to `waitMs` for a command, so
+  // an idle gadget sends a few frames a second instead of ten. Requests stay one at a time:
+  // state and events wait for the poll, so `waitMs` stays below StateIntervalMs. A relay
+  // before this change refuses the field once; the gadget then polls without it until the
+  // next boot. Call before begin().
+  bool longPoll(uint32_t waitMs = 2500) {
+    if (began_ || waitMs < 100 || waitMs >= StateIntervalMs)
+      return false;
+    waitMs_ = waitMs;
+    return true;
+  }
   void showClaimCodes() {
     if (!began_)
       claimWanted_ = true;
@@ -385,6 +396,10 @@ private:
                (update_ && update_->downloading() && uint32_t(now - lastPoll_) >= UpdatePollMs)) {
       outgoing_.clear();
       outgoing_["type"] = "poll";
+      // During a download, update frames go between quick polls.
+      waitSent_ = waitMs_ && !waitRefused_ && !(update_ && update_->downloading());
+      if (waitSent_)
+        outgoing_["wait_ms"] = waitMs_;
       lastPoll_ = now;
       transmit(Kind::Poll, now);
     }
@@ -564,6 +579,10 @@ private:
   }
   // A rejected event never blocks polling: drop it (counted as lost) and continue.
   bool failed(const char *code, uint32_t now) {
+    if (pending_ == Kind::Poll && waitSent_ && !strcmp(code, "invalid_request")) {
+      waitRefused_ = true; // An older relay: it keeps the session; poll without the field.
+      return true;
+    }
     if (pending_ == Kind::Hello && !strcmp(code, "invalid_request")) {
       // An older relay: ask without the newest field first, then without the claim.
       if (updateSent_)
@@ -672,6 +691,8 @@ private:
   bool connected_ = false, waiting_ = false, haveAck_ = false;
   // Claim codes (hub ADR 011).
   bool claimWanted_ = false, claimRefused_ = false, claimSent_ = false, afterSetup_ = false;
+  uint32_t waitMs_ = 0;
+  bool waitSent_ = false, waitRefused_ = false;
   bool claimed_ = false;
   char claimCode_[10] = {};
   // Signed updates (hub ADR 012).
