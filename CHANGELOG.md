@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Long-poll, opt-in ([gateway #182](https://github.com/adidshaft/grok-gadgets-gateway/issues/182), hub ADR 014). `gadget.longPoll(2500)` before `begin()` adds `wait_ms` to each poll, so an idle gadget sends about one frame a second instead of ten. Commands still arrive at once; state and events wait for the poll, so the wait must stay below the 3 s state interval. Polls during an update download do not wait. An older relay refuses the field once; the gadget keeps its session and stops asking until the next boot. Host tests in `tests/long_poll_tests.cpp`.
+
 ## 0.2.0-alpha.18 — 18 October 2026
 
 - On 17 October 2026 the owner's kit passed the Phase 12a dry run on a fresh relay. It was provisioned from a batch, joined Wi-Fi from a phone, was claimed with its screen code, showed text from Grok Bot and took a signed update ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/builder-kit-2026-10-17.md)). The default firmware version is now `0.2.0-alpha.18`. The climate sensor, switch and servo examples are not tested on hardware yet.

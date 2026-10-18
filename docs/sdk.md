@@ -57,6 +57,21 @@ The gateway rejects schema references, `pattern` and `patternProperties`. Use ex
 
 `begin()` calls `Serial.setRxBufferSize` for two full frames (4096 bytes) before `Serial.begin()`. The Arduino-ESP32 2.0.17 USB CDC queue otherwise stays 256 bytes and can drop a long reply. That call is unverified on hardware.
 
+## Long-poll
+
+An idle gadget polls ten times a second. On a relay with many gadgets that is most of the
+relay's work (hub ADR 014). Opt in before `begin()`:
+
+```cpp
+gadget.longPoll(2500); // milliseconds, 100 up to (not including) 3000
+```
+
+Each poll then asks the relay to wait up to 2.5 s for a command. A command still arrives at
+once. Requests stay one at a time, so state and button events wait for the poll; the limit
+keeps the 3-second state report on time. During a signed-update download the gadget polls
+without waiting. A relay from before long-poll answers `invalid_request` once; the gadget keeps
+its session and polls without the field until the next boot.
+
 ## Claim codes
 
 On a relay with accounts (hub ADR 011), a person claims a gadget with a code it shows. A
