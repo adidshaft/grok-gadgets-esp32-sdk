@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.0-alpha.19 — 18 October 2026
+
+- Long-poll (hub ADR 014). On 18 October 2026 a fresh 512 MB relay carried 1,000 simulated gadgets with long-poll at about 67 % CPU; polling every 100 ms it saturated from about 400 ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/ready-for-others-2026-10-18.md)). The default firmware version is now `0.2.0-alpha.19`. Long-poll on the owner's kit is not tested yet.
+
 - The OLED kit's Wi-Fi build and `grok::WifiApp` (template, climate sensor, switch, servo) turn on long-poll with a 2.5 s wait (hub ADR 014). On a relay from gateway 0.1.0a18 an idle gadget sends about one frame a second instead of ten; an older relay refuses it once and nothing else changes.
 
 - Long-poll, opt-in ([gateway #182](https://github.com/adidshaft/grok-gadgets-gateway/issues/182), hub ADR 014). `gadget.longPoll(2500)` before `begin()` adds `wait_ms` to each poll, so an idle gadget sends about one frame a second instead of ten. Commands still arrive at once; state and events wait for the poll, so the wait must stay below the 3 s state interval. Polls during an update download do not wait. An older relay refuses the field once; the gadget keeps its session and stops asking until the next boot. Host tests in `tests/long_poll_tests.cpp`.

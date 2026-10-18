@@ -33,7 +33,7 @@ constexpr size_t MaxText = 32, Columns = 16;
 // The version this image reports in its hello; a signed update names the same string.
 // tools/update_build.py replaces it from GROK_FIRMWARE_VERSION.
 #ifndef OLED_KIT_VERSION
-#define OLED_KIT_VERSION "0.2.0-alpha.18"
+#define OLED_KIT_VERSION "0.2.0-alpha.19"
 #endif
 constexpr const char *FirmwareVersion = OLED_KIT_VERSION;
 
