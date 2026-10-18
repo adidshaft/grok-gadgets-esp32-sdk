@@ -323,6 +323,7 @@ void setup() {
   wifiLink.begin(gadget.deviceId());
   console.status(consoleStatus, nullptr);
   gadget.showClaimCodes(); // Ignored by relays without accounts.
+  gadget.longPoll(2500);   // Hub ADR 014: older relays refuse it once; polling goes on as before.
 #ifdef OLED_KIT_UPDATES
   updater.begin(millis());
   if (updateCrypto.keys())

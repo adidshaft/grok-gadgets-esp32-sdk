@@ -56,6 +56,7 @@ public:
     link_.begin(gadget_.deviceId());
     console_.status(consoleStatus, this);
     gadget_.showClaimCodes(); // Ignored by relays without accounts.
+    gadget_.longPoll(2500);   // Hub ADR 014; older relays refuse it once.
 #ifdef GROK_APP_UPDATES
     updater_.begin(millis());
     if (crypto_.keys())
