@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The climate sensor, switch and servo examples each have a README (parts, wiring, the checks to make with Grok Bot), a `rehearse.py` that runs the sketch's host build, and a host test against a scripted relay (ESP-EXAMPLE-004). The climate sensor now finds a module that was missing at boot or stopped answering, within 5 seconds, instead of reporting `missing` until a reboot. The three examples are still Not tested on hardware.
+
 ## 0.2.0-alpha.19 — 18 October 2026
 
 - Long-poll (hub ADR 014). On 18 October 2026 a fresh 512 MB relay carried 1,000 simulated gadgets with long-poll at about 67 % CPU; polling every 100 ms it saturated from about 400 ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/ready-for-others-2026-10-18.md)). The default firmware version is now `0.2.0-alpha.19`. Long-poll on the owner's kit is not tested yet.

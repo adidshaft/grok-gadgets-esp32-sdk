@@ -2,14 +2,17 @@
 // Climate sensor (hub ADR 013 §6): an AHT20 temperature and humidity module on I2C (SDA GPIO8,
 // SCL GPIO9, 3.3 V). It reports `climate` in its state every 2 seconds and sends a
 // `threshold.crossed` event when the temperature goes above or below `above_c`. Grok Bot can
-// answer "how warm is it?" and "tell me when it goes above 26 degrees".
+// answer "how warm is it?" and "tell me when it goes above 26 degrees". A module that is
+// missing at boot, or stops answering three times in a row, reports `sensor: missing`; the
+// sketch looks for it again every 5 seconds, so a loose wire recovers without a reboot.
 // Not tested on hardware until someone runs it with the part; host models cover the logic.
 #include <GrokApp.h>
 #include <Wire.h>
 
 constexpr int SdaPin = 8, SclPin = 9;
 constexpr uint8_t Aht20 = 0x38;
-constexpr uint32_t SampleMs = 2000, MeasureMs = 80;
+constexpr uint32_t SampleMs = 2000, MeasureMs = 80, RetryMs = 5000;
+constexpr int MaxFailures = 3;
 
 grok::Gadget gadget("Climate sensor", GROK_APP_VERSION, "climate");
 grok::WifiApp app(gadget);
@@ -17,18 +20,23 @@ float temperature = 0, humidity = 0, aboveC = 25;
 bool sensorOk = false, haveReading = false, wasAbove = false;
 uint32_t sampledAt = 0, triggeredAt = 0;
 bool measuring = false;
+int failures = 0;
 
 #ifdef GROK_HOST_SIMULATION
 // Host model: a repeatable swing from 22 to 28 degrees and back, one degree a reading.
-bool startMeasure() { return true; }
+// Host tests unplug and replug the module with hostSensorPresent.
+bool hostSensorPresent = true;
+bool startMeasure() { return hostSensorPresent; }
 bool readMeasure() {
   static int step = 0;
+  if (!hostSensorPresent)
+    return false;
   temperature = 22.0f + float(step < 6 ? step : 12 - step);
   humidity = 45.0f;
   step = (step + 1) % 12;
   return true;
 }
-bool beginSensor() { return true; }
+bool beginSensor() { return hostSensorPresent; }
 #else
 bool beginSensor() {
   Wire.begin(SdaPin, SclPin);
@@ -102,19 +110,38 @@ void setup() {
   app.begin();
 }
 
+void sensorFailed() {
+  measuring = false;
+  if (++failures < MaxFailures)
+    return;
+  sensorOk = false; // Stop reporting a stale reading; look for the module again.
+  haveReading = false;
+  failures = 0;
+}
+
 void loop() {
   app.loop();
   uint32_t now = millis();
-  if (!sensorOk)
+  if (!sensorOk) {
+    if (uint32_t(now - sampledAt) >= RetryMs) {
+      sampledAt = now;
+      sensorOk = beginSensor();
+    }
     return;
+  }
   if (!measuring && uint32_t(now - sampledAt) >= SampleMs) {
-    measuring = startMeasure();
-    triggeredAt = now;
     sampledAt = now;
+    triggeredAt = now;
+    measuring = startMeasure();
+    if (!measuring)
+      sensorFailed();
   } else if (measuring && uint32_t(now - triggeredAt) >= MeasureMs) {
     measuring = false;
-    if (!readMeasure())
+    if (!readMeasure()) {
+      sensorFailed();
       return;
+    }
+    failures = 0;
     bool above = temperature > aboveC;
     if (haveReading && above != wasAbove) {
       StaticJsonDocument<128> data;
