@@ -897,6 +897,23 @@
       ],
       "stage": "done",
       "evidence": "GitHub #118; GrokApp.h, examples/, tests/app_tests.cpp, transcripts in tools/check_contract.py; tools/check.sh 15/15. Not tested on hardware. Released in 0.2.0-alpha.18. Phase 12a acceptance on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): the guide and the OLED kit passed batch provisioning, phone setup, claim and a signed update on a fresh relay. The three examples are Not tested on hardware."
+    },
+    {
+      "id": "ESP-COMMUNITY-X-001",
+      "owner": "grok-gadgets-esp32-sdk",
+      "problem": "Community links direct people to the former Reddit community",
+      "acceptance": [
+        "README, support policy and issue contact link point to the Grok Gadgets X Community"
+      ],
+      "dependencies": [],
+      "labels": [
+        "documentation",
+        "community"
+      ],
+      "milestone": "Documentation upkeep",
+      "stage": "done",
+      "commits": [],
+      "evidence": "CTA links and Git diff reviewed; documentation-only change; firmware unchanged."
     }
   ]
 }

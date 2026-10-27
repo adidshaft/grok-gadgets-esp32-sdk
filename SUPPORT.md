@@ -22,7 +22,7 @@ Use [GitHub Issues](https://github.com/adidshaft/grok-gadgets-esp32-sdk/issues/n
 - Whether the device was simulated or physical.
 - Logs with private data removed.
 
-Use [r/GrokGadgets](https://www.reddit.com/r/GrokGadgets/) for general discussion. Use [Security](SECURITY.md) for private vulnerability reports. Send private conduct reports to [adidshaft@kyokasuigetsu.xyz](mailto:adidshaft@kyokasuigetsu.xyz).
+Use [Grok Gadgets community on X](https://x.com/i/communities/2026191471578067281) for general discussion. Use [Security](SECURITY.md) for private vulnerability reports. Send private conduct reports to [adidshaft@kyokasuigetsu.xyz](mailto:adidshaft@kyokasuigetsu.xyz).
 
 ## Verification limits
 
