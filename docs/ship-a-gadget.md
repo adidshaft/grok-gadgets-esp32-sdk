@@ -10,16 +10,17 @@ before you give or sell a gadget.
 | Example | What it does | Part |
 | --- | --- | --- |
 | `examples/oled-kit` | Shows text from Grok Bot | 1.3-inch I2C OLED (owner-tested) |
-| `examples/climate-sensor` | Reports temperature and humidity; tells Grok Bot when it gets hot | AHT20 on I2C |
-| `examples/switch` | Turns a low-voltage load on or off | 3.3 V opto-isolated relay module |
-| `examples/servo` | Moves to an angle, for example a feeder flap | SG90 servo |
+| [`examples/climate-sensor`](../examples/climate-sensor/README.md) | Reports temperature and humidity; tells Grok Bot when it gets hot | AHT20 on I2C |
+| [`examples/switch`](../examples/switch/README.md) | Turns a low-voltage load on or off | 3.3 V opto-isolated relay module |
+| [`examples/servo`](../examples/servo/README.md) | Moves to an angle, for example a feeder flap | SG90 servo |
 
 The climate sensor, switch and servo examples use `grok::WifiApp` (`GrokApp.h`). It brings
 the relay link, phone setup, claim codes, signed updates and the factory-reset button. A
 gadget without a display shows its claim code on the setup page after it goes Online.
 
-These three examples have host models and host tests. **Nobody has run them with the parts
-yet.** Treat them as Not tested on hardware until you do.
+These three examples have host models, host tests and a `rehearse.py` that runs the sketch on
+your computer. Each README lists the parts, the wiring and the checks to make with Grok Bot.
+**Nobody has run them with the parts yet.** Treat them as Not tested on hardware until you do.
 
 **Never wire mains voltage to the switch example.**
 
@@ -75,12 +76,12 @@ private until every row says `provisioned: yes`.
 
 ## Cost on the board
 
-Arduino-ESP32 2.0.17, without an update key, 18 October 2026:
+Arduino-ESP32 2.0.17, without an update key, 27 October 2026:
 
 | Example | Static RAM (bytes) | Flash (bytes) |
 | --- | ---: | ---: |
-| `esp32s3-climate-sensor` | 108,052 | 926,857 |
-| `esp32s3-switch` | 107,716 | 911,329 |
-| `esp32s3-servo` | 107,780 | 916,777 |
+| `esp32s3-climate-sensor` | 108,068 | 927,193 |
+| `esp32s3-switch` | 107,724 | 911,593 |
+| `esp32s3-servo` | 107,788 | 917,021 |
 
 An update key adds about 1.1 KB of RAM and 9.5 KB of flash.

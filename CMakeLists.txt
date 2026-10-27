@@ -76,3 +76,8 @@ target_compile_definitions(update_tests PRIVATE GROK_UPDATE_FIXTURE="${CMAKE_SOU
 add_test(NAME update COMMAND update_tests)
 host_sketch(app_tests tests/app_tests.cpp)
 add_test(NAME app COMMAND app_tests)
+# Each builder example against a scripted relay (hub Phase 18 step 2).
+foreach(example climate switch servo)
+ host_sketch(${example}_tests tests/${example}_tests.cpp)
+ add_test(NAME ${example} COMMAND ${example}_tests)
+endforeach()
